@@ -1,0 +1,20 @@
+//
+//  Game.swift
+//  MetaGrab
+//
+//  Created by David Zeng on 2019-08-17.
+//  Copyright © 2019 David Zeng. All rights reserved.
+//
+
+import Foundation
+import SwiftUI
+
+struct Game: Hashable, Codable, Identifiable {
+    var id: Int
+    var name: String
+    var releaseDate: Date
+    var developer: Developer
+    var lastUpdated: Date
+    var genre: Genre
+    var icon: String
+}
