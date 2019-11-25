@@ -21,16 +21,17 @@ struct FollowGamesView: View {
             .padding()
             .onAppear() {
                 self.gameDataStore.fetchAndSortGamesWithGenre(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
+                print("wow")
             }
-            
-            HStack {
-                Text("Game Library")
-                    .font(.headline)
-                Spacer()
-            }
-            
+
             // There's a bug with scrollview - list, using forEach for now
-            ScrollView(.vertical, showsIndicators: false) {
+            // Bug 2 - If there is only my VStack inside ScrollView, it does not appear until I have clicked/dragged near the area then it appears. Works fine with the HStack inside here for some reason.
+            ScrollView(.vertical, showsIndicators: true) {
+                HStack {
+                    Text("Game Library")
+                        .font(.headline)
+                    Spacer()
+                }
                 VStack {
                     ForEach(self.gameDataStore.genreGameArray.keys.sorted(), id: \.self) { key in
                         Group {
@@ -50,7 +51,7 @@ struct FollowGamesView: View {
     }
     
     func dismiss() {
-        self.presentationMode.value.dismiss()
+        self.presentationMode.wrappedValue.dismiss()
     }
 }
 

@@ -14,27 +14,33 @@ struct ForumView : View {
     var gameId: Int
     
     func fetchNextPage() {
-        self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[gameId]!, fetchNextPage: true)
+        self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[gameId]!)
     }
     
     var body: some View {
         VStack {
-            NavigationLink(destination: NewThreadView(forumId: gameId)) {
-                HStack {
-                    Spacer()
-                    Text("Post thread")
+            HStack {
+                Spacer()
+                NavigationLink(destination: NewThreadView(forumId: gameId)) {
+                    Text("POST")
                 }
-            }
-            List(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
-                ThreadRow(threadId: threadId)
+                .frame(width: 100, height: 50, alignment: .center)
+                .background(Color.orange)
+                .cornerRadius(5)
             }
             
-            if self.gameDataStore.threadCursorByForumId[gameId] != nil {
+            ScrollView {
+                ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
+                    ThreadRow(threadId: threadId)
+                        .padding(.all, 20)
+                }
+            }
+            
+            if self.gameDataStore.forumsNextPageStartIndex[gameId] != -1 {
                 Button(action: fetchNextPage) {
-                    Text("More Threads")
+                    Text("Click me for more Threads")
                 }
             }
-            
         }
         .navigationBarTitle(Text(self.gameDataStore.games[gameId]!.name + " Forum"))
     }

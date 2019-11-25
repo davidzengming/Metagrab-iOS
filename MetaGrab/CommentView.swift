@@ -22,48 +22,90 @@ struct CommentView : View {
         self.replyBoxOpen = !self.replyBoxOpen
     }
     
-    func postSecondaryComment() {
-        self.gameDataStore.postSecondaryComment(access: self.userDataStore.token!.access, primaryCommentId: commentId, text: text)
+    func postChildComment() {
+        self.gameDataStore.postChildComment(access: self.userDataStore.token!.access, parentCommentId: commentId, text: text)
     }
     
     func fetchNextPage() {
-        self.gameDataStore.fetchSecondaryComments(access: self.userDataStore.token!.access, primaryCommentId: commentId, fetchNextPage: true)
+        self.gameDataStore.fetchCommentTreeByParentComment(access: self.userDataStore.token!.access, parentCommentId: commentId, start: self.gameDataStore.commentNextPageStartIndex[commentId]!)
+    }
+    
+    func onClickUpvoteButton() {
+        if self.gameDataStore.voteCommentMapping[commentId] != nil {
+            if self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.isPositive == true {
+                            self.gameDataStore.deleteCommentVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!)
+            } else {
+                self.gameDataStore.switchUpvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+            }
+        } else {
+            self.gameDataStore.upvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+        }
+    }
+    
+    func onClickDownvoteButton() {
+        if self.gameDataStore.voteCommentMapping[commentId] != nil {
+            if self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.isPositive == false {
+                self.gameDataStore.deleteCommentVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!)
+            } else {
+                self.gameDataStore.switchDownvoteComment(access:  self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+            }
+        } else {
+            self.gameDataStore.downvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+        }
     }
     
     var body: some View {
         VStack {
             HStack {
-                Text(self.gameDataStore.primaryComments[self.commentId]!.content)
+                VStack {
+                    if self.gameDataStore.voteCommentMapping[commentId] != nil {
+                        Text("Hi I voted on this")
+                    }
+                    Button(action: onClickUpvoteButton) {
+                        Text("👍")
+                    }
+                    Text(String(self.gameDataStore.comments[commentId]!.upvotes - self.gameDataStore.comments[commentId]!.downvotes))
+                    Button(action: onClickDownvoteButton) {
+                        Text("👎")
+                    }
+                }
+                
+                Text(self.gameDataStore.comments[self.commentId]!.content)
                     .font(.subheadline)
                 Spacer()
                 Button(action: toggleReplyBoxOpen) {
                     Text("Reply")
                 }
+                
             }
-            VStack {
-                List(self.gameDataStore.secondaryCommentListByPrimeCommentId[self.commentId]!, id: \.self) { key in
-                    HStack {
-                        Text(self.gameDataStore.secondaryComments[key]!.content)
-                        Spacer()
-                    }.padding(.leading, 50)
+            
+            ForEach(self.gameDataStore.childCommentListByParentCommentId[self.commentId]!, id: \.self) { key in
+                VStack {
+                    CommentView(commentId: key)
+                    Spacer()
                 }
             }
             
-            if self.gameDataStore.secondaryCommentsCursorByPrimaryCommentId[self.commentId] != nil {
+            if self.gameDataStore.moreCommentsByParentCommentId[commentId] != nil && self.gameDataStore.moreCommentsByParentCommentId[commentId]!.count > 0 {
                 Button(action: fetchNextPage) {
-                    Text("More comments")
+                    Text("Load more comments")
                 }
             }
             
             if self.replyBoxOpen {
                 TextField("Reply", text: $text)
                     .padding(.leading, 50)
-                Button(action: postSecondaryComment) {
+                Button(action: postChildComment) {
                     Text("Submit")
                 }
             }
-        }.onAppear() {
-            self.gameDataStore.fetchSecondaryComments(access: self.userDataStore.token!.access, primaryCommentId: self.commentId)
+        }
+        .padding(.leading, 20)
+        .onAppear() {
+            if self.gameDataStore.commentNextPageStartIndex[self.commentId] != nil {
+                return
+            }
+            self.gameDataStore.fetchChildComments(access: self.userDataStore.token!.access, parentCommentId: self.commentId)
         }
     }
 }

@@ -7,13 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3E74B4442321E772002EEF7F /* GamesPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74B4432321E772002EEF7F /* GamesPage.swift */; };
-		3E74B4462321E7AB002EEF7F /* DevelopersPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74B4452321E7AB002EEF7F /* DevelopersPage.swift */; };
-		3E74B4482321E80B002EEF7F /* UsersPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74B4472321E80B002EEF7F /* UsersPage.swift */; };
-		3E74B44A2321E86B002EEF7F /* GenresPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74B4492321E86B002EEF7F /* GenresPage.swift */; };
-		3E74B44C2321E8A0002EEF7F /* ThreadsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74B44B2321E8A0002EEF7F /* ThreadsPage.swift */; };
-		3E74B44E2321E8D8002EEF7F /* PrimaryCommentsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74B44D2321E8D8002EEF7F /* PrimaryCommentsPage.swift */; };
-		3E74B4502321E8FE002EEF7F /* SecondaryCommentsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74B44F2321E8FE002EEF7F /* SecondaryCommentsPage.swift */; };
+		3E02DA2B23873A110063BCD7 /* NewThreadResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */; };
+		3E3098D82387154100E2758F /* NewCommentResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3098D72387154100E2758F /* NewCommentResponse.swift */; };
+		3E4640A7237C585F009D01C1 /* ThreadsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */; };
+		3E747DDC2385BB4200B807CE /* Vote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E747DDB2385BB4200B807CE /* Vote.swift */; };
+		3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */; };
 		3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */; };
 		3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210C23086963002DE02E /* AppDelegate.swift */; };
 		3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210E23086963002DE02E /* SceneDelegate.swift */; };
@@ -42,20 +40,17 @@
 		3EF6214923086BBE002DE02E /* Forum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6214823086BBD002DE02E /* Forum.swift */; };
 		3EF6214B23086BCD002DE02E /* AccessToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6214A23086BCD002DE02E /* AccessToken.swift */; };
 		3EF6214F23086BF2002DE02E /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6214E23086BF2002DE02E /* Token.swift */; };
-		3EFCE174230EEA31000FD392 /* PrimaryComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE173230EEA31000FD392 /* PrimaryComment.swift */; };
-		3EFCE176230EEA69000FD392 /* SecondaryComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE175230EEA69000FD392 /* SecondaryComment.swift */; };
+		3EFCE174230EEA31000FD392 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE173230EEA31000FD392 /* Comment.swift */; };
 		3EFCE178230EF22A000FD392 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE177230EF22A000FD392 /* ThreadView.swift */; };
 		3EFCE17A230F010F000FD392 /* CommentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE179230F010F000FD392 /* CommentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3E74B4432321E772002EEF7F /* GamesPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamesPage.swift; sourceTree = "<group>"; };
-		3E74B4452321E7AB002EEF7F /* DevelopersPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevelopersPage.swift; sourceTree = "<group>"; };
-		3E74B4472321E80B002EEF7F /* UsersPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersPage.swift; sourceTree = "<group>"; };
-		3E74B4492321E86B002EEF7F /* GenresPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenresPage.swift; sourceTree = "<group>"; };
-		3E74B44B2321E8A0002EEF7F /* ThreadsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsPage.swift; sourceTree = "<group>"; };
-		3E74B44D2321E8D8002EEF7F /* PrimaryCommentsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryCommentsPage.swift; sourceTree = "<group>"; };
-		3E74B44F2321E8FE002EEF7F /* SecondaryCommentsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryCommentsPage.swift; sourceTree = "<group>"; };
+		3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadResponse.swift; sourceTree = "<group>"; };
+		3E3098D72387154100E2758F /* NewCommentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCommentResponse.swift; sourceTree = "<group>"; };
+		3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsResponse.swift; sourceTree = "<group>"; };
+		3E747DDB2385BB4200B807CE /* Vote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vote.swift; sourceTree = "<group>"; };
+		3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentLoadTree.swift; sourceTree = "<group>"; };
 		3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadView.swift; sourceTree = "<group>"; };
 		3EF6210923086963002DE02E /* MetaGrab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetaGrab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EF6210C23086963002DE02E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -86,8 +81,7 @@
 		3EF6214823086BBD002DE02E /* Forum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forum.swift; sourceTree = "<group>"; };
 		3EF6214A23086BCD002DE02E /* AccessToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessToken.swift; sourceTree = "<group>"; };
 		3EF6214E23086BF2002DE02E /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
-		3EFCE173230EEA31000FD392 /* PrimaryComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryComment.swift; sourceTree = "<group>"; };
-		3EFCE175230EEA69000FD392 /* SecondaryComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryComment.swift; sourceTree = "<group>"; };
+		3EFCE173230EEA31000FD392 /* Comment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
 		3EFCE177230EF22A000FD392 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
 		3EFCE179230F010F000FD392 /* CommentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -163,21 +157,18 @@
 			children = (
 				3EF6213E23086B5A002DE02E /* Game.swift */,
 				3EF6214023086B6F002DE02E /* Developer.swift */,
-				3EF6214223086B81002DE02E /* User.swift */,
 				3EF6214423086B90002DE02E /* Genre.swift */,
+				3EF6214223086B81002DE02E /* User.swift */,
 				3EF6214623086B9F002DE02E /* Thread.swift */,
 				3EF6214823086BBD002DE02E /* Forum.swift */,
 				3EF6214A23086BCD002DE02E /* AccessToken.swift */,
 				3EF6214E23086BF2002DE02E /* Token.swift */,
-				3EFCE173230EEA31000FD392 /* PrimaryComment.swift */,
-				3EFCE175230EEA69000FD392 /* SecondaryComment.swift */,
-				3E74B4432321E772002EEF7F /* GamesPage.swift */,
-				3E74B4452321E7AB002EEF7F /* DevelopersPage.swift */,
-				3E74B4472321E80B002EEF7F /* UsersPage.swift */,
-				3E74B4492321E86B002EEF7F /* GenresPage.swift */,
-				3E74B44B2321E8A0002EEF7F /* ThreadsPage.swift */,
-				3E74B44D2321E8D8002EEF7F /* PrimaryCommentsPage.swift */,
-				3E74B44F2321E8FE002EEF7F /* SecondaryCommentsPage.swift */,
+				3EFCE173230EEA31000FD392 /* Comment.swift */,
+				3E747DDB2385BB4200B807CE /* Vote.swift */,
+				3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */,
+				3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */,
+				3E3098D72387154100E2758F /* NewCommentResponse.swift */,
+				3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -257,36 +248,33 @@
 				3EF6214123086B6F002DE02E /* Developer.swift in Sources */,
 				3EF6213F23086B5A002DE02E /* Game.swift in Sources */,
 				3EF6212623086A1D002DE02E /* MainView.swift in Sources */,
+				3E02DA2B23873A110063BCD7 /* NewThreadResponse.swift in Sources */,
+				3E4640A7237C585F009D01C1 /* ThreadsResponse.swift in Sources */,
 				3EF6212423086A00002DE02E /* LaunchView.swift in Sources */,
 				3EF6213023086AB1002DE02E /* FollowGameIcon.swift in Sources */,
-				3E74B44C2321E8A0002EEF7F /* ThreadsPage.swift in Sources */,
-				3EFCE176230EEA69000FD392 /* SecondaryComment.swift in Sources */,
-				3E74B44A2321E86B002EEF7F /* GenresPage.swift in Sources */,
 				3EF6214523086B90002DE02E /* Genre.swift in Sources */,
+				3E3098D82387154100E2758F /* NewCommentResponse.swift in Sources */,
 				3EF6213C23086B2C002DE02E /* UserDataStore.swift in Sources */,
 				3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */,
-				3E74B4442321E772002EEF7F /* GamesPage.swift in Sources */,
 				3EF6214323086B81002DE02E /* User.swift in Sources */,
-				3EFCE174230EEA31000FD392 /* PrimaryComment.swift in Sources */,
+				3EFCE174230EEA31000FD392 /* Comment.swift in Sources */,
+				3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */,
 				3EF6214F23086BF2002DE02E /* Token.swift in Sources */,
 				3EF6211423086963002DE02E /* ContentView.swift in Sources */,
 				3EF6213A23086B17002DE02E /* ImageLoader.swift in Sources */,
 				3EF6212A23086A5C002DE02E /* Load.swift in Sources */,
 				3EF6214723086B9F002DE02E /* Thread.swift in Sources */,
 				3EF6213223086AC8002DE02E /* GameList.swift in Sources */,
-				3E74B4502321E8FE002EEF7F /* SecondaryCommentsPage.swift in Sources */,
 				3EF6213823086B00002DE02E /* ThreadRow.swift in Sources */,
 				3EF6212C23086A82002DE02E /* GameFeedRow.swift in Sources */,
-				3E74B4482321E80B002EEF7F /* UsersPage.swift in Sources */,
 				3EF6214923086BBE002DE02E /* Forum.swift in Sources */,
 				3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */,
 				3EF6212823086A37002DE02E /* UserView.swift in Sources */,
-				3E74B4462321E7AB002EEF7F /* DevelopersPage.swift in Sources */,
 				3EF6213623086AEC002DE02E /* ForumView.swift in Sources */,
 				3EFCE178230EF22A000FD392 /* ThreadView.swift in Sources */,
+				3E747DDC2385BB4200B807CE /* Vote.swift in Sources */,
 				3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */,
 				3EF6213423086ADB002DE02E /* GameDataStore.swift in Sources */,
-				3E74B44E2321E8D8002EEF7F /* PrimaryCommentsPage.swift in Sources */,
 				3EFCE17A230F010F000FD392 /* CommentView.swift in Sources */,
 				3EF6214B23086BCD002DE02E /* AccessToken.swift in Sources */,
 			);

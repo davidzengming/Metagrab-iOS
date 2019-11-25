@@ -1,5 +1,5 @@
 //
-//  SecondaryComment.swift
+//  Comment.swift
 //  MetaGrab
 //
 //  Created by David Zeng on 2019-08-22.
@@ -8,11 +8,14 @@
 
 import Foundation
 
-struct SecondaryComment: Hashable, Codable, Identifiable {
+struct Comment: Hashable, Codable, Identifiable {
     var id: Int
     var content: String
     var upvotes: Int
     var downvotes: Int
     var author: Int
-    var parentPost: Int
+    var parentThread: Int?
+    var parentPost: Int?
+    var numChilds: Int
+    var numSubtreeNodes: Int
 }

@@ -15,8 +15,9 @@ struct Thread: Hashable, Codable, Identifiable {
     var content: String
     var upvotes: Int
     var downvotes: Int
-    var flair: String
+    var flair: Int
     var author: Int
     var forum: Forum
-    var numComments: Int
+    var numChilds: Int
+    var numSubtreeNodes: Int
 }

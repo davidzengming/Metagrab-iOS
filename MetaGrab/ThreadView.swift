@@ -23,11 +23,11 @@ struct ThreadView : View {
     }
     
     func postPrimaryComment() {
-        self.gameDataStore.postPrimaryComment(access: self.userDataStore.token!.access, threadId: threadId, text: text)
+        self.gameDataStore.postMainComment(access: self.userDataStore.token!.access, threadId: threadId, text: text)
     }
     
     func fetchNextPage() {
-        self.gameDataStore.fetchPrimaryComments(access: self.userDataStore.token!.access, threadId: threadId, fetchNextPage: true)
+        self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId, start: self.gameDataStore.threadsNextPageStartIndex[threadId]!)
     }
     
     var body: some View {
@@ -49,21 +49,32 @@ struct ThreadView : View {
                 }
             }
             Divider()
-            List(self.gameDataStore.primaryCommentListByThreadId[threadId]!, id: \.self) { key in
+            
+            ScrollView() {
                 HStack {
-                    self.placeholder
-                        .frame(width: 100, height: 75)
-                    CommentView(commentId: key)
+                    Text("Thread")
+                        .font(.headline)
+                    Spacer()
                 }
+                VStack {
+                    Spacer().frame(height: 160)
+                    ForEach(self.gameDataStore.mainCommentListByThreadId[threadId]!, id: \.self) { key in
+                        HStack {
+                            self.placeholder.frame(width: 100, height: 75)
+                            CommentView(commentId: key)
+                        }
+                    }
+                }.scaledToFill()
             }
-            if self.gameDataStore.primaryCommentsCursorByThreadId[threadId] != nil {
+            
+            if self.gameDataStore.moreCommentsByThreadId[threadId] != nil && self.gameDataStore.moreCommentsByThreadId[threadId]!.count > 0 {
                 Button(action: fetchNextPage) {
-                    Text("More comments")
+                    Text("More comments ->")
                 }
             }
             
         }.onAppear() {
-            self.gameDataStore.fetchPrimaryComments(access: self.userDataStore.token!.access, threadId: self.threadId)
+            self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId)
         }
         .navigationBarTitle(Text(self.gameDataStore.threads[threadId]!.title))
     }

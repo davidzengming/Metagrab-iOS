@@ -21,6 +21,7 @@ struct GameFeedRow : View {
     }
     
     var body: some View {
+        
         VStack {
             HStack {
                 if (self.gameDataStore.gameIcons[game.id] != nil) {
@@ -38,6 +39,7 @@ struct GameFeedRow : View {
                 }
             }.onAppear{
                 self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.game)
+                self.gameDataStore.loadGameIcon(game: self.game)
             }
 
             HStack {
@@ -49,8 +51,6 @@ struct GameFeedRow : View {
                     }.padding()
                 }
             }
-        }.onAppear() {
-            self.gameDataStore.loadGameIcon(game: self.game)
         }
     }
 }
