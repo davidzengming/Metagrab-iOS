@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,7 +12,10 @@
 		3E4640A7237C585F009D01C1 /* ThreadsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */; };
 		3E747DDC2385BB4200B807CE /* Vote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E747DDB2385BB4200B807CE /* Vote.swift */; };
 		3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */; };
+		3ECA00B123905BCF001FB0B6 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECA00B023905BCF001FB0B6 /* TextView.swift */; };
+		3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECF12C3238ECAE000A7160B /* KeyChain.swift */; };
 		3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */; };
+		3EEA4738238D79BB00171396 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA4737238D79BB00171396 /* ImagePicker.swift */; };
 		3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210C23086963002DE02E /* AppDelegate.swift */; };
 		3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210E23086963002DE02E /* SceneDelegate.swift */; };
 		3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6211023086963002DE02E /* MetaGrab.xcdatamodeld */; };
@@ -43,15 +46,22 @@
 		3EFCE174230EEA31000FD392 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE173230EEA31000FD392 /* Comment.swift */; };
 		3EFCE178230EF22A000FD392 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE177230EF22A000FD392 /* ThreadView.swift */; };
 		3EFCE17A230F010F000FD392 /* CommentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFCE179230F010F000FD392 /* CommentView.swift */; };
+		D02123350BE08246159262D4 /* Pods_MetaGrab.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04ABB7672B6A2E1EC02454EF /* Pods_MetaGrab.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		04ABB7672B6A2E1EC02454EF /* Pods_MetaGrab.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MetaGrab.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2DF202A7E2C4F11AE9EC5C3A /* Pods-MetaGrab.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetaGrab.release.xcconfig"; path = "Target Support Files/Pods-MetaGrab/Pods-MetaGrab.release.xcconfig"; sourceTree = "<group>"; };
+		3CDF4CE4F285DAF5750237EC /* Pods-MetaGrab.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetaGrab.debug.xcconfig"; path = "Target Support Files/Pods-MetaGrab/Pods-MetaGrab.debug.xcconfig"; sourceTree = "<group>"; };
 		3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadResponse.swift; sourceTree = "<group>"; };
 		3E3098D72387154100E2758F /* NewCommentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCommentResponse.swift; sourceTree = "<group>"; };
 		3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsResponse.swift; sourceTree = "<group>"; };
 		3E747DDB2385BB4200B807CE /* Vote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vote.swift; sourceTree = "<group>"; };
 		3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentLoadTree.swift; sourceTree = "<group>"; };
+		3ECA00B023905BCF001FB0B6 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		3ECF12C3238ECAE000A7160B /* KeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
 		3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadView.swift; sourceTree = "<group>"; };
+		3EEA4737238D79BB00171396 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		3EF6210923086963002DE02E /* MetaGrab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetaGrab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EF6210C23086963002DE02E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3EF6210E23086963002DE02E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -91,6 +101,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D02123350BE08246159262D4 /* Pods_MetaGrab.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +113,8 @@
 			children = (
 				3EF6210B23086963002DE02E /* MetaGrab */,
 				3EF6210A23086963002DE02E /* Products */,
+				A66F28AE76AAEE044052F701 /* Pods */,
+				91AD2EC2E6782974DA724549 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -140,6 +153,9 @@
 				3EF6211D23086963002DE02E /* Info.plist */,
 				3EF6211023086963002DE02E /* MetaGrab.xcdatamodeld */,
 				3EF6211723086963002DE02E /* Preview Content */,
+				3EEA4737238D79BB00171396 /* ImagePicker.swift */,
+				3ECF12C3238ECAE000A7160B /* KeyChain.swift */,
+				3ECA00B023905BCF001FB0B6 /* TextView.swift */,
 			);
 			path = MetaGrab;
 			sourceTree = "<group>";
@@ -173,6 +189,23 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		91AD2EC2E6782974DA724549 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				04ABB7672B6A2E1EC02454EF /* Pods_MetaGrab.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A66F28AE76AAEE044052F701 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				3CDF4CE4F285DAF5750237EC /* Pods-MetaGrab.debug.xcconfig */,
+				2DF202A7E2C4F11AE9EC5C3A /* Pods-MetaGrab.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -180,9 +213,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3EF6212023086963002DE02E /* Build configuration list for PBXNativeTarget "MetaGrab" */;
 			buildPhases = (
+				A77EDBB0931BD875476AE34E /* [CP] Check Pods Manifest.lock */,
 				3EF6210523086963002DE02E /* Sources */,
 				3EF6210623086963002DE02E /* Frameworks */,
 				3EF6210723086963002DE02E /* Resources */,
+				A791E25FCE0C59EEE33F3162 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -239,6 +274,48 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A77EDBB0931BD875476AE34E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MetaGrab-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A791E25FCE0C59EEE33F3162 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MetaGrab/Pods-MetaGrab-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MetaGrab/Pods-MetaGrab-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MetaGrab/Pods-MetaGrab-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		3EF6210523086963002DE02E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -247,6 +324,7 @@
 				3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */,
 				3EF6214123086B6F002DE02E /* Developer.swift in Sources */,
 				3EF6213F23086B5A002DE02E /* Game.swift in Sources */,
+				3EEA4738238D79BB00171396 /* ImagePicker.swift in Sources */,
 				3EF6212623086A1D002DE02E /* MainView.swift in Sources */,
 				3E02DA2B23873A110063BCD7 /* NewThreadResponse.swift in Sources */,
 				3E4640A7237C585F009D01C1 /* ThreadsResponse.swift in Sources */,
@@ -275,6 +353,8 @@
 				3E747DDC2385BB4200B807CE /* Vote.swift in Sources */,
 				3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */,
 				3EF6213423086ADB002DE02E /* GameDataStore.swift in Sources */,
+				3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */,
+				3ECA00B123905BCF001FB0B6 /* TextView.swift in Sources */,
 				3EFCE17A230F010F000FD392 /* CommentView.swift in Sources */,
 				3EF6214B23086BCD002DE02E /* AccessToken.swift in Sources */,
 			);
@@ -410,6 +490,7 @@
 		};
 		3EF6212123086963002DE02E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3CDF4CE4F285DAF5750237EC /* Pods-MetaGrab.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -429,6 +510,7 @@
 		};
 		3EF6212223086963002DE02E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2DF202A7E2C4F11AE9EC5C3A /* Pods-MetaGrab.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

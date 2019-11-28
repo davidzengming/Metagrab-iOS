@@ -13,15 +13,54 @@ import Combine
 final class UserDataStore: ObservableObject {
     let objectWillChange = PassthroughSubject<Void, Never>()
     
-    var username: String?
-    var password: String?
-    var token: Token?
-    var accessToken: Token?
+    var username: String? = nil {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var password: String? = nil {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var token: Token? = nil {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var isAuthenticated: Bool = false {
+        willSet {
+            objectWillChange.send()
+        }
+    }
     
+    func onStart() {
+        if let usernameData = KeyChain.load(key: "metagrabusername"), let passwordData = KeyChain.load(key: "metagrabpassword"), let tokenaccessData = KeyChain.load(key: "metagrabtokenaccess"), let tokenrefreshData = KeyChain.load(key: "metagrabtokenrefresh") {
+            self.username = String(data: usernameData, encoding: String.Encoding.utf8) as String?
+            self.password = String(data: passwordData, encoding: String.Encoding.utf8) as String?
+            self.token = Token(refresh: String(data: tokenrefreshData, encoding: String.Encoding.utf8)!, access: String(data: tokenaccessData, encoding: String.Encoding.utf8)!)
+        }
+    }
+    
+    func autologin() {
+        acquireToken()
+    }
+
     func login(username: String, password: String) {
         self.username = username
         self.password = password
-        self.acquireToken()
+        
+        let taskGroup = DispatchGroup()
+        taskGroup.enter()
+        self.acquireToken(taskGroup: taskGroup)
+        
+        taskGroup.notify(queue: DispatchQueue.global()) {
+            print("set to keychain credentials")
+            let status1 = KeyChain.save(key: "metagrabusername", data: username.data(using: String.Encoding.utf8)!)
+            let status2 = KeyChain.save(key: "metagrabpassword", data: password.data(using: String.Encoding.utf8)!)
+            let status3 = KeyChain.save(key: "metagrabtokenaccess", data: self.token!.access.data(using: String.Encoding.utf8)!)
+            let status4 = KeyChain.save(key: "metagrabtokenrefresh", data: self.token!.refresh.data(using: String.Encoding.utf8)!)
+        }
     }
     
     func refreshToken(queryGroup: DispatchGroup) {
@@ -35,8 +74,7 @@ final class UserDataStore: ObservableObject {
             if let data = data {
                 if let jsonString = String(data: data, encoding: .utf8) {
                     DispatchQueue.main.async {
-                        self.accessToken = load(jsonData: jsonString.data(using: .utf8)!)
-                        self.token!.access = self.accessToken!.access
+                        self.token!.access = load(jsonData: jsonString.data(using: .utf8)!)
                         queryGroup.leave()
                     }
                 }
@@ -44,7 +82,7 @@ final class UserDataStore: ObservableObject {
         }.resume()
     }
     
-    func acquireToken() {
+    func acquireToken(taskGroup: DispatchGroup? = nil) {
         guard let url = URL(string: "http://127.0.0.1:8000/api/token/") else { return }
         var request = URLRequest(url: url)
 
@@ -57,8 +95,11 @@ final class UserDataStore: ObservableObject {
                 if let jsonString = String(data: data, encoding: .utf8) {
                     DispatchQueue.main.async {
                         self.token = load(jsonData: jsonString.data(using: .utf8)!)
-                        print(self.token!.access)
+                        self.isAuthenticated = true
                         self.objectWillChange.send()
+                        if taskGroup != nil {
+                            taskGroup!.leave()
+                        }
                     }
                 }
             }

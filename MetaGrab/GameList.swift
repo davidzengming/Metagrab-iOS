@@ -21,7 +21,6 @@ struct FollowGamesView: View {
             .padding()
             .onAppear() {
                 self.gameDataStore.fetchAndSortGamesWithGenre(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
-                print("wow")
             }
 
             // There's a bug with scrollview - list, using forEach for now

@@ -44,6 +44,12 @@ struct ThreadRow : View {
     
     var body: some View {
         HStack {
+            if (self.gameDataStore.threadsImage[threadId] != nil) {
+                Image(uiImage: self.gameDataStore.threadsImage[threadId]!)
+                    .resizable()
+                    .frame(width: 100, height: 75)
+            }
+            
             VStack {
                 if self.gameDataStore.voteThreadMapping[threadId] != nil {
                     Text("Hi I voted on this")
@@ -58,6 +64,10 @@ struct ThreadRow : View {
                     Text("👎")
                 }
             }
+            .onAppear() {
+                self.gameDataStore.loadThreadIcon(thread: self.gameDataStore.threads[self.threadId]!)
+            }
+            
             NavigationLink(destination: ThreadView(threadId: threadId)) {
                 HStack {
                     VStack(alignment: .leading, spacing: 5) {

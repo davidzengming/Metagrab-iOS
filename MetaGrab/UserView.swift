@@ -36,6 +36,10 @@ struct LoginUserView: View {
     @State var password: String = ""
     @EnvironmentObject var userDataStore: UserDataStore
     
+    func submit() {
+        userDataStore.login(username: name, password: password)
+    }
+    
     var body: some View {
         VStack {
             Text(verbatim: "USERNAME").font(.headline)
@@ -54,11 +58,13 @@ struct LoginUserView: View {
             Button(action: submit) {
                 Text("Submit")
             }
+            .onAppear() {
+                self.userDataStore.onStart()
+                if self.userDataStore.username != nil {
+                    self.userDataStore.autologin()
+                }
+            }
         }
-    }
-    
-    func submit() {
-        userDataStore.login(username: name, password: password)
     }
 }
 

@@ -7,7 +7,7 @@ struct MainView: View {
     var body: some View {
         NavigationView {
             VStack {
-                if self.userDataStore.username == nil {
+                if self.userDataStore.isAuthenticated == false {
                     UserView()
                 } else {
                     GameList().environmentObject(GameDataStore())

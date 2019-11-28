@@ -33,8 +33,15 @@ struct ThreadView : View {
     var body: some View {
         VStack {
             HStack {
-                self.placeholder
-                    .frame(width: 100, height: 75)
+                if (self.gameDataStore.threadsImage[threadId] != nil) {
+                    Image(uiImage: self.gameDataStore.threadsImage[threadId]!)
+                        .resizable()
+                        .frame(width: 100, height: 75)
+                } else {
+                    self.placeholder
+                        .frame(width: 100, height: 75)
+                }
+
                 Text(self.gameDataStore.threads[threadId]!.content)
                 Spacer()
                 Button(action: toggleReplyBoxOpen) {
@@ -75,6 +82,7 @@ struct ThreadView : View {
             
         }.onAppear() {
             self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId)
+            self.gameDataStore.loadThreadIcon(thread: self.gameDataStore.threads[self.threadId]!)
         }
         .navigationBarTitle(Text(self.gameDataStore.threads[threadId]!.title))
     }

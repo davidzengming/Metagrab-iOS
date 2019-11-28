@@ -9,9 +9,11 @@
 import Foundation
 import SwiftUI
 import Combine
+import Cloudinary
 
 final class GameDataStore: ObservableObject {
     let objectWillChange = PassthroughSubject<Void, Never>()
+    let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "dzengcdn", apiKey: "348513889264333", secure: true))
     
     // Game and Icon States
     var games = [Int: Game]() {
@@ -43,6 +45,11 @@ final class GameDataStore: ObservableObject {
         }
     }
     var threadsNextPageStartIndex = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var threadsImage = [Int: UIImage]() {
         willSet {
             objectWillChange.send()
         }
@@ -119,38 +126,63 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    func submitThread(access: String, forumId: Int, title: String, flair: Int, content: String) {
+    
+    func submitThread(access: String, forumId: Int, title: String, flair: Int, content: String, imageData: Data?) {
+        let taskGroup = DispatchGroup()
+        
+        var imageUrl = ""
+        if imageData != nil {
+            taskGroup.enter()
+            let preprocessChain = CLDImagePreprocessChain()
+            .addStep(CLDPreprocessHelpers.limit(width: 500, height: 500))
+            .addStep(CLDPreprocessHelpers.dimensionsValidator(minWidth: 10, maxWidth: 500, minHeight: 10, maxHeight: 500))
+            _ = cloudinary.createUploader().upload(data: imageData!, uploadPreset: "cyr1nlwn", preprocessChain: preprocessChain)
+            .response({response, error in
+                if error == nil {
+                    imageUrl = response!.secureUrl!
+                    taskGroup.leave()
+                }
+            })
+        }
+        
         guard let url = URL(string: "http://127.0.0.1:8000/threads/post_thread_by_game_id/?game_id=" + String(forumId)) else { return }
         
-        let json: [String: Any] = ["title": title, "content": content, "flair": flair]
-        let jsonData = try? JSONSerialization.data(withJSONObject: json)
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = jsonData
-        let sessionConfig = URLSessionConfiguration.default
-        let authString: String? = "Bearer \(access)"
-        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
-        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
-        
-        session.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    
-                    let tempNewThreadResponse: NewThreadResponse = load(jsonData: jsonString.data(using: .utf8)!)
-                    let tempThread = tempNewThreadResponse.threadResponse
-                    let vote = tempNewThreadResponse.voteResponse
-                    DispatchQueue.main.async {
-                        self.threads[tempThread.id] = tempThread
-                        self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
-                        self.mainCommentListByThreadId[tempThread.id] = []
-                        self.threadsNextPageStartIndex[tempThread.id] = 0
-                        self.votes[vote.id] = vote
-                        self.voteThreadMapping[tempThread.id] = vote.id
+        taskGroup.notify(queue: DispatchQueue.global()) {
+            let json: [String: Any] = ["title": title, "content": content, "flair": flair, "image_url": imageUrl]
+            let jsonData = try? JSONSerialization.data(withJSONObject: json)
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = jsonData
+            let sessionConfig = URLSessionConfiguration.default
+            let authString: String? = "Bearer \(access)"
+            sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+            let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+            
+            session.dataTask(with: request) { (data, response, error) in
+                if let data = data {
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        
+                        let tempNewThreadResponse: NewThreadResponse = load(jsonData: jsonString.data(using: .utf8)!)
+                        let tempThread = tempNewThreadResponse.threadResponse
+                        let vote = tempNewThreadResponse.voteResponse
+                        
+                        DispatchQueue.main.async {
+                            self.threads[tempThread.id] = tempThread
+                            self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
+                            self.mainCommentListByThreadId[tempThread.id] = []
+                            self.threadsNextPageStartIndex[tempThread.id] = 0
+                            self.votes[vote.id] = vote
+                            self.voteThreadMapping[tempThread.id] = vote.id
+                            
+                            if imageData != nil {
+                                self.threadsImage[tempThread.id] = UIImage(data: imageData!)
+                            }
+                        }
                     }
                 }
-            }
-        }.resume()
+            }.resume()
+        }
     }
     
     func incrementTreeNodes(node: Comment) {
@@ -205,7 +237,6 @@ final class GameDataStore: ObservableObject {
                         self.childCommentListByParentCommentId[tempMainComment.id] = []
                         self.incrementTreeNodes(node: tempMainComment)
                         self.votes[tempVote.id] = tempVote
-                        
                         self.voteCommentMapping[tempMainComment.id] = tempVote.id
                     }
                 }
@@ -515,6 +546,25 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
+    func loadThreadIcon(thread: Thread) {
+        if threadsImage[thread.id] != nil || thread.imageUrl == "" {
+            return
+        }
+        
+        guard let imageURL = URL(string: thread.imageUrl) else {
+            fatalError("ImageURL is not correct!")
+        }
+        
+        URLSession.shared.dataTask(with: imageURL) { data, response, error in
+            guard let data = data, error == nil else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.threadsImage[thread.id] = UIImage(data: data)
+            }
+        }.resume()
+    }
     
     func loadGameIcon(game: Game) {
         if gameIcons[game.id] != nil {
@@ -538,31 +588,23 @@ final class GameDataStore: ObservableObject {
     
     func fetchAndSortGamesWithGenre(access: String, userDataStore: UserDataStore) {
         let taskGroup = DispatchGroup()
-        
-        DispatchQueue.main.async {
-            taskGroup.enter()
-        }
+        taskGroup.enter()
         self.fetchGenres(access: access, userDataStore: userDataStore, taskGroup: taskGroup)
-        DispatchQueue.main.async {
-            taskGroup.enter()
-        }
+        taskGroup.enter()
         self.fetchAllGames(access: access, userDataStore: userDataStore, taskGroup: taskGroup)
         
-        
-        DispatchQueue.main.async {
-            print("---- WAITING FOR GAMES AND GENRE ------")
-            taskGroup.notify(queue: .main) {
-                print("----- NOTIFIED - LOADED GAMES AND GENRE -----")
-                print(self.genreGameArray)
-                var tempGenreGameArray = self.genreGameArray
-                for (game_id, game) in self.games {
-                    let genreIndex = game.genre.id
-                    tempGenreGameArray[genreIndex]!.append(game_id)
-                }
-                
+        print("---- WAITING FOR GAMES AND GENRE ------")
+        taskGroup.notify(queue: .global()) {
+            print("----- NOTIFIED - LOADED GAMES AND GENRE -----")
+            print(self.genreGameArray)
+            var tempGenreGameArray = self.genreGameArray
+            for (game_id, game) in self.games {
+                let genreIndex = game.genre.id
+                tempGenreGameArray[genreIndex]!.append(game_id)
+            }
+            
+            DispatchQueue.main.async {
                 self.genreGameArray = tempGenreGameArray
-                
-                
             }
         }
     }
@@ -587,8 +629,7 @@ final class GameDataStore: ObservableObject {
                             self.genres[genre.id] = genre
                             self.genreGameArray[genre.id] = [Int]()
                         }
-                        
-                        print("I'm done fetching genres", self.genres, self.genreGameArray)
+                        print("----- Done fetching genres----- ", self.genres, self.genreGameArray)
                         taskGroup.leave()
                     }
                 }
@@ -655,7 +696,7 @@ final class GameDataStore: ObservableObject {
                             }
                             self.games[game.id] = game
                         }
-                        print("I am done fetching games", self.games)
+                        print("----- Done fetching games ----- ", self.games)
                         taskGroup.leave()
                     }
                 }
@@ -751,9 +792,6 @@ final class GameDataStore: ObservableObject {
                         self.voteThreadMapping[thread.id] = newVote.id
                         self.threads[thread.id]!.upvotes += 1
                         self.threads[thread.id]!.downvotes -= 1
-                        
-                        print(self.threads[thread.id]!.upvotes)
-                        print(self.threads[thread.id]!.downvotes)
                     }
                 }
             }
@@ -950,7 +988,6 @@ final class GameDataStore: ObservableObject {
                     
                     self.voteCommentMapping.removeValue(forKey: vote.comment!)
                     self.votes.removeValue(forKey: vote.id)
-                    
                 }
             }
         }.resume()
@@ -984,7 +1021,5 @@ final class GameDataStore: ObservableObject {
             }
         }.resume()
     }
-    
-    
 }
 
