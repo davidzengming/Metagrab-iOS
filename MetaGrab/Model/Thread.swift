@@ -21,4 +21,5 @@ struct Thread: Hashable, Codable, Identifiable {
     var numChilds: Int
     var numSubtreeNodes: Int
     var imageUrl: String
+    var created: Date
 }

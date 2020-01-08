@@ -11,6 +11,6 @@ import SwiftUI
 
 struct User: Hashable, Codable, Identifiable {
     var id: Int
-    var name: String
-    var password: String
+    var username: String
+    var created: Date
 }

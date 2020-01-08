@@ -14,7 +14,7 @@ func load<T: Decodable>(jsonData: Data, as type: T.Type = T.self) -> T {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let dateFormat = DateFormatter()
         dateFormat.locale = Locale(identifier: "en_US_POSIX")
-        dateFormat.dateFormat = "yyyy-MM-dd"
+        dateFormat.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         decoder.dateDecodingStrategy = .formatted(dateFormat)
         return try(decoder.decode(T.self, from: jsonData))
     } catch {

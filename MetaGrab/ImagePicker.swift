@@ -18,7 +18,6 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Binding var data: Data?
 
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-
         @Binding var presentationMode: PresentationMode
         @Binding var image: Image?
         @Binding var data: Data?
@@ -58,5 +57,4 @@ struct ImagePicker: UIViewControllerRepresentable {
                                 context: UIViewControllerRepresentableContext<ImagePicker>) {
 
     }
-
 }

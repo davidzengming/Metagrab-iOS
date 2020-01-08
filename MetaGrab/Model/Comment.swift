@@ -18,4 +18,5 @@ struct Comment: Hashable, Codable, Identifiable {
     var parentPost: Int?
     var numChilds: Int
     var numSubtreeNodes: Int
+    var created: Date
 }

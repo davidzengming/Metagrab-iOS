@@ -12,5 +12,5 @@ struct Vote: Hashable, Codable, Identifiable {
     var id: Int
     var thread: Int?
     var comment: Int?
-    var isPositive: Bool
+    var direction: Int
 }

@@ -12,4 +12,5 @@ struct ThreadsResponse: Hashable, Codable {
     var threadsResponse: [Thread]
     var hasNextPage: Bool
     var votesResponse: [Vote]
+    var usersResponse: [User]
 }

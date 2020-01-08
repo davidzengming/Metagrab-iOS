@@ -33,6 +33,30 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    var gameBannerImage = [Int: UIImage]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var gamesByYear = [Int: [Int: [Int:Set<Int>]]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isBackToGamesView: Bool = true {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isFirstFetchAllGames: Bool = true {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     // Threads
     var threads = [Int: Thread]() {
         willSet {
@@ -126,6 +150,12 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    // Users
+    var users = [Int: User]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
     
     func submitThread(access: String, forumId: Int, title: String, flair: Int, content: String, imageData: Data?) {
         let taskGroup = DispatchGroup()
@@ -166,8 +196,10 @@ final class GameDataStore: ObservableObject {
                         let tempNewThreadResponse: NewThreadResponse = load(jsonData: jsonString.data(using: .utf8)!)
                         let tempThread = tempNewThreadResponse.threadResponse
                         let vote = tempNewThreadResponse.voteResponse
+                        let user = tempNewThreadResponse.userResponse
                         
                         DispatchQueue.main.async {
+                            self.users[user.id] = user
                             self.threads[tempThread.id] = tempThread
                             self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
                             self.mainCommentListByThreadId[tempThread.id] = []
@@ -199,7 +231,6 @@ final class GameDataStore: ObservableObject {
             while curComment.parentThread != nil || curComment.parentPost != nil {
                 if curComment.parentThread != nil {
                     self.threads[curComment.parentThread!]!.numSubtreeNodes += 1
-                    print("hello", self.threads[curComment.parentThread!]!.numSubtreeNodes)
                     break
                 } else {
                     self.comments[curComment.parentPost!]!.numSubtreeNodes += 1
@@ -229,7 +260,10 @@ final class GameDataStore: ObservableObject {
                     let tempNewCommentResponse: NewCommentResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     let tempMainComment = tempNewCommentResponse.commentResponse
                     let tempVote = tempNewCommentResponse.voteResponse
+                    let user = tempNewCommentResponse.userResponse
+                    
                     DispatchQueue.main.async {
+                        self.users[user.id] = user
                         self.comments[tempMainComment.id] = tempMainComment
                         self.mainCommentListByThreadId[tempMainComment.parentThread!]!.insert(tempMainComment.id, at: 0)
                         self.threadsNextPageStartIndex[tempMainComment.parentThread!]! += 1
@@ -264,7 +298,10 @@ final class GameDataStore: ObservableObject {
                     let tempNewCommentResponse: NewCommentResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     let tempChildComment = tempNewCommentResponse.commentResponse
                     let tempVote = tempNewCommentResponse.voteResponse
+                    let user = tempNewCommentResponse.userResponse
+                    
                     DispatchQueue.main.async {
+                        self.users[user.id] = user
                         self.comments[tempChildComment.id] = tempChildComment
                         self.childCommentListByParentCommentId[tempChildComment.parentPost!]!.insert(tempChildComment.id, at: 0)
                         self.childCommentListByParentCommentId[tempChildComment.id] = [Int]()
@@ -278,8 +315,15 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func fetchCommentTreeByThreadId(access: String, threadId: Int, start:Int = 0, count:Int = 10, size:Int = 50) {
-        print("Load comment tree from Thread: ", threadId)
+    func fetchCommentTreeByThreadId(access: String, threadId: Int, start:Int = 0, count:Int = 10, size:Int = 50, refresh: Bool = false) {
+        if refresh == true {
+            DispatchQueue.main.async {
+                self.mainCommentListByThreadId[threadId] = [Int]()
+                self.threadsNextPageStartIndex[threadId] = 0
+                self.moreCommentsByThreadId[threadId] = [Int]()
+            }
+        }
+        
         let params: String = "?parent_thread_id=" + String(threadId) + "&start=" + String(start) + "&count=" + String(count) + "&size=" + String(size)
         
         var roots: String = ""
@@ -302,7 +346,6 @@ final class GameDataStore: ObservableObject {
             if let data = data {
                 if let jsonString = String(data: data, encoding: .utf8) {
                     let commentLoadTree: CommentLoadTree = load(jsonData: jsonString.data(using: .utf8)!)
-                    
                     DispatchQueue.main.async {
                         if commentLoadTree.addedComments.count == 0 {
                             self.commentNextPageStartIndex[threadId] = -1
@@ -314,24 +357,20 @@ final class GameDataStore: ObservableObject {
                         }
                         
                         for comment in commentLoadTree.addedComments {
-                            if self.comments[comment.id] == nil {
-                                self.comments[comment.id] = comment
-                                
-                                if comment.parentThread != nil {
-                                    self.mainCommentListByThreadId[threadId]!.append(comment.id)
-                                    self.childCommentListByParentCommentId[comment.id] = [Int]()
-                                    self.threadsNextPageStartIndex[threadId]! += 1
-                                    self.commentNextPageStartIndex[comment.id] = 0
-                                } else {
-                                    self.childCommentListByParentCommentId[comment.parentPost!]!.append(comment.id)
-                                    self.childCommentListByParentCommentId[comment.id] = [Int]()
-                                    self.commentNextPageStartIndex[comment.id] = 1
-                                    self.commentNextPageStartIndex[comment.parentPost!]! += 1
-                                }
-                                self.moreCommentsByParentCommentId[comment.id] = [Int]()
+                            self.comments[comment.id] = comment
+                            
+                            if comment.parentThread != nil {
+                                self.mainCommentListByThreadId[threadId]!.append(comment.id)
+                                self.childCommentListByParentCommentId[comment.id] = [Int]()
+                                self.threadsNextPageStartIndex[threadId]! += 1
+                                self.commentNextPageStartIndex[comment.id] = 0
                             } else {
-                                self.comments[comment.id] = comment
+                                self.childCommentListByParentCommentId[comment.parentPost!]!.append(comment.id)
+                                self.childCommentListByParentCommentId[comment.id] = [Int]()
+                                self.commentNextPageStartIndex[comment.id] = 0
+                                self.commentNextPageStartIndex[comment.parentPost!]! += 1
                             }
+                            self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
                         
                         self.moreCommentsByThreadId[threadId]! = [Int]()
@@ -346,6 +385,10 @@ final class GameDataStore: ObservableObject {
                         for vote in commentLoadTree.addedVotes {
                             self.votes[vote.id] = vote
                             self.voteCommentMapping[vote.comment!] = vote.id
+                        }
+                        
+                        for user in commentLoadTree.usersResponse {
+                            self.users[user.id] = user
                         }
                     }
                 }
@@ -385,18 +428,14 @@ final class GameDataStore: ObservableObject {
                         }
                         
                         for comment in commentLoadTree.addedComments {
-                            if self.comments[comment.id] == nil {
-                                self.comments[comment.id] = comment
-                                self.childCommentListByParentCommentId[parentCommentId]!.append(comment.id)
-                                self.childCommentListByParentCommentId[comment.id] = [Int]()
-                                self.commentNextPageStartIndex[comment.id] = 0
-                                self.commentNextPageStartIndex[comment.parentPost!]! += 1
-                                self.moreCommentsByParentCommentId[comment.id] = [Int]()
-                            } else {
-                                self.comments[comment.id] = comment
-                            }
+                            self.comments[comment.id] = comment
+                            self.childCommentListByParentCommentId[parentCommentId]!.append(comment.id)
+                            self.childCommentListByParentCommentId[comment.id] = [Int]()
+                            self.commentNextPageStartIndex[comment.id] = 0
+                            self.commentNextPageStartIndex[comment.parentPost!]! += 1
+                            self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
-                        
+
                         self.moreCommentsByParentCommentId[parentCommentId]! = [Int]()
                         for comment in commentLoadTree.moreComments {
                             self.moreCommentsByParentCommentId[comment.parentPost!]!.append(comment.id)
@@ -405,6 +444,10 @@ final class GameDataStore: ObservableObject {
                         for vote in commentLoadTree.addedVotes {
                             self.votes[vote.id] = vote
                             self.voteCommentMapping[vote.comment!] = vote.id
+                        }
+                        
+                        for user in commentLoadTree.usersResponse {
+                            self.users[user.id] = user
                         }
                     }
                 }
@@ -485,7 +528,7 @@ final class GameDataStore: ObservableObject {
                                 self.comments[comment.id] = comment
                             }
                         }
-                        
+
                         self.commentNextPageStartIndex[parentCommentId] = start + count
                     }
                 }
@@ -493,10 +536,16 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func fetchThreads(access: String, game: Game, start:Int = 0, count:Int = 10) {
+    func fetchThreads(access: String, game: Game, start:Int = 0, count:Int = 10, refresh: Bool = false) {
+        if refresh == true {
+             DispatchQueue.main.async {
+                self.threadListByGameId[game.id] = [Int]()
+                self.forumsNextPageStartIndex[game.id] = nil
+            }
+        }
+        
         let params: String = "?game=" + String(game.id) + "&start=" + String(start) + "&count=" + String(count)
         guard let url = URL(string: "http://127.0.0.1:8000/threads/get_threads_by_game_id/" + params) else { return }
-
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         let sessionConfig = URLSessionConfiguration.default
@@ -509,6 +558,7 @@ final class GameDataStore: ObservableObject {
                 if let jsonString = String(data: data, encoding: .utf8) {
                     let tempThreadsResponse: ThreadsResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     
+                    
                     DispatchQueue.main.async {
                         if self.threadListByGameId[game.id] == nil {
                              self.threadListByGameId[game.id] = [Int]()
@@ -520,14 +570,10 @@ final class GameDataStore: ObservableObject {
                         }
                         
                         for thread in tempThreadsResponse.threadsResponse {
-                            if self.threads[thread.id] == nil {
-                                self.threads[thread.id] = thread
-                                self.mainCommentListByThreadId[thread.id] = [Int]()
-                                self.threadListByGameId[game.id]!.append(thread.id)
-                                self.threadsNextPageStartIndex[thread.id] = 0
-                            } else {
-                                self.threads[thread.id] = thread
-                            }
+                            self.threads[thread.id] = thread
+                            self.mainCommentListByThreadId[thread.id] = [Int]()
+                            self.threadListByGameId[game.id]!.append(thread.id)
+                            self.threadsNextPageStartIndex[thread.id] = 0
                         }
                         
                         if tempThreadsResponse.hasNextPage == true {
@@ -539,6 +585,10 @@ final class GameDataStore: ObservableObject {
                         for vote in tempThreadsResponse.votesResponse {
                             self.votes[vote.id] = vote
                             self.voteThreadMapping[vote.thread!] = vote.id
+                        }
+                        
+                        for user in tempThreadsResponse.usersResponse {
+                            self.users[user.id] = user
                         }
                     }
                 }
@@ -562,6 +612,26 @@ final class GameDataStore: ObservableObject {
             
             DispatchQueue.main.async {
                 self.threadsImage[thread.id] = UIImage(data: data)
+            }
+        }.resume()
+    }
+    
+    func loadGameBanner(game: Game) {
+        if gameBannerImage[game.id] != nil || game.banner == "" {
+            return
+        }
+        
+        guard let imageURL = URL(string: game.banner) else {
+            fatalError("ImageURL is not correct!")
+        }
+        
+        URLSession.shared.dataTask(with: imageURL) { data, response, error in
+            guard let data = data, error == nil else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.gameBannerImage[game.id] = UIImage(data: data)
             }
         }.resume()
     }
@@ -673,10 +743,19 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func fetchAllGames(access: String, userDataStore: UserDataStore, taskGroup: DispatchGroup, start:Int = 0, count:Int = 10) {
+    func fetchRecentAndUpcomingGames(access: String, userDataStore: UserDataStore, beforeMonths: Int = 2, afterYear: Int = 1) {
+        let date = Date()
+        let calendar = Calendar.current
+        let year = calendar.component(.year, from: date)
+        let month = calendar.component(.month, from: date)
         
-        let params: String = "?start=" + String(start) + "&count=" + String(count)
-        guard let url = URL(string: "http://127.0.0.1:8000/games/" + params) else { return }
+        let startMonth = (month - beforeMonths) % 12
+        let startYear = (month - beforeMonths) >= 0 ? year : year - 1
+        let endMonth = month
+        let endYear = year + afterYear
+        
+        let params: String = "?start_month=" + String(startMonth) + "&start_year=" + String(startYear) + "&end_month=" + String(endMonth) + "&end_year" + String(endYear)
+        guard let url = URL(string: "http://127.0.0.1:8000/games/get_recent_games/" + params) else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         let sessionConfig = URLSessionConfiguration.default
@@ -695,6 +774,66 @@ final class GameDataStore: ObservableObject {
                                 self.isFollowed[game.id] = false
                             }
                             self.games[game.id] = game
+                        }
+                    }
+                }
+            }
+        }.resume()
+    }
+    
+    func fetchAllGames(access: String, userDataStore: UserDataStore, taskGroup: DispatchGroup, start:Int = 0, count:Int = 10) {
+        let params: String = "?start=" + String(start) + "&count=" + String(count)
+        guard let url = URL(string: "http://127.0.0.1:8000/games/get_recent_games/" + params) else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    
+                    let tempGames: [Game] = load(jsonData: jsonString.data(using: .utf8)!)
+                    let calendar = Calendar.current
+                    
+                    DispatchQueue.main.async {
+                        for game in tempGames {
+                            if self.isFollowed[game.id] == nil {
+                                self.isFollowed[game.id] = false
+                            }
+                            self.games[game.id] = game
+                            
+                            if self.threadListByGameId[game.id] == nil {
+                                self.threadListByGameId[game.id] = [Int]()
+                            }
+                            
+                            if game.nextExpansionReleaseDate != nil {
+                                if self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)] == nil {
+                                    self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)] = [Int:[Int: Set<Int>]]()
+                                }
+                                if self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)] == nil {
+                                    self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)] = [Int: Set<Int>]()
+                                }
+                                
+                                if self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)]![calendar.component(.day, from: game.nextExpansionReleaseDate!)] == nil {
+                                    self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)]![calendar.component(.day, from: game.nextExpansionReleaseDate!)] = Set<Int>()
+                                }
+                                
+                                self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)]![calendar.component(.day, from: game.nextExpansionReleaseDate!)]!.insert(game.id)
+                            } else {
+                                if self.gamesByYear[calendar.component(.year, from: game.releaseDate)] == nil {
+                                    self.gamesByYear[calendar.component(.year, from: game.releaseDate)] = [Int:[Int: Set<Int>]]()
+                                }
+                                if self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)] == nil {
+                                    self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)] = [Int: Set<Int>]()
+                                }
+                                if self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)]![calendar.component(.day, from: game.releaseDate)] == nil {
+                                    self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)]![calendar.component(.day, from: game.releaseDate)] = Set<Int>()
+                                }
+                                 self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)]![calendar.component(.day, from: game.releaseDate)]!.insert(game.id)
+                            }
                         }
                         print("----- Done fetching games ----- ", self.games)
                         taskGroup.leave()
@@ -743,8 +882,100 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func upvoteThread(access: String, thread: Thread) {
-        guard let url = URL(string: "http://127.0.0.1:8000/votes/upvote_by_thread_id/") else { return }
+    func upvoteByExistingVoteIdThread(access: String, voteId: Int, thread: Thread) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/upvote_by_vote_id/") else { return }
+        let json: [String: Any] = ["vote_id": voteId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        session.dataTask(with: request) { (data, response, error) in
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.threads[thread.id]!.upvotes += 1
+                    self.votes[voteId]!.direction = 1
+                }
+            }
+        }.resume()
+    }
+    
+    func downvoteByExistingVoteIdThread(access: String, voteId: Int, thread: Thread) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/downvote_by_vote_id/") else { return }
+        let json: [String: Any] = ["vote_id": voteId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        session.dataTask(with: request) { (data, response, error) in
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.threads[thread.id]!.downvotes += 1
+                    self.votes[voteId]!.direction = -1
+                }
+            }
+        }.resume()
+    }
+    
+    func upvoteByExistingVoteIdComment(access: String, voteId: Int, comment: Comment) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/upvote_by_vote_id/") else { return }
+        let json: [String: Any] = ["vote_id": voteId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        session.dataTask(with: request) { (data, response, error) in
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.comments[comment.id]!.upvotes += 1
+                    self.votes[voteId]!.direction = 1
+                }
+            }
+        }.resume()
+    }
+    
+    func downvoteByExistingVoteIdComment(access: String, voteId: Int, comment: Comment) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/downvote_by_vote_id/") else { return }
+        let json: [String: Any] = ["vote_id": voteId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        session.dataTask(with: request) { (data, response, error) in
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.comments[comment.id]!.downvotes += 1
+                    self.votes[voteId]!.direction = -1
+                }
+            }
+        }.resume()
+    }
+    
+    func addNewUpvoteThread(access: String, thread: Thread) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/add_new_upvote_by_thread_id/") else { return }
         let json: [String: Any] = ["thread_id": thread.id]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
@@ -784,22 +1015,18 @@ final class GameDataStore: ObservableObject {
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
         let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
         session.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    let newVote: Vote = load(jsonData: jsonString.data(using: .utf8)!)
-                    DispatchQueue.main.async {
-                        self.votes[newVote.id] = newVote
-                        self.voteThreadMapping[thread.id] = newVote.id
-                        self.threads[thread.id]!.upvotes += 1
-                        self.threads[thread.id]!.downvotes -= 1
-                    }
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.votes[self.voteThreadMapping[thread.id]!]!.direction = 1
+                    self.threads[thread.id]!.upvotes += 1
+                    self.threads[thread.id]!.downvotes -= 1
                 }
             }
         }.resume()
     }
     
-    func downvoteThread(access: String, thread: Thread) {
-        guard let url = URL(string: "http://127.0.0.1:8000/votes/downvote_by_thread_id/") else { return }
+    func addNewDownvoteThread(access: String, thread: Thread) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/add_new_downvote_by_thread_id/") else { return }
         let json: [String: Any] = ["thread_id": thread.id]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
@@ -839,22 +1066,19 @@ final class GameDataStore: ObservableObject {
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
         let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
         session.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    let newVote: Vote = load(jsonData: jsonString.data(using: .utf8)!)
-                    DispatchQueue.main.async {
-                        self.votes[newVote.id] = newVote
-                        self.voteThreadMapping[thread.id] = newVote.id
-                        self.threads[thread.id]!.upvotes -= 1
-                        self.threads[thread.id]!.downvotes += 1
-                    }
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.votes[self.voteThreadMapping[thread.id]!]!.direction = -1
+                    self.threads[thread.id]!.upvotes -= 1
+                    self.threads[thread.id]!.downvotes += 1
                 }
             }
+
         }.resume()
     }
     
-    func upvoteComment(access: String, comment: Comment) {
-        guard let url = URL(string: "http://127.0.0.1:8000/votes/upvote_by_comment_id/") else { return }
+    func addNewUpvoteComment(access: String, comment: Comment) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/add_new_upvote_by_comment_id/") else { return }
         let json: [String: Any] = ["comment_id": comment.id]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
@@ -894,22 +1118,18 @@ final class GameDataStore: ObservableObject {
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
         let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
         session.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    let newVote: Vote = load(jsonData: jsonString.data(using: .utf8)!)
-                    DispatchQueue.main.async {
-                        self.votes[newVote.id] = newVote
-                        self.voteCommentMapping[comment.id] = newVote.id
-                        self.comments[comment.id]!.upvotes += 1
-                        self.comments[comment.id]!.downvotes -= 1
-                    }
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.votes[self.voteCommentMapping[comment.id]!]!.direction = 1
+                    self.comments[comment.id]!.upvotes += 1
+                    self.comments[comment.id]!.downvotes -= 1
                 }
             }
         }.resume()
     }
     
-    func downvoteComment(access: String, comment: Comment) {
-        guard let url = URL(string: "http://127.0.0.1:8000/votes/downvote_by_comment_id/") else { return }
+    func addNewDownvoteComment(access: String, comment: Comment) {
+        guard let url = URL(string: "http://127.0.0.1:8000/votes/add_new_downvote_by_comment_id/") else { return }
         let json: [String: Any] = ["comment_id": comment.id]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
@@ -949,17 +1169,13 @@ final class GameDataStore: ObservableObject {
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
         let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
         session.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    let newVote: Vote = load(jsonData: jsonString.data(using: .utf8)!)
-                    DispatchQueue.main.async {
-                        self.votes[newVote.id] = newVote
-                        self.voteCommentMapping[comment.id] = newVote.id
-                        self.comments[comment.id]!.upvotes -= 1
-                        self.comments[comment.id]!.downvotes += 1
-                    }
-                }
-            }
+             if error == nil {
+                 DispatchQueue.main.async {
+                     self.votes[self.voteCommentMapping[comment.id]!]!.direction = -1
+                     self.comments[comment.id]!.upvotes -= 1
+                     self.comments[comment.id]!.downvotes += 1
+                 }
+             }
         }.resume()
     }
     
@@ -980,14 +1196,13 @@ final class GameDataStore: ObservableObject {
         session.dataTask(with: request) { (data, response, error) in
             if error == nil {
                 DispatchQueue.main.async {
-                    if vote.isPositive == true {
+                    if vote.direction == 1 {
                         self.comments[vote.comment!]!.upvotes -= 1
                     } else {
                         self.comments[vote.comment!]!.downvotes -= 1
                     }
                     
-                    self.voteCommentMapping.removeValue(forKey: vote.comment!)
-                    self.votes.removeValue(forKey: vote.id)
+                    self.votes[vote.id]!.direction = 0
                 }
             }
         }.resume()
@@ -1009,14 +1224,13 @@ final class GameDataStore: ObservableObject {
         session.dataTask(with: request) { (data, response, error) in
             if error == nil {
                 DispatchQueue.main.async {
-                    if vote.isPositive == true {
+                    if vote.direction == 1 {
                         self.threads[vote.thread!]!.upvotes -= 1
                     } else {
                         self.threads[vote.thread!]!.downvotes -= 1
                     }
                     
-                    self.voteThreadMapping.removeValue(forKey: vote.thread!)
-                    self.votes.removeValue(forKey: vote.id)
+                    self.votes[vote.id]!.direction = 0
                 }
             }
         }.resume()

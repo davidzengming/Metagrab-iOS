@@ -38,8 +38,8 @@ struct GameFeedRow : View {
                     self.showDetail.toggle()
                 }
             }.onAppear{
-                self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.game)
                 self.gameDataStore.loadGameIcon(game: self.game)
+                self.gameDataStore.isBackToGamesView = true
             }
 
             HStack {
@@ -55,12 +55,3 @@ struct GameFeedRow : View {
     }
 }
 
-#if DEBUG
-struct GameFeedRow_Previews : PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            GameFeedRow(game: Game(id: 4, name: "Resident Evil 2", releaseDate: Date.init(), developer: Developer(id: 1, name: "Valve"), lastUpdated: Date.init(), genre: Genre(id: 2, name: "First Person Shooter"), icon: "https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Resident_Evil_2_Remake.jpg/220px-Resident_Evil_2_Remake.jpg"))
-        }
-    }
-}
-#endif

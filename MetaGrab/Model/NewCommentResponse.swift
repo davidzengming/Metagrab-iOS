@@ -11,4 +11,5 @@ import Foundation
 struct NewCommentResponse: Hashable, Codable {
     var commentResponse: Comment
     var voteResponse: Vote
+    var userResponse: User
 }

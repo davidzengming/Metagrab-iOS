@@ -11,4 +11,5 @@ import Foundation
 struct NewThreadResponse: Hashable, Codable {
     var threadResponse: Thread
     var voteResponse: Vote
+    var userResponse: User
 }

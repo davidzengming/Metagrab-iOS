@@ -40,12 +40,12 @@ struct FollowGameIcon: View {
                     Image(uiImage: self.gameDataStore.gameIcons[game.id]!)
                         .renderingMode(.original)
                         .resizable()
-                        .frame(width: 200, height: 200)
+                        .frame(width: 100, height: 100)
                         .border(self.gameDataStore.isFollowed[self.game.id] == true ? Color.green : Color.red, width: 4)
                 }
             } else {
                 placeholder
-                    .frame(width: 200, height: 200)
+                    .frame(width: 100, height: 100)
             }
         }.onAppear() {
             self.gameDataStore.loadGameIcon(game: self.game)

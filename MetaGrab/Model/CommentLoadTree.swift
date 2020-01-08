@@ -12,4 +12,5 @@ struct CommentLoadTree: Hashable, Codable {
     var addedComments: [Comment]
     var moreComments: [Comment]
     var addedVotes: [Vote]
+    var usersResponse: [User]
 }

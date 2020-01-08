@@ -9,9 +9,12 @@
 /* Begin PBXBuildFile section */
 		3E02DA2B23873A110063BCD7 /* NewThreadResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */; };
 		3E3098D82387154100E2758F /* NewCommentResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3098D72387154100E2758F /* NewCommentResponse.swift */; };
+		3E366D1423C3C06D0029C2E1 /* FancyPantsEditorBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */; };
 		3E4640A7237C585F009D01C1 /* ThreadsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */; };
 		3E747DDC2385BB4200B807CE /* Vote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E747DDB2385BB4200B807CE /* Vote.swift */; };
 		3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */; };
+		3E9E286223A833D70012CD6F /* PopularGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9E286123A833D70012CD6F /* PopularGamesView.swift */; };
+		3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9E286323A834100012CD6F /* TimelineGamesView.swift */; };
 		3ECA00B123905BCF001FB0B6 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECA00B023905BCF001FB0B6 /* TextView.swift */; };
 		3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECF12C3238ECAE000A7160B /* KeyChain.swift */; };
 		3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */; };
@@ -19,7 +22,6 @@
 		3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210C23086963002DE02E /* AppDelegate.swift */; };
 		3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210E23086963002DE02E /* SceneDelegate.swift */; };
 		3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6211023086963002DE02E /* MetaGrab.xcdatamodeld */; };
-		3EF6211423086963002DE02E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6211323086963002DE02E /* ContentView.swift */; };
 		3EF6211623086963002DE02E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EF6211523086963002DE02E /* Assets.xcassets */; };
 		3EF6211923086963002DE02E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EF6211823086963002DE02E /* Preview Assets.xcassets */; };
 		3EF6211C23086963002DE02E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3EF6211A23086963002DE02E /* LaunchScreen.storyboard */; };
@@ -55,9 +57,12 @@
 		3CDF4CE4F285DAF5750237EC /* Pods-MetaGrab.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetaGrab.debug.xcconfig"; path = "Target Support Files/Pods-MetaGrab/Pods-MetaGrab.debug.xcconfig"; sourceTree = "<group>"; };
 		3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadResponse.swift; sourceTree = "<group>"; };
 		3E3098D72387154100E2758F /* NewCommentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCommentResponse.swift; sourceTree = "<group>"; };
+		3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FancyPantsEditorBarView.swift; sourceTree = "<group>"; };
 		3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsResponse.swift; sourceTree = "<group>"; };
 		3E747DDB2385BB4200B807CE /* Vote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vote.swift; sourceTree = "<group>"; };
 		3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentLoadTree.swift; sourceTree = "<group>"; };
+		3E9E286123A833D70012CD6F /* PopularGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopularGamesView.swift; sourceTree = "<group>"; };
+		3E9E286323A834100012CD6F /* TimelineGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineGamesView.swift; sourceTree = "<group>"; };
 		3ECA00B023905BCF001FB0B6 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		3ECF12C3238ECAE000A7160B /* KeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
 		3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadView.swift; sourceTree = "<group>"; };
@@ -66,7 +71,6 @@
 		3EF6210C23086963002DE02E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3EF6210E23086963002DE02E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		3EF6211123086963002DE02E /* MetaGrab.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MetaGrab.xcdatamodel; sourceTree = "<group>"; };
-		3EF6211323086963002DE02E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3EF6211523086963002DE02E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3EF6211823086963002DE02E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3EF6211B23086963002DE02E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -139,8 +143,9 @@
 				3EF6212723086A37002DE02E /* UserView.swift */,
 				3EF6212923086A5C002DE02E /* Load.swift */,
 				3EF6212B23086A82002DE02E /* GameFeedRow.swift */,
-				3EF6211323086963002DE02E /* ContentView.swift */,
 				3EF6213123086AC8002DE02E /* GameList.swift */,
+				3E9E286123A833D70012CD6F /* PopularGamesView.swift */,
+				3E9E286323A834100012CD6F /* TimelineGamesView.swift */,
 				3EF6213523086AEC002DE02E /* ForumView.swift */,
 				3EF6213723086B00002DE02E /* ThreadRow.swift */,
 				3EFCE177230EF22A000FD392 /* ThreadView.swift */,
@@ -155,6 +160,7 @@
 				3EF6211723086963002DE02E /* Preview Content */,
 				3EEA4737238D79BB00171396 /* ImagePicker.swift */,
 				3ECF12C3238ECAE000A7160B /* KeyChain.swift */,
+				3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */,
 				3ECA00B023905BCF001FB0B6 /* TextView.swift */,
 			);
 			path = MetaGrab;
@@ -321,6 +327,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */,
 				3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */,
 				3EF6214123086B6F002DE02E /* Developer.swift in Sources */,
 				3EF6213F23086B5A002DE02E /* Game.swift in Sources */,
@@ -337,8 +344,9 @@
 				3EF6214323086B81002DE02E /* User.swift in Sources */,
 				3EFCE174230EEA31000FD392 /* Comment.swift in Sources */,
 				3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */,
+				3E9E286223A833D70012CD6F /* PopularGamesView.swift in Sources */,
+				3E366D1423C3C06D0029C2E1 /* FancyPantsEditorBarView.swift in Sources */,
 				3EF6214F23086BF2002DE02E /* Token.swift in Sources */,
-				3EF6211423086963002DE02E /* ContentView.swift in Sources */,
 				3EF6213A23086B17002DE02E /* ImageLoader.swift in Sources */,
 				3EF6212A23086A5C002DE02E /* Load.swift in Sources */,
 				3EF6214723086B9F002DE02E /* Thread.swift in Sources */,
@@ -495,6 +503,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "MetaGrab/Preview\\ Content";
+				DEVELOPMENT_TEAM = 4Z2YGQNYQH;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MetaGrab/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -515,6 +524,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "MetaGrab/Preview\\ Content";
+				DEVELOPMENT_TEAM = 4Z2YGQNYQH;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MetaGrab/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

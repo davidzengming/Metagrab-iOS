@@ -13,8 +13,10 @@ struct Game: Hashable, Codable, Identifiable {
     var id: Int
     var name: String
     var releaseDate: Date
+    var nextExpansionReleaseDate: Date?
     var developer: Developer
     var lastUpdated: Date
     var genre: Genre
     var icon: String
+    var banner: String
 }
