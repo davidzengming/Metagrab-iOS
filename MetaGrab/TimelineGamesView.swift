@@ -16,7 +16,6 @@ struct TimelineGamesView: View {
     let MONTH_ABBREV = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     
     func calcRangeStartMonth() -> Int {
-        print((calendar.component(.month, from: date) - 2) % 12, "start", (calendar.component(.month, from: date), "kew"))
         return (calendar.component(.month, from: date) - 2)
     }
     

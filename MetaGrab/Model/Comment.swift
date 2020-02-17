@@ -10,7 +10,8 @@ import Foundation
 
 struct Comment: Hashable, Codable, Identifiable {
     var id: Int
-    var content: String
+    var contentString: String
+    var contentAttributes: Attributes
     var upvotes: Int
     var downvotes: Int
     var author: Int

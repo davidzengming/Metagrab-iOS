@@ -13,10 +13,26 @@ import SwiftUI
 struct ThreadRow : View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
+    
     var threadId: Int
     var gameId: Int
     let placeholder = Image(systemName: "photo")
     let formatter = RelativeDateTimeFormatter()
+    
+    let threadsFromBottomToGetReadyToLoadNextPage = 1
+    let threadsPerNewPageCount = 10
+    
+    func fetchNextPage() {
+        DispatchQueue.main.async {
+            if self.gameDataStore.forumsNextPageStartIndex[self.gameId] == nil || self.gameDataStore.forumsNextPageStartIndex[self.gameId]! == -1 || self.gameDataStore.isLoadingNextPageInForum[self.gameId] == nil || self.gameDataStore.isLoadingNextPageInForum[self.gameId]! == true || self.gameDataStore.threadsIndexInGameList[self.threadId] == nil || self.gameDataStore.threadsIndexInGameList[self.threadId]! < self.gameDataStore.threadListByGameId[self.gameId]!.count - self.threadsFromBottomToGetReadyToLoadNextPage {
+                return
+            }
+            
+            self.gameDataStore.isLoadingNextPageInForum[self.gameId] = true
+
+            self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!)
+        }
+    }
     
     func onClickUpvoteButton() {
         if self.gameDataStore.voteThreadMapping[threadId] != nil {
@@ -46,9 +62,9 @@ struct ThreadRow : View {
         }
     }
     
-    func transformVotesString() -> String {
-        let isNegative = self.gameDataStore.threads[threadId]!.downvotes > self.gameDataStore.threads[threadId]!.upvotes
-        let numPoints = abs(self.gameDataStore.threads[threadId]!.upvotes - self.gameDataStore.threads[threadId]!.downvotes)
+    func transformVotesString(points: Int) -> String {
+        let isNegative = false
+        let numPoints = points
         
         var concatVotesStr = ""
         if numPoints > 1000000 {
@@ -67,72 +83,92 @@ struct ThreadRow : View {
     func getRelativeDate(postedDate: Date) -> String {
         return formatter.localizedString(for: postedDate, relativeTo: Date())
     }
-//    func fetchNextPageIfBottom() {
-//        print("fetching", threadId)
-//        if self.gameDataStore.forumsNextPageStartIndex[gameId] == -1 || self.gameDataStore.threadListByGameId[gameId]?.last! != threadId || self.gameDataStore.isGameFetchingThreads[gameId] == true {
-//            print(self.gameDataStore.forumsNextPageStartIndex[gameId] == -1, self.gameDataStore.threadListByGameId[gameId]?.last! != threadId, self.gameDataStore.isGameFetchingThreads[gameId] == true)
-//            return
-//        }
-//
-//        self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[gameId]!)
-//    }
+    
+    func isVotedUp() -> Bool {
+        return self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 1
+    }
+    
+    func isVotedDown() -> Bool {
+        return self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == -1
+    }
     
     var body: some View {
         VStack {
-            Text(getRelativeDate(postedDate: self.gameDataStore.threads[threadId]!.created))
-            Text(self.gameDataStore.users[self.gameDataStore.threads[threadId]!.author]!.username)
+            Text(self.getRelativeDate(postedDate: self.gameDataStore.threads[self.threadId]!.created))
+                .frame(width: 100, height: 20, alignment: .center)
+            Text(self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.username)
+                .frame(width: 100, height: 20, alignment: .center)
             
-            NavigationLink(destination: ThreadView(threadId: threadId)) {
+            NavigationLink(destination: ThreadView(threadId: self.threadId)) {
+                VStack {
+                    HStack {
+                        if self.gameDataStore.threads[self.threadId]!.title.count > 0 {
+                            Text(self.gameDataStore.threads[self.threadId]!.title)
+                                .font(.system(size: 18))
+                            Spacer()
+                        }
+                    }
+                    if self.gameDataStore.threadsTextStorage[self.threadId] != nil {
+                        FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isFirstResponder: false)
+                    }
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+            .background(Color.red)
+            
+            
+            if (self.gameDataStore.threadsImage[self.threadId] != nil) {
                 HStack {
-                    Text(self.gameDataStore.threads[threadId]!.title)
-                        .font(.system(size: 22))
+                    Image(uiImage: self.gameDataStore.threadsImage[self.threadId]!)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(minWidth: 50, maxWidth: 100, minHeight: 100, maxHeight: 150)
+                        .cornerRadius(5)
+                        .padding(5)
                     Spacer()
                 }
-            }.buttonStyle(PlainButtonStyle())
-
-            if (self.gameDataStore.threadsImage[threadId] != nil) {
-                Image(uiImage: self.gameDataStore.threadsImage[threadId]!)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(minWidth: 100, maxWidth: 200, minHeight: 100, maxHeight: 260)
-                    .cornerRadius(5)
-                    .padding(5)
-            } else {
-                Text(self.gameDataStore.threads[threadId]!.content)
-                .font(.system(size: 15))
-                .lineLimit(5)
-                .padding(15)
             }
-            
-            Divider()
             
             HStack {
-                Text("💬 " + (self.gameDataStore.threads[threadId]!.numSubtreeNodes != 0 ? String(self.gameDataStore.threads[threadId]!.numSubtreeNodes) : "") + " Comments")
-                .font(.system(size: 12))
-                Spacer()
+                HStack {
+                    Image(uiImage: UIImage(systemName: "bubble.left")!)
+                    Text(String(self.gameDataStore.threads[self.threadId]!.numSubtreeNodes))
+                    .font(.system(size: 12))
+                }
+                .frame(width: 60, height: 30, alignment: .center)
                 
                 HStack {
-                    Button(action: onClickUpvoteButton) {
-                        Text("👍")
-                    }
-                    Spacer()
-                    Text(self.transformVotesString())
-                        .foregroundColor(self.gameDataStore.voteThreadMapping[threadId] != nil && self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction != 0 ? Color.red : Color.green)
+                    Image(uiImage: UIImage(systemName: self.isVotedUp() ? "hand.thumbsup.fill" : "hand.thumbsup")!)
+                        .onTapGesture {
+                            self.onClickUpvoteButton()
+                        }
+                    Text(self.transformVotesString(points: self.gameDataStore.threads[self.threadId]!.upvotes))
                     .font(.system(size: 12))
-                    Spacer()
-                    Button(action: onClickDownvoteButton) {
-                        Text("👎")
-                    }
                 }
-                .frame(width: 100)
+                .frame(width: 60, height: 30, alignment: .center)
+
+                HStack {
+                    Image(uiImage: UIImage(systemName: self.isVotedDown() ? "hand.thumbsdown.fill" : "hand.thumbsdown")!)
+                        .onTapGesture {
+                            self.onClickDownvoteButton()
+                        }
+                    Text(self.transformVotesString(points: self.gameDataStore.threads[self.threadId]!.downvotes))
+                    .font(.system(size: 12))
+                }
+                .frame(width: 60, height: 30, alignment: .center)
+                
+                Spacer()
             }
+            .padding(.top, 10)
         }
-        .padding(15)
-            
+        .padding(.vertical, 5)
         .onAppear() {
-                self.gameDataStore.loadThreadIcon(thread: self.gameDataStore.threads[self.threadId]!)
-            }
+            self.gameDataStore.loadThreadIcon(thread: self.gameDataStore.threads[self.threadId]!)
+            self.fetchNextPage()
+            print(self.gameDataStore.threadsDesiredHeight[self.threadId]!, self.threadId, "test id")
+        }
         .background(Color.white)
+        
     }
 }
 

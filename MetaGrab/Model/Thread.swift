@@ -12,7 +12,8 @@ import SwiftUI
 struct Thread: Hashable, Codable, Identifiable {
     var id: Int
     var title: String
-    var content: String
+    var contentString: String
+    var contentAttributes: Attributes
     var upvotes: Int
     var downvotes: Int
     var flair: Int

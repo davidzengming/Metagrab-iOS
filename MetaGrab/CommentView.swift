@@ -7,8 +7,6 @@
 //
 
 import Foundation
-
-import Foundation
 import SwiftUI
 
 struct CommentView : View {
@@ -17,24 +15,21 @@ struct CommentView : View {
     var commentId: Int
     let formatter = RelativeDateTimeFormatter()
     @State var replyBoxOpen: Bool = false
-    @State var text: NSMutableString = ""
-    @State var isBold: Bool = false
-    @State var isNumberedBulletList = false
-    @State var didChangeBold = false
-    @State var didChangeNumberedBulletList = false
+    @State var replyContent: NSTextStorage = NSTextStorage(string: "")
+    @State var isEditable: Bool = false
+    @State var desiredHeight: CGFloat = 0
     
     func toggleReplyBoxOpen() {
         self.replyBoxOpen = !self.replyBoxOpen
     }
     
     func postChildComment() {
-        self.gameDataStore.postChildComment(access: self.userDataStore.token!.access, parentCommentId: commentId, text: text as String)
+        self.gameDataStore.postChildComment(access: self.userDataStore.token!.access, parentCommentId: commentId, content: replyContent)
     }
     
     func fetchNextPage() {
         self.gameDataStore.fetchCommentTreeByParentComment(access: self.userDataStore.token!.access, parentCommentId: commentId, start: self.gameDataStore.commentNextPageStartIndex[commentId]!)
     }
-    
     
     func onClickUpvoteButton() {
         if self.gameDataStore.voteCommentMapping[commentId] != nil {
@@ -68,16 +63,16 @@ struct CommentView : View {
         return formatter.localizedString(for: postedDate, relativeTo: Date())
     }
     
-    func doSomething() {
-        print("Hello world!")
-    }
     
     var body: some View {
         VStack {
-            VStack(alignment: .leading) {
+            VStack {
                 Text(getRelativeDate(postedDate: self.gameDataStore.comments[commentId]!.created))
                 Text(self.gameDataStore.users[self.gameDataStore.comments[commentId]!.author]!.username)
-                Text(self.gameDataStore.comments[self.commentId]!.content)
+                
+                if self.gameDataStore.commentsTextStorage[self.commentId] != nil {
+                    FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: $isEditable, isNewContent: false, isThread: false, commentId: self.commentId, isFirstResponder: false)
+                }
                 
                 HStack {
                     Button(action: toggleReplyBoxOpen) {
@@ -102,14 +97,7 @@ struct CommentView : View {
 
                 if self.replyBoxOpen {
                     VStack {
-                        FancyPantsEditorBarView(isBold: $isBold, isNumberedBulletList: $isNumberedBulletList, didChangeBold: $didChangeBold, didChangeNumberedBulletList: $didChangeNumberedBulletList)
-                        TextView(text: $text, isBold: $isBold, isNumberedBulletList: $isNumberedBulletList, didChangeBold: $didChangeBold, didChangeNumberedBulletList: $didChangeNumberedBulletList, textStorage: NSTextStorage())
-                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 50, maxHeight: 100)
-                        .background(Color.white)
-                        .cornerRadius(5)
-                        .overlay(RoundedRectangle(cornerRadius: 3)
-                                 .stroke(Color.black, lineWidth: 1))
-                        .padding(.horizontal, 10)
+                        FancyPantsEditorView(newTextStorage: $replyContent, isEditable: .constant(true), isNewContent: true, isThread: false, isFirstResponder: false)
                     }
                     
                     HStack {

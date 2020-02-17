@@ -118,7 +118,7 @@ final class UserDataStore: ObservableObject {
             if let data = data {
                 if String(data: data, encoding: .utf8) != nil {
                     DispatchQueue.main.async {
-                        let data = String(bytes: data, encoding: String.Encoding.utf8)
+                        //let data = String(bytes: data, encoding: String.Encoding.utf8)
                         self.username = username
                         self.password = password
                         self.acquireToken()

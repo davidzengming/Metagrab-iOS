@@ -73,7 +73,29 @@ final class GameDataStore: ObservableObject {
             objectWillChange.send()
         }
     }
+    var threadsIndexInGameList = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var isLoadingNextPageInForum = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var threadsDesiredHeight = [Int: CGFloat]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     var threadsImage = [Int: UIImage]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var threadsTextStorage = [Int: NSTextStorage]() {
         willSet {
             objectWillChange.send()
         }
@@ -106,6 +128,16 @@ final class GameDataStore: ObservableObject {
         }
     }
     var moreCommentsByThreadId = [Int: [Int]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var commentsTextStorage = [Int: NSTextStorage]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    var commentsDesiredHeight = [Int: CGFloat]() {
         willSet {
             objectWillChange.send()
         }
@@ -157,7 +189,27 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    func submitThread(access: String, forumId: Int, title: String, flair: Int, content: String, imageData: Data?) {
+    var attributesEncodingCache: [Int: Any] = [:]
+    func generateTextStorageFromJson(isThread: Bool, id: Int) -> NSTextStorage {
+        let generatedTextStorage = NSTextStorage(string: isThread ? self.threads[id]!.contentString : self.comments[id]!.contentString)
+
+        for attribute in isThread ? self.threads[id]!.contentAttributes.attributes : self.comments[id]!.contentAttributes.attributes {
+            let encode = attribute[0]
+            let location = attribute[1]
+            let length = attribute[2]
+            
+            if attributesEncodingCache[encode] != nil {
+                generatedTextStorage.addAttributes(attributesEncodingCache[encode] as! [NSAttributedString.Key : Any], range: NSMakeRange(location, length))
+            } else {
+                let attributesToBeApplied = TextViewHelper.generateAttributesFromEncoding(encode: encode)
+                generatedTextStorage.addAttributes(attributesToBeApplied, range: NSMakeRange(location, length))
+                attributesEncodingCache[encode] = attributesToBeApplied
+            }
+        }
+        return generatedTextStorage
+    }
+    
+    func submitThread(access: String, forumId: Int, title: String, flair: Int, content: NSTextStorage, imageData: Data?) {
         let taskGroup = DispatchGroup()
         
         var imageUrl = ""
@@ -178,9 +230,8 @@ final class GameDataStore: ObservableObject {
         guard let url = URL(string: "http://127.0.0.1:8000/threads/post_thread_by_game_id/?game_id=" + String(forumId)) else { return }
         
         taskGroup.notify(queue: DispatchQueue.global()) {
-            let json: [String: Any] = ["title": title, "content": content, "flair": flair, "image_url": imageUrl]
+            let json: [String: Any] = ["title": title, "content_string": content.string, "content_attributes": ["attributes": TextViewHelper.parseTextStorageAttributesAsBitRep(content: content)], "flair": flair, "image_url": imageUrl]
             let jsonData = try? JSONSerialization.data(withJSONObject: json)
-            
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.httpBody = jsonData
@@ -188,25 +239,26 @@ final class GameDataStore: ObservableObject {
             let authString: String? = "Bearer \(access)"
             sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
             let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
-            
-            session.dataTask(with: request) { (data, response, error) in
+
+            session.dataTask(with: request) {(data, response, error) in
                 if let data = data {
                     if let jsonString = String(data: data, encoding: .utf8) {
-                        
                         let tempNewThreadResponse: NewThreadResponse = load(jsonData: jsonString.data(using: .utf8)!)
                         let tempThread = tempNewThreadResponse.threadResponse
                         let vote = tempNewThreadResponse.voteResponse
                         let user = tempNewThreadResponse.userResponse
-                        
+
                         DispatchQueue.main.async {
                             self.users[user.id] = user
                             self.threads[tempThread.id] = tempThread
-                            self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
+                            self.threadsDesiredHeight[tempThread.id] = 0
                             self.mainCommentListByThreadId[tempThread.id] = []
                             self.threadsNextPageStartIndex[tempThread.id] = 0
                             self.votes[vote.id] = vote
                             self.voteThreadMapping[tempThread.id] = vote.id
+                            self.threadsTextStorage[tempThread.id] = content
                             
+                            self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
                             if imageData != nil {
                                 self.threadsImage[tempThread.id] = UIImage(data: imageData!)
                             }
@@ -240,10 +292,10 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    func postMainComment(access: String, threadId: Int, text: String) {
+    func postMainComment(access: String, threadId: Int, content: NSTextStorage) {
         guard let url = URL(string: "http://127.0.0.1:8000/comments/post_comment_by_thread_id/?thread_id=" + String(threadId)) else { return }
         
-        let json: [String: Any] = ["content": text]
+        let json: [String: Any] = ["content_string": content.string, "content_attributes": ["attributes": TextViewHelper.parseTextStorageAttributesAsBitRep(content: content)]]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
         var request = URLRequest(url: url)
@@ -265,23 +317,25 @@ final class GameDataStore: ObservableObject {
                     DispatchQueue.main.async {
                         self.users[user.id] = user
                         self.comments[tempMainComment.id] = tempMainComment
-                        self.mainCommentListByThreadId[tempMainComment.parentThread!]!.insert(tempMainComment.id, at: 0)
+                        self.commentsTextStorage[tempMainComment.id] = content
                         self.threadsNextPageStartIndex[tempMainComment.parentThread!]! += 1
                         self.commentNextPageStartIndex[tempMainComment.id] = 0
                         self.childCommentListByParentCommentId[tempMainComment.id] = []
                         self.incrementTreeNodes(node: tempMainComment)
                         self.votes[tempVote.id] = tempVote
                         self.voteCommentMapping[tempMainComment.id] = tempVote.id
+                        
+                        self.mainCommentListByThreadId[tempMainComment.parentThread!]!.insert(tempMainComment.id, at: 0)
                     }
                 }
             }
         }.resume()
     }
     
-    func postChildComment(access: String, parentCommentId: Int, text: String) {
+    func postChildComment(access: String, parentCommentId: Int, content: NSTextStorage) {
         guard let url = URL(string: "http://127.0.0.1:8000/comments/post_comment_by_parent_comment_id/?parent_comment_id=" + String(parentCommentId)) else { return }
         
-        let json: [String: Any] = ["content": text]
+        let json: [String: Any] = ["content_string": content.string, "content_attributes": ["attributes": TextViewHelper.parseTextStorageAttributesAsBitRep(content: content)]]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
         var request = URLRequest(url: url)
@@ -303,12 +357,14 @@ final class GameDataStore: ObservableObject {
                     DispatchQueue.main.async {
                         self.users[user.id] = user
                         self.comments[tempChildComment.id] = tempChildComment
-                        self.childCommentListByParentCommentId[tempChildComment.parentPost!]!.insert(tempChildComment.id, at: 0)
+                        self.commentsTextStorage[tempChildComment.id] = content
                         self.childCommentListByParentCommentId[tempChildComment.id] = [Int]()
                         self.commentNextPageStartIndex[tempChildComment.parentPost!]! += 1
                         self.incrementTreeNodes(node: tempChildComment)
                         self.votes[tempVote.id] = tempVote
                         self.voteCommentMapping[tempChildComment.id] = tempVote.id
+                        
+                        self.childCommentListByParentCommentId[tempChildComment.parentPost!]!.insert(tempChildComment.id, at: 0)
                     }
                 }
             }
@@ -370,6 +426,8 @@ final class GameDataStore: ObservableObject {
                                 self.commentNextPageStartIndex[comment.id] = 0
                                 self.commentNextPageStartIndex[comment.parentPost!]! += 1
                             }
+                            
+                            self.commentsTextStorage[comment.id] = self.generateTextStorageFromJson(isThread: false, id: comment.id)
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
                         
@@ -433,6 +491,7 @@ final class GameDataStore: ObservableObject {
                             self.childCommentListByParentCommentId[comment.id] = [Int]()
                             self.commentNextPageStartIndex[comment.id] = 0
                             self.commentNextPageStartIndex[comment.parentPost!]! += 1
+                            self.commentsTextStorage[comment.id] = self.generateTextStorageFromJson(isThread: false, id: comment.id)
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
 
@@ -454,47 +513,6 @@ final class GameDataStore: ObservableObject {
             }
         }.resume()
     }
-    
-//    func fetchMainComments(access: String, threadId: Int, start:Int = 0, count:Int = 10) {
-//        let params: String = "?thread_id=" + String(threadId) + "&start=" + String(start) + "&count=" + String(count)
-//        guard let url = URL(string: "http://127.0.0.1:8000/comments/get_comments_by_thread_id/" + params) else { return }
-//
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "GET"
-//        let sessionConfig = URLSessionConfiguration.default
-//        let authString: String? = "Bearer \(access)"
-//        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
-//        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
-//
-//        session.dataTask(with: request) { (data, response, error) in
-//            if let data = data {
-//                if let jsonString = String(data: data, encoding: .utf8) {
-//                    let tempPrimaryComments: [Comment] = load(jsonData: jsonString.data(using: .utf8)!)
-//                    DispatchQueue.main.async {
-//                        if tempPrimaryComments.count == 0 {
-//                            self.commentNextPageStartIndex[threadId] = -1
-//                            return
-//                        }
-//
-//                        if self.moreCommentsByThreadId[threadId] == nil {
-//                            self.moreCommentsByThreadId[threadId] = [Int]()
-//                        }
-//
-//                        for comment in tempPrimaryComments {
-//                            if self.comments[comment.id] == nil {
-//                                self.comments[comment.id] = comment
-//                                self.moreCommentsByThreadId[threadId]!.append(comment.id)
-//                            } else {
-//                                self.comments[comment.id] = comment
-//                            }
-//                        }
-//
-//                        self.commentNextPageStartIndex[threadId] = start + count
-//                    }
-//                }
-//            }
-//        }.resume()
-//    }
     
     func fetchChildComments(access: String, parentCommentId: Int, start:Int = 0, count:Int = 10) {
         let params: String = "?parent_comment_id=" + String(parentCommentId) + "&start=" + String(start) + "&count=" + String(count)
@@ -558,7 +576,6 @@ final class GameDataStore: ObservableObject {
                 if let jsonString = String(data: data, encoding: .utf8) {
                     let tempThreadsResponse: ThreadsResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     
-                    
                     DispatchQueue.main.async {
                         if self.threadListByGameId[game.id] == nil {
                              self.threadListByGameId[game.id] = [Int]()
@@ -569,12 +586,19 @@ final class GameDataStore: ObservableObject {
                             return
                         }
                         
+                        var newThreadsList: [Int] = []
+                        
                         for thread in tempThreadsResponse.threadsResponse {
                             self.threads[thread.id] = thread
                             self.mainCommentListByThreadId[thread.id] = [Int]()
-                            self.threadListByGameId[game.id]!.append(thread.id)
+                            newThreadsList.append(thread.id)
+                            self.threadsIndexInGameList[thread.id] = self.threadListByGameId[game.id]!.count - 1
                             self.threadsNextPageStartIndex[thread.id] = 0
+                            self.threadsTextStorage[thread.id] = self.generateTextStorageFromJson(isThread: true, id: thread.id)
+                            self.threadsDesiredHeight[thread.id] = 0
                         }
+                        
+                        self.threadListByGameId[game.id]! += newThreadsList
                         
                         if tempThreadsResponse.hasNextPage == true {
                             self.forumsNextPageStartIndex[game.id] = start + count
@@ -590,6 +614,8 @@ final class GameDataStore: ObservableObject {
                         for user in tempThreadsResponse.usersResponse {
                             self.users[user.id] = user
                         }
+                        
+                        self.isLoadingNextPageInForum[game.id] = false
                     }
                 }
             }
@@ -732,6 +758,7 @@ final class GameDataStore: ObservableObject {
                             followedGamesTempArr.append(game.id)
                             if self.games[game.id] == nil {
                                 self.games[game.id] = game
+                                self.isLoadingNextPageInForum[game.id] = false
                                 self.threadListByGameId[game.id] = [Int]()
                             }
                         }

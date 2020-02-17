@@ -67,11 +67,23 @@ struct GameList: View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
     
+    init() {
+        // To remove only extra separators below the list:
+        // UITableView.appearance().tableFooterView = UIView()
+        // To remove all separators including the actual ones:
+        UITableView.appearance().separatorStyle = .none
+    }
+    
     var body: some View {
         VStack {
             FollowGameParentView()
-            List(self.gameDataStore.followedGames, id: \.self) { id in
-                GameFeedRow(game: self.gameDataStore.games[id]!)
+            List {
+                ForEach(self.gameDataStore.followedGames, id: \.self) { id in
+                    VStack {
+                        GameFeedRow(game: self.gameDataStore.games[id]!)
+                        Divider()
+                    }
+                }
             }.onAppear() {
                 self.gameDataStore.fetchFollowGames(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
             }.navigationBarTitle(Text("Games"))

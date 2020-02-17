@@ -24,76 +24,63 @@ struct RoundedCorner: Shape {
     }
 }
 
+
 struct ForumView : View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
     var gameId: Int
-
-    func fetchNextPage() {
-        self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[gameId]!)
+    
+    init(gameId: Int) {
+        // To remove only extra separators below the list:
+        // UITableView.appearance().tableFooterView = UIView()
+        
+        self.gameId = gameId
+        // To remove all separators including the actual ones:
+        UITableView.appearance().separatorStyle = .none
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            ZStack {
+        GeometryReader { a in
+            VStack(spacing: 0) {
                 if self.gameDataStore.gameBannerImage[self.gameId] != nil {
                     Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
                     .resizable()
                     .cornerRadius(20, corners: [.topLeft, .topRight])
-                    .frame(height:100)
+                        .frame(height: a.size.height * 0.15)
                 }
                 
-                NavigationLink(destination: NewThreadView(forumId: self.gameId)) {
-                    HStack {
-                        Spacer()
-                        Image(systemName: "plus")
-                            .resizable()
-                            .cornerRadius(10)
-                            .frame(width: 30, height: 30)
-                            .padding(5)
-                            .background(Color.white)
-                    }
-                }
-                .cornerRadius(3)
-                .padding(.horizontal, 10)
-                .offset(y: 50)
-            }
-            .padding(.bottom, 30)
-            
-            ScrollView() {
-                VStack(spacing: 0) {
-                    HStack {
-                        Text("Threads")
-                            .font(.headline)
-                        Spacer()
-                    }
-                    
+                List {
                     ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
-                        ThreadRow(threadId: threadId, gameId: self.gameId)
-                        .cornerRadius(3)
-                        .overlay(RoundedRectangle(cornerRadius: 3)
-                        .stroke(Color.gray, lineWidth: 1))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 10)
-                    }
+                        VStack {
+                            ThreadRow(threadId: threadId, gameId: self.gameId)
+                                    .frame(width: a.size.width, height: self.gameDataStore.threadsDesiredHeight[threadId] != nil ? self.gameDataStore.threadsDesiredHeight[threadId]!: 200, alignment: .center)
+                                    .padding(.vertical, 10)
+                            
+                            if self.gameDataStore.threadsDesiredHeight[threadId] != nil {
+                                Text(String(Double(self.gameDataStore.threadsDesiredHeight[threadId]!)))
+                            }
+                        }
+                    }.background(Color.yellow)
+                }
+            }
+            .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
+            .edgesIgnoringSafeArea(.bottom)
+            .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Forum"), displayMode: .inline)
+            .onAppear() {
+                if self.gameDataStore.isBackToGamesView {
+                    self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, refresh: true)
+                    self.gameDataStore.loadGameBanner(game: self.gameDataStore.games[self.gameId]!)
+                    self.gameDataStore.isBackToGamesView = false
                 }
             }
             
-            if self.gameDataStore.forumsNextPageStartIndex[gameId] != -1 {
-                Button(action: fetchNextPage) {
-                    Text("Load next page")
-                }
+            NavigationLink(destination: NewThreadView(forumId: self.gameId)) {
+                NewThreadButton()
+                .frame(width: min(a.size.width, a.size.height) * 0.10, height: min(a.size.width, a.size.height) * 0.10, alignment: .center)
+                .shadow(radius: 5)
+                    
             }
-        }
-        .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
-        .edgesIgnoringSafeArea(.bottom)
-        .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Forum"), displayMode: .inline)
-        .onAppear() {
-            if self.gameDataStore.isBackToGamesView {
-                self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, refresh: true)
-                self.gameDataStore.loadGameBanner(game: self.gameDataStore.games[self.gameId]!)
-                self.gameDataStore.isBackToGamesView = false
-            }
+            .position(x: a.size.width * 0.87, y: a.size.height * 0.90)
         }
     }
 }

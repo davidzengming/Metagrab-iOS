@@ -10,13 +10,19 @@
 		3E02DA2B23873A110063BCD7 /* NewThreadResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */; };
 		3E3098D82387154100E2758F /* NewCommentResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3098D72387154100E2758F /* NewCommentResponse.swift */; };
 		3E366D1423C3C06D0029C2E1 /* FancyPantsEditorBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */; };
+		3E42D59D23DF77760033BEA4 /* Attributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E42D59C23DF77760033BEA4 /* Attributes.swift */; };
 		3E4640A7237C585F009D01C1 /* ThreadsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */; };
+		3E5AC80123E34668008AAB17 /* TextEditorButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5AC80023E34668008AAB17 /* TextEditorButtons.swift */; };
+		3E6C619023EC9126009015B7 /* UploadDashPlaceholderButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6C618F23EC9126009015B7 /* UploadDashPlaceholderButton.swift */; };
 		3E747DDC2385BB4200B807CE /* Vote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E747DDB2385BB4200B807CE /* Vote.swift */; };
 		3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */; };
+		3E9C750523CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9C750423CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift */; };
 		3E9E286223A833D70012CD6F /* PopularGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9E286123A833D70012CD6F /* PopularGamesView.swift */; };
 		3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9E286323A834100012CD6F /* TimelineGamesView.swift */; };
+		3EB10A2723E0936D0079D80D /* TextViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB10A2623E0936D0079D80D /* TextViewHelper.swift */; };
 		3ECA00B123905BCF001FB0B6 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECA00B023905BCF001FB0B6 /* TextView.swift */; };
 		3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECF12C3238ECAE000A7160B /* KeyChain.swift */; };
+		3ED871A423E8CEDD0089F946 /* NewThreadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */; };
 		3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */; };
 		3EEA4738238D79BB00171396 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA4737238D79BB00171396 /* ImagePicker.swift */; };
 		3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210C23086963002DE02E /* AppDelegate.swift */; };
@@ -58,13 +64,19 @@
 		3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadResponse.swift; sourceTree = "<group>"; };
 		3E3098D72387154100E2758F /* NewCommentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCommentResponse.swift; sourceTree = "<group>"; };
 		3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FancyPantsEditorBarView.swift; sourceTree = "<group>"; };
+		3E42D59C23DF77760033BEA4 /* Attributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attributes.swift; sourceTree = "<group>"; };
 		3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsResponse.swift; sourceTree = "<group>"; };
+		3E5AC80023E34668008AAB17 /* TextEditorButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorButtons.swift; sourceTree = "<group>"; };
+		3E6C618F23EC9126009015B7 /* UploadDashPlaceholderButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadDashPlaceholderButton.swift; sourceTree = "<group>"; };
 		3E747DDB2385BB4200B807CE /* Vote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vote.swift; sourceTree = "<group>"; };
 		3E7C01AD237B26110074BD19 /* CommentLoadTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentLoadTree.swift; sourceTree = "<group>"; };
+		3E9C750423CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedStringKey+CustomAttribute.swift"; sourceTree = "<group>"; };
 		3E9E286123A833D70012CD6F /* PopularGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopularGamesView.swift; sourceTree = "<group>"; };
 		3E9E286323A834100012CD6F /* TimelineGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineGamesView.swift; sourceTree = "<group>"; };
+		3EB10A2623E0936D0079D80D /* TextViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewHelper.swift; sourceTree = "<group>"; };
 		3ECA00B023905BCF001FB0B6 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		3ECF12C3238ECAE000A7160B /* KeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
+		3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadButton.swift; sourceTree = "<group>"; };
 		3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadView.swift; sourceTree = "<group>"; };
 		3EEA4737238D79BB00171396 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		3EF6210923086963002DE02E /* MetaGrab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetaGrab.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -149,10 +161,16 @@
 				3EF6213523086AEC002DE02E /* ForumView.swift */,
 				3EF6213723086B00002DE02E /* ThreadRow.swift */,
 				3EFCE177230EF22A000FD392 /* ThreadView.swift */,
-				3EF6213923086B17002DE02E /* ImageLoader.swift */,
 				3EFCE179230F010F000FD392 /* CommentView.swift */,
 				3EF6212F23086AB1002DE02E /* FollowGameIcon.swift */,
+				3EF6213923086B17002DE02E /* ImageLoader.swift */,
 				3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */,
+				3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */,
+				3ECA00B023905BCF001FB0B6 /* TextView.swift */,
+				3EB10A2623E0936D0079D80D /* TextViewHelper.swift */,
+				3E5AC80023E34668008AAB17 /* TextEditorButtons.swift */,
+				3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */,
+				3E6C618F23EC9126009015B7 /* UploadDashPlaceholderButton.swift */,
 				3EF6211523086963002DE02E /* Assets.xcassets */,
 				3EF6211A23086963002DE02E /* LaunchScreen.storyboard */,
 				3EF6211D23086963002DE02E /* Info.plist */,
@@ -160,8 +178,7 @@
 				3EF6211723086963002DE02E /* Preview Content */,
 				3EEA4737238D79BB00171396 /* ImagePicker.swift */,
 				3ECF12C3238ECAE000A7160B /* KeyChain.swift */,
-				3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */,
-				3ECA00B023905BCF001FB0B6 /* TextView.swift */,
+				3E9C750423CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift */,
 			);
 			path = MetaGrab;
 			sourceTree = "<group>";
@@ -191,6 +208,7 @@
 				3E4640A6237C585F009D01C1 /* ThreadsResponse.swift */,
 				3E3098D72387154100E2758F /* NewCommentResponse.swift */,
 				3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */,
+				3E42D59C23DF77760033BEA4 /* Attributes.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -329,6 +347,7 @@
 			files = (
 				3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */,
 				3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */,
+				3E6C619023EC9126009015B7 /* UploadDashPlaceholderButton.swift in Sources */,
 				3EF6214123086B6F002DE02E /* Developer.swift in Sources */,
 				3EF6213F23086B5A002DE02E /* Game.swift in Sources */,
 				3EEA4738238D79BB00171396 /* ImagePicker.swift in Sources */,
@@ -344,7 +363,9 @@
 				3EF6214323086B81002DE02E /* User.swift in Sources */,
 				3EFCE174230EEA31000FD392 /* Comment.swift in Sources */,
 				3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */,
+				3ED871A423E8CEDD0089F946 /* NewThreadButton.swift in Sources */,
 				3E9E286223A833D70012CD6F /* PopularGamesView.swift in Sources */,
+				3E42D59D23DF77760033BEA4 /* Attributes.swift in Sources */,
 				3E366D1423C3C06D0029C2E1 /* FancyPantsEditorBarView.swift in Sources */,
 				3EF6214F23086BF2002DE02E /* Token.swift in Sources */,
 				3EF6213A23086B17002DE02E /* ImageLoader.swift in Sources */,
@@ -352,8 +373,10 @@
 				3EF6214723086B9F002DE02E /* Thread.swift in Sources */,
 				3EF6213223086AC8002DE02E /* GameList.swift in Sources */,
 				3EF6213823086B00002DE02E /* ThreadRow.swift in Sources */,
+				3E5AC80123E34668008AAB17 /* TextEditorButtons.swift in Sources */,
 				3EF6212C23086A82002DE02E /* GameFeedRow.swift in Sources */,
 				3EF6214923086BBE002DE02E /* Forum.swift in Sources */,
+				3EB10A2723E0936D0079D80D /* TextViewHelper.swift in Sources */,
 				3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */,
 				3EF6212823086A37002DE02E /* UserView.swift in Sources */,
 				3EF6213623086AEC002DE02E /* ForumView.swift in Sources */,
@@ -364,6 +387,7 @@
 				3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */,
 				3ECA00B123905BCF001FB0B6 /* TextView.swift in Sources */,
 				3EFCE17A230F010F000FD392 /* CommentView.swift in Sources */,
+				3E9C750523CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift in Sources */,
 				3EF6214B23086BCD002DE02E /* AccessToken.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -15,17 +15,11 @@ struct NewThreadView: View {
     
     @State var title: String = ""
     @State var flair = 0
-    @State var content: NSMutableString = ""
-    
+    @State var content: NSTextStorage = NSTextStorage(string: "")
+
     @State var showImagePicker: Bool = false
     @State var image: Image? = nil
     @State var data: Data? = nil
-    @State var isImageThread = 0
-    
-    @State var isBold = false
-    @State var isNumberedBulletList = false
-    @State var didChangeBold = false
-    @State var didChangeNumberedBulletList = false
     
     var forumId: Int
     var flairs = ["Update", "Discussion", "Meme"]
@@ -33,95 +27,61 @@ struct NewThreadView: View {
     let placeholder = Image(systemName: "photo")
     
     func submitThread() {
-        if isImageThread == 0 {
-            self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content as String, imageData: nil)
-        } else {
-            self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: "", imageData: data)
-        }
-
+        self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: data)
         self.presentationMode.wrappedValue.dismiss()
     }
     
     var body: some View {
-        VStack {
-            TextField("What do you want to say?", text: $title)
-            .autocapitalization(.none)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .padding(.top, 30)
-            .padding(.leading, 50)
-            .padding(.trailing, 50)
-            .padding(.bottom, 20)
-            
-            Picker("Flair", selection: $flair) {
-                ForEach(0 ..< flairs.count) { index in
-                    Text(self.flairs[index]).tag(index)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal, 50)
-            
-            Picker("Image", selection: $isImageThread) {
-                ForEach(0 ..< imageThread.count) { index in
-                    Text(self.imageThread[index]).tag(index)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal, 50)
-            
-            if self.isImageThread == 0 {
-                VStack {
-                    FancyPantsEditorBarView(isBold: $isBold, isNumberedBulletList: $isNumberedBulletList, didChangeBold: $didChangeBold, didChangeNumberedBulletList: $didChangeNumberedBulletList)
-                    TextView(
-                        text: $content,
-                        isBold: $isBold,
-                        isNumberedBulletList: $isNumberedBulletList,
-                        didChangeBold: $didChangeBold,
-                        didChangeNumberedBulletList: $didChangeNumberedBulletList,
-                        textStorage: NSTextStorage()
-                    )
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    .background(Color.white)
-                    .cornerRadius(5)
-                    .overlay(RoundedRectangle(cornerRadius: 5)
-                             .stroke(Color.black, lineWidth: 1))
-                    .padding(.horizontal, 50)
-                }
-            } else {
-                ZStack {
-                    image?.resizable()
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    Button(action: {
-                        withAnimation {
-                            self.showImagePicker.toggle()
-                        }
-                    }) {
-                        self.placeholder
-                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                        .cornerRadius(5)
-                        .opacity(self.image == nil ? 1 : 0)
-                    }
-                }
-                .background(Color.white)
-                .overlay(RoundedRectangle(cornerRadius: 5)
-                         .stroke(Color.black, lineWidth: 1))
-                .padding(.horizontal, 50)
+        GeometryReader { a in
+            VStack {
+                TextField("Add a title! (Optional)", text: self.$title)
+                .autocapitalization(.none)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.top, 30)
+                .padding(.bottom, 20)
+                .padding(.horizontal, 20)
                 
-                .sheet(isPresented: $showImagePicker) {
-                    ImagePicker(image: self.$image, data: self.$data)
+                HStack {
+                    ZStack {
+                        self.image?.resizable()
+                            .frame(width: 100, height: 100, alignment: .leading)
+                        Button(action: {
+                            withAnimation {
+                                self.showImagePicker.toggle()
+                            }
+                        }) {
+                            UploadDashPlaceholderButton()
+                            .foregroundColor(Color.gray)
+                            .frame(width: 100, height: 100, alignment: .leading)
+                            .opacity(self.image == nil ? 1 : 0)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    .padding(.horizontal, 20)
+                    .sheet(isPresented: self.$showImagePicker) {
+                        ImagePicker(image: self.$image, data: self.$data)
+                    }
+                    Spacer()
                 }
+
+                FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isNewContent: true, isThread: true, isFirstResponder: true)
+                    .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.5, alignment: .leading)
+                    .background(Color.white)
+                    .cornerRadius(5, corners: [.bottomLeft, .bottomRight, .topLeft, .topRight])
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.black, lineWidth: 2)
+                    )
+                    .padding(.vertical, 25)
+                    .padding(.horizontal, 20)
+                
+                Spacer()
             }
-            
-            Button(action: submitThread) {
-                Text("SUBMIT")
-                    .font(.headline)
-                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 50)
-            }
-            .background(Color.yellow)
-            .cornerRadius(10)
-            .padding(.all, 50)
+            .edgesIgnoringSafeArea(.bottom)
+            .navigationBarTitle(Text("Post to \(self.gameDataStore.games[self.forumId]!.name)"))
+            .navigationBarItems(trailing: Button(action: self.submitThread) {
+                Text("Submit")
+            })
         }
-        .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
-        .edgesIgnoringSafeArea(.bottom)
-        .navigationBarTitle(Text("Create a New Thread"))
     }
 }
