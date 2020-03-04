@@ -72,77 +72,77 @@ struct FancyPantsEditorView: View {
     
     var body: some View {
         GeometryReader { a in
-            VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
                 if self.isEditable {
                     GeometryReader { b in
-                            HStack(spacing: 0) {
-                                Button(action: {
-                                    self.turnOnDidChangeBold()
-                                    self.toggleBold()
-                                }) {
-                                    Image(systemName: "bold")
-                                        .resizable()
-                                        .padding(10)
-                                        .foregroundColor(self.isBold ? .black : .gray)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
+                        HStack(spacing: 0) {
+                            Button(action: {
+                                self.turnOnDidChangeBold()
+                                self.toggleBold()
+                            }) {
+                                Image(systemName: "bold")
+                                    .resizable()
+                                    .padding(10)
+                                    .foregroundColor(self.isBold ? .black : .gray)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
+                            
+                            Button(action: {
+                                self.turnOnDidChangeItalic()
+                                self.toggleItalic()
+                            }) {
+                                Image(systemName: "italic")
+                                    .resizable()
+                                    .padding(10)
+                                    .foregroundColor(self.isItalic ? .black : .gray)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
+                            
+                            Button(action: {
+                                self.turnOnDidChangeStrikethrough()
+                                self.toggleStrikethrough()
+                            }) {
+                                Image(systemName: "strikethrough")
+                                    .resizable()
+                                    .padding(10)
+                                    .foregroundColor(self.isStrikethrough ? .black : .gray)
+                            }
                                 
-                                Button(action: {
-                                    self.turnOnDidChangeItalic()
-                                    self.toggleItalic()
-                                }) {
-                                    Image(systemName: "italic")
-                                        .resizable()
-                                        .padding(10)
-                                        .foregroundColor(self.isItalic ? .black : .gray)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
-                                
-                                Button(action: {
-                                    self.turnOnDidChangeStrikethrough()
-                                    self.toggleStrikethrough()
-                                }) {
-                                    Image(systemName: "strikethrough")
-                                        .resizable()
-                                        .padding(10)
-                                        .foregroundColor(self.isStrikethrough ? .black : .gray)
-                                }
-                                    
-                                .buttonStyle(PlainButtonStyle())
-                                .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
-                                
-                                Button(action: {
-                                    self.turnOnDidChangeBulletList()
-                                    self.toggleBulletList()
-                                }) {
-                                    Image(systemName: "list.bullet")
-                                        .resizable()
-                                        .padding(10)
-                                        .foregroundColor(self.isDashBulletList ? .black : .gray)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
-                                
-                                Button(action: {
-                                    self.turnOnDidChangeNumberedBulletList()
-                                    self.toggleNumberBulletList()
-                                }) {
-                                    Image(systemName: "list.number")
-                                        .resizable()
-                                        .padding(10)
-                                        .foregroundColor(self.isNumberedBulletList ? .black : .gray)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
-                                
-                                Spacer()
-                            }.frame(alignment: .leading)
-                        }
-                        .frame(width: a.size.width, height: a.size.height * 0.1, alignment: .leading)
-                        .background(Color.yellow)
+                            .buttonStyle(PlainButtonStyle())
+                            .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
+                            
+                            Button(action: {
+                                self.turnOnDidChangeBulletList()
+                                self.toggleBulletList()
+                            }) {
+                                Image(systemName: "list.bullet")
+                                    .resizable()
+                                    .padding(10)
+                                    .foregroundColor(self.isDashBulletList ? .black : .gray)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
+                            
+                            Button(action: {
+                                self.turnOnDidChangeNumberedBulletList()
+                                self.toggleNumberBulletList()
+                            }) {
+                                Image(systemName: "list.number")
+                                    .resizable()
+                                    .padding(10)
+                                    .foregroundColor(self.isNumberedBulletList ? .black : .gray)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .frame(width: min(b.size.width, b.size.height), height: min(b.size.width, b.size.height), alignment: .center)
+                            
+                            Spacer()
+                        }.frame(alignment: .leading)
                     }
+                    .frame(width: a.size.width, height: self.isThread == true ? a.size.height * 0.1 : a.size.height * 0.3, alignment: .leading)
+                    .background(Color.yellow)
+                }
                 
                 TextView(
                     newTextStorage: self.$newTextStorage,
@@ -164,7 +164,6 @@ struct FancyPantsEditorView: View {
                     isFirstResponder: self.isFirstResponder
                 )
             }
-            
         }
     }
 }

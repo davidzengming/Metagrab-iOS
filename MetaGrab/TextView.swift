@@ -72,18 +72,15 @@ struct TextView: UIViewRepresentable {
         myTextView.isEditable = true
         myTextView.isUserInteractionEnabled = isEditable ? true : false
         myTextView.backgroundColor = UIColor.clear
-        myTextView.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        myTextView.textContainerInset = UIEdgeInsets.zero
+        myTextView.textContainer.lineFragmentPadding = 0
         
         DispatchQueue.main.async {
             if self.isNewContent == false {
                 if self.isThread == true {
-                    if self.gameDataStore.threadsDesiredHeight[self.threadId!] == 0 {
-                        self.gameDataStore.threadsDesiredHeight[self.threadId!] = TextViewHelper.calculateTextViewHeight(textView: myTextView)
-                    }
+                    self.gameDataStore.threadsDesiredHeight[self.threadId!] = TextViewHelper.calculateTextViewHeight(textView: myTextView)
                 } else {
-                    if self.gameDataStore.commentsDesiredHeight[self.commentId!] == 0 {
-                        self.gameDataStore.commentsDesiredHeight[self.commentId!] = TextViewHelper.calculateTextViewHeight(textView: myTextView)
-                    }
+                    self.gameDataStore.commentsDesiredHeight[self.commentId!] = TextViewHelper.calculateTextViewHeight(textView: myTextView)
                 }
             }
         }
@@ -318,8 +315,6 @@ struct TextView: UIViewRepresentable {
                     TextViewHelper.adjustLeftCursorFromForbiddenSpace(leftCaretPos: leftCaretPos, textStorage: textStorage, k: k, textView: textView, isNumberedList: nextNumberedListState ? true : false)
                 }
             }
-            
-            
             
             setBoldState(to: nextBoldState)
             setDidChangeBold(to: false)

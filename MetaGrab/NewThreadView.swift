@@ -8,6 +8,12 @@
 
 import SwiftUI
 
+struct IdentifiableImageContainer: Identifiable {
+    var id = UUID()
+    var image: Image?
+    var arrayIndex: Int
+}
+
 struct NewThreadView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var gameDataStore: GameDataStore
@@ -16,18 +22,20 @@ struct NewThreadView: View {
     @State var title: String = ""
     @State var flair = 0
     @State var content: NSTextStorage = NSTextStorage(string: "")
-
-    @State var showImagePicker: Bool = false
-    @State var image: Image? = nil
-    @State var data: Data? = nil
+    
+    @State var showImagePicker = false
+    @State var imagesDict: [UUID: Image] = [:]
+    @State var dataDict: [UUID: Data] = [:]
+    @State var imagesArray: [UUID] = [UUID()]
+    @State var clickedImageIndex : Int?
     
     var forumId: Int
     var flairs = ["Update", "Discussion", "Meme"]
     var imageThread = ["Text", "Image"]
     let placeholder = Image(systemName: "photo")
-    
+
     func submitThread() {
-        self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: data)
+        self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: dataDict, imagesArray: imagesArray)
         self.presentationMode.wrappedValue.dismiss()
     }
     
@@ -42,31 +50,35 @@ struct NewThreadView: View {
                 .padding(.horizontal, 20)
                 
                 HStack {
-                    ZStack {
-                        self.image?.resizable()
-                            .frame(width: 100, height: 100, alignment: .leading)
-                        Button(action: {
-                            withAnimation {
-                                self.showImagePicker.toggle()
+                    ForEach(self.imagesArray, id: \.self) { id in
+                        ZStack {
+                            if self.imagesDict[id] != nil {
+                                self.imagesDict[id]!.resizable()
+                                    .frame(width: 100, height: 100, alignment: .leading)
                             }
-                        }) {
-                            UploadDashPlaceholderButton()
-                            .foregroundColor(Color.gray)
-                            .frame(width: 100, height: 100, alignment: .leading)
-                            .opacity(self.image == nil ? 1 : 0)
+                            Button(action: {
+                                self.clickedImageIndex = self.imagesArray.firstIndex(of: id)!
+                                withAnimation {
+                                    self.showImagePicker.toggle()
+                                }
+                            }) {
+                                UploadDashPlaceholderButton()
+                                .foregroundColor(Color.gray)
+                                .frame(width: 100, height: 100, alignment: .leading)
+                                .opacity(self.imagesDict[id] != nil ? 0.5 : 1)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                    .padding(.horizontal, 20)
-                    .sheet(isPresented: self.$showImagePicker) {
-                        ImagePicker(image: self.$image, data: self.$data)
                     }
                     Spacer()
                 }
+                .sheet(isPresented: self.$showImagePicker) {
+                    ImagePicker(image: self.$imagesDict[self.imagesArray[self.clickedImageIndex!]], data: self.$dataDict[self.imagesArray[self.clickedImageIndex!]], currentImages: self.$imagesArray, imagesDict: self.$imagesDict, dataDict: self.$dataDict)
+                }
+                .padding(.horizontal, 20)
 
                 FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isNewContent: true, isThread: true, isFirstResponder: true)
                     .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.5, alignment: .leading)
-                    .background(Color.white)
                     .cornerRadius(5, corners: [.bottomLeft, .bottomRight, .topLeft, .topRight])
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
@@ -74,7 +86,7 @@ struct NewThreadView: View {
                     )
                     .padding(.vertical, 25)
                     .padding(.horizontal, 20)
-                
+
                 Spacer()
             }
             .edgesIgnoringSafeArea(.bottom)

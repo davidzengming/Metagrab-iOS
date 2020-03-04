@@ -13,8 +13,9 @@ struct TimelineGamesView: View {
     @EnvironmentObject var userDataStore: UserDataStore
     let date = Date()
     let calendar = Calendar.current
-    let MONTH_ABBREV = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     
+    let months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
     func calcRangeStartMonth() -> Int {
         return (calendar.component(.month, from: date) - 2)
     }
@@ -26,21 +27,16 @@ struct TimelineGamesView: View {
     func getCurrentMonth() -> Int {
         return (calendar.component(.month, from: date))
     }
-    
-    func checkHasGames(year: Int, month: Int) -> Bool {
-        return self.gameDataStore.gamesByYear[year] != nil && self.gameDataStore.gamesByYear[year]![month] != nil
-    }
-    
-    func getSortedMonthGameList(year: Int, month: Int) -> [Int] {
-        return Array(self.gameDataStore.gamesByYear[year]![month]!.keys).sorted{$0 < $1}
-    }
-    
+
     func mod(_ a: Int, _ n: Int) -> Int {
         precondition(n > 0, "modulus must be positive")
         let r = a % n
         return r >= 0 ? r : r + n
     }
-
+    
+    func checkHasGames(year: Int, month: Int) -> Bool {
+        return self.gameDataStore.gamesByYear[year] != nil && self.gameDataStore.gamesByYear[year]![month] != nil
+    }
     
     func checkPrevMonthsHasGamesRelease() -> Bool {
         for month in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].suffix(mod(calcRangeStartMonth(), 12)) {
@@ -53,99 +49,29 @@ struct TimelineGamesView: View {
     
     // Lists recent games is past 2 months and upcoming games 1 year down the road
     var body: some View {
-        ScrollView {
-            VStack {
-                // Previous year
-                if checkPrevMonthsHasGamesRelease() == true {
-                    Text(String(self.getCurrentYear() - 1))
-                    ForEach([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].suffix(mod(calcRangeStartMonth(), 12)), id: \.self) { month in
-                        VStack(spacing: 0) {
-                            if self.checkHasGames(year: self.getCurrentYear() - 1, month: month) {
-                                Text(String(self.MONTH_ABBREV[month - 1]))
-                                    .font(.headline)
-                                ForEach(self.getSortedMonthGameList(year: self.getCurrentYear() - 1, month: month), id: \.self) { day in
-                                    HStack {
-                                        Text(String(day))
-                                            .padding(.horizontal, 100)
-                                        ZStack {
-                                            Rectangle()
-                                            .fill(Color.red)
-                                            .frame(width: 10, height: 150)
-                                            Circle()
-                                            .fill(Color.black)
-                                            .frame(width: 20, height: 50)
-                                        }
-                                        Spacer()
-                                        ForEach(Array(self.gameDataStore.gamesByYear[self.getCurrentYear() - 1]![month]![day]!), id: \.self) { gameId in
-                                            HStack {
-                                                FollowGameIcon(game: self.gameDataStore.games[gameId]!)
-                                            }
-                                        }
-                                    }
-                                }
+        GeometryReader { a in
+            ScrollView {
+                HStack {
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Previous year
+                        if self.checkPrevMonthsHasGamesRelease() == true {
+                            Text(String(self.getCurrentYear() - 1))
+                            ForEach(self.months.suffix(self.mod(self.calcRangeStartMonth(), 12)), id: \.self) { month in
+                                MonthView(year: self.getCurrentYear() - 1, month: month, width: a.size.width, height: a.size.height)
                             }
                         }
-                    }
-                }
-                
-                Text(String(self.getCurrentYear()))
-                // Current year
-                ForEach([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], id: \.self) { month in
-                    VStack(spacing: 0) {
-                        if self.checkHasGames(year: self.getCurrentYear(), month: month) {
-                            Text(String(self.MONTH_ABBREV[month - 1]))
-                                .font(.headline)
-                            ForEach(self.getSortedMonthGameList(year: self.getCurrentYear(), month: month), id: \.self) { day in
-                                HStack {
-                                    Text(String(day))
-                                    ZStack {
-                                        Rectangle()
-                                        .fill(Color.red)
-                                        .frame(width: 10, height: 150)
-                                        Circle()
-                                        .fill(Color.black)
-                                        .frame(width: 20, height: 50)
-                                    }
-                                    Spacer()
-                                    ForEach(Array(self.gameDataStore.gamesByYear[self.getCurrentYear()]![month]![day]!), id: \.self) { gameId in
-                                        HStack {
-                                            FollowGameIcon(game: self.gameDataStore.games[gameId]!)
-                                        }
-                                    }
-                                }
-                            }
+                        
+                        Text(String(self.getCurrentYear()))
+                        // Current year
+                        ForEach(self.months, id: \.self) { month in
+                            MonthView(year: self.getCurrentYear(), month: month, width: a.size.width, height: a.size.height)
                         }
-                    }
-                }
-                
-                // Next year
-                if calcRangeStartMonth() > 1 {
-                    Text(String(self.getCurrentYear() + 1))
-                    ForEach([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].prefix(getCurrentMonth()), id: \.self) { month in
-                        VStack(spacing: 0) {
-                            if self.checkHasGames(year: self.getCurrentYear() + 1, month: month) {
-                                Text(String(self.MONTH_ABBREV[month - 1]))
-                                    .font(.headline)
-                                ForEach(self.getSortedMonthGameList(year: self.getCurrentYear() + 1, month: month), id: \.self) { day in
-                                    HStack {
-                                        Text(String(day))
-                                            .frame(width: 100)
-                                        ZStack {
-                                            Rectangle()
-                                            .fill(Color.red)
-                                            .frame(width: 10, height: 150)
-                                            Circle()
-                                            .fill(Color.black)
-                                            .frame(width: 20, height: 50)
-                                        }
-                                        Spacer()
-                                        ForEach(Array(self.gameDataStore.gamesByYear[self.getCurrentYear() + 1]![month]![day]!), id: \.self) { gameId in
-                                            HStack {
-                                                FollowGameIcon(game: self.gameDataStore.games[gameId]!)
-                                            }
-                                        }
-                                    }
-                                }
+                        
+                        // Next year
+                        if self.calcRangeStartMonth() > 1 {
+                            Text(String(self.getCurrentYear() + 1))
+                            ForEach(self.months.prefix(self.getCurrentMonth()), id: \.self) { month in
+                                MonthView(year: self.getCurrentYear() + 1, month: month, width: a.size.width, height: a.size.height)
                             }
                         }
                     }

@@ -45,6 +45,18 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    var sortedDaysListByMonthYear = [Int: [Int: [Int]]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var sortedGamesListByDayMonthYear = [Int: [Int: [Int: [Int]]]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     var isBackToGamesView: Bool = true {
         willSet {
             objectWillChange.send()
@@ -90,7 +102,7 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var threadsImage = [Int: UIImage]() {
+    var threadsImages = [Int: [UIImage]]() {
         willSet {
             objectWillChange.send()
         }
@@ -188,7 +200,7 @@ final class GameDataStore: ObservableObject {
             objectWillChange.send()
         }
     }
-    
+
     var attributesEncodingCache: [Int: Any] = [:]
     func generateTextStorageFromJson(isThread: Bool, id: Int) -> NSTextStorage {
         let generatedTextStorage = NSTextStorage(string: isThread ? self.threads[id]!.contentString : self.comments[id]!.contentString)
@@ -209,28 +221,35 @@ final class GameDataStore: ObservableObject {
         return generatedTextStorage
     }
     
-    func submitThread(access: String, forumId: Int, title: String, flair: Int, content: NSTextStorage, imageData: Data?) {
+    func submitThread(access: String, forumId: Int, title: String, flair: Int, content: NSTextStorage, imageData: [UUID: Data], imagesArray: [UUID]) {
         let taskGroup = DispatchGroup()
         
-        var imageUrl = ""
-        if imageData != nil {
-            taskGroup.enter()
-            let preprocessChain = CLDImagePreprocessChain()
-            .addStep(CLDPreprocessHelpers.limit(width: 500, height: 500))
-            .addStep(CLDPreprocessHelpers.dimensionsValidator(minWidth: 10, maxWidth: 500, minHeight: 10, maxHeight: 500))
-            _ = cloudinary.createUploader().upload(data: imageData!, uploadPreset: "cyr1nlwn", preprocessChain: preprocessChain)
-            .response({response, error in
-                if error == nil {
-                    imageUrl = response!.secureUrl!
-                    taskGroup.leave()
+        var imageUrls : [String] = []
+        
+        if imagesArray.count != 0 {
+            for id in imagesArray {
+                if imageData[id] == nil {
+                    continue
                 }
-            })
+                
+                taskGroup.enter()
+                    let preprocessChain = CLDImagePreprocessChain()
+                    .addStep(CLDPreprocessHelpers.limit(width: 500, height: 500))
+                    .addStep(CLDPreprocessHelpers.dimensionsValidator(minWidth: 10, maxWidth: 500, minHeight: 10, maxHeight: 500))
+                    _ = cloudinary.createUploader().upload(data: imageData[id]!, uploadPreset: "cyr1nlwn", preprocessChain: preprocessChain)
+                    .response({response, error in
+                        if error == nil {
+                            imageUrls.append(response!.secureUrl!)
+                            taskGroup.leave()
+                    }
+                })
+            }
         }
         
         guard let url = URL(string: "http://127.0.0.1:8000/threads/post_thread_by_game_id/?game_id=" + String(forumId)) else { return }
         
         taskGroup.notify(queue: DispatchQueue.global()) {
-            let json: [String: Any] = ["title": title, "content_string": content.string, "content_attributes": ["attributes": TextViewHelper.parseTextStorageAttributesAsBitRep(content: content)], "flair": flair, "image_url": imageUrl]
+            let json: [String: Any] = ["title": title, "content_string": content.string, "content_attributes": ["attributes": TextViewHelper.parseTextStorageAttributesAsBitRep(content: content)], "flair": flair, "image_urls": ["urls": imageUrls]]
             let jsonData = try? JSONSerialization.data(withJSONObject: json)
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
@@ -259,8 +278,11 @@ final class GameDataStore: ObservableObject {
                             self.threadsTextStorage[tempThread.id] = content
                             
                             self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
-                            if imageData != nil {
-                                self.threadsImage[tempThread.id] = UIImage(data: imageData!)
+                            
+                            for id in imagesArray {
+                                if imageData[id] != nil {
+                                    self.threadsImages[tempThread.id]!.append(UIImage(data: imageData[id]!)!)
+                                }
                             }
                         }
                     }
@@ -318,6 +340,7 @@ final class GameDataStore: ObservableObject {
                         self.users[user.id] = user
                         self.comments[tempMainComment.id] = tempMainComment
                         self.commentsTextStorage[tempMainComment.id] = content
+                        self.commentsDesiredHeight[tempMainComment.id] = 0
                         self.threadsNextPageStartIndex[tempMainComment.parentThread!]! += 1
                         self.commentNextPageStartIndex[tempMainComment.id] = 0
                         self.childCommentListByParentCommentId[tempMainComment.id] = []
@@ -358,6 +381,7 @@ final class GameDataStore: ObservableObject {
                         self.users[user.id] = user
                         self.comments[tempChildComment.id] = tempChildComment
                         self.commentsTextStorage[tempChildComment.id] = content
+                        self.commentsDesiredHeight[tempChildComment.id] = 0
                         self.childCommentListByParentCommentId[tempChildComment.id] = [Int]()
                         self.commentNextPageStartIndex[tempChildComment.parentPost!]! += 1
                         self.incrementTreeNodes(node: tempChildComment)
@@ -412,24 +436,40 @@ final class GameDataStore: ObservableObject {
                             self.moreCommentsByThreadId[threadId] = [Int]()
                         }
                         
+                        var commentListToBeAppendedToThread : [Int] = []
+                        var commentListToBeAppendedToComment : [Int: [Int]] = [:]
+                        
                         for comment in commentLoadTree.addedComments {
                             self.comments[comment.id] = comment
                             
                             if comment.parentThread != nil {
-                                self.mainCommentListByThreadId[threadId]!.append(comment.id)
+                                commentListToBeAppendedToThread.append(comment.id)
                                 self.childCommentListByParentCommentId[comment.id] = [Int]()
                                 self.threadsNextPageStartIndex[threadId]! += 1
                                 self.commentNextPageStartIndex[comment.id] = 0
                             } else {
-                                self.childCommentListByParentCommentId[comment.parentPost!]!.append(comment.id)
+                                if commentListToBeAppendedToComment[comment.parentPost!] == nil {
+                                    commentListToBeAppendedToComment[comment.parentPost!] = []
+                                }
+                                commentListToBeAppendedToComment[comment.parentPost!]!.append(comment.id)
                                 self.childCommentListByParentCommentId[comment.id] = [Int]()
                                 self.commentNextPageStartIndex[comment.id] = 0
                                 self.commentNextPageStartIndex[comment.parentPost!]! += 1
                             }
                             
                             self.commentsTextStorage[comment.id] = self.generateTextStorageFromJson(isThread: false, id: comment.id)
+                            
+                            if self.commentsDesiredHeight[comment.id] == nil {
+                                self.commentsDesiredHeight[comment.id] = 0
+                            }
+                            
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
+                        
+                        for (parentComment, childComments) in commentListToBeAppendedToComment {
+                            self.childCommentListByParentCommentId[parentComment]! = childComments
+                        }
+                        self.mainCommentListByThreadId[threadId]! += commentListToBeAppendedToThread
                         
                         self.moreCommentsByThreadId[threadId]! = [Int]()
                         for comment in commentLoadTree.moreComments {
@@ -492,6 +532,11 @@ final class GameDataStore: ObservableObject {
                             self.commentNextPageStartIndex[comment.id] = 0
                             self.commentNextPageStartIndex[comment.parentPost!]! += 1
                             self.commentsTextStorage[comment.id] = self.generateTextStorageFromJson(isThread: false, id: comment.id)
+                            
+                            if self.commentsDesiredHeight[comment.id] == nil {
+                                self.commentsDesiredHeight[comment.id] = 0
+                            }
+                            
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
 
@@ -555,8 +600,9 @@ final class GameDataStore: ObservableObject {
     }
     
     func fetchThreads(access: String, game: Game, start:Int = 0, count:Int = 10, refresh: Bool = false) {
-        if refresh == true {
-             DispatchQueue.main.async {
+        
+        DispatchQueue.main.async {
+            if refresh == true {
                 self.threadListByGameId[game.id] = [Int]()
                 self.forumsNextPageStartIndex[game.id] = nil
             }
@@ -587,15 +633,17 @@ final class GameDataStore: ObservableObject {
                         }
                         
                         var newThreadsList: [Int] = []
-                        
                         for thread in tempThreadsResponse.threadsResponse {
+                            newThreadsList.append(thread.id)
                             self.threads[thread.id] = thread
                             self.mainCommentListByThreadId[thread.id] = [Int]()
-                            newThreadsList.append(thread.id)
                             self.threadsIndexInGameList[thread.id] = self.threadListByGameId[game.id]!.count - 1
                             self.threadsNextPageStartIndex[thread.id] = 0
                             self.threadsTextStorage[thread.id] = self.generateTextStorageFromJson(isThread: true, id: thread.id)
-                            self.threadsDesiredHeight[thread.id] = 0
+                            
+                            if self.threadsDesiredHeight[thread.id] == nil {
+                                self.threadsDesiredHeight[thread.id] = 0
+                            }
                         }
                         
                         self.threadListByGameId[game.id]! += newThreadsList
@@ -622,24 +670,23 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func loadThreadIcon(thread: Thread) {
-        if threadsImage[thread.id] != nil || thread.imageUrl == "" {
+    func loadThreadIcons(thread: Thread) {
+        if threadsImages[thread.id] != nil || thread.imageUrls.urls.count == 0 {
             return
         }
         
-        guard let imageURL = URL(string: thread.imageUrl) else {
-            fatalError("ImageURL is not correct!")
+        self.threadsImages[thread.id] = []
+        for imageURL in thread.imageUrls.urls {
+            URLSession.shared.dataTask(with: URL(string: imageURL)!) { data, response, error in
+                guard let data = data, error == nil else {
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    self.threadsImages[thread.id]!.append(UIImage(data: data)!)
+                }
+            }.resume()
         }
-        
-        URLSession.shared.dataTask(with: imageURL) { data, response, error in
-            guard let data = data, error == nil else {
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self.threadsImage[thread.id] = UIImage(data: data)
-            }
-        }.resume()
     }
     
     func loadGameBanner(game: Game) {
@@ -836,32 +883,55 @@ final class GameDataStore: ObservableObject {
                                 self.threadListByGameId[game.id] = [Int]()
                             }
                             
+                            var releaseYear = calendar.component(.year, from: game.releaseDate)
+                            var releaseMonth = calendar.component(.month, from: game.releaseDate)
+                            var releaseDay = calendar.component(.day, from: game.releaseDate)
+                            
                             if game.nextExpansionReleaseDate != nil {
-                                if self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)] == nil {
-                                    self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)] = [Int:[Int: Set<Int>]]()
-                                }
-                                if self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)] == nil {
-                                    self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)] = [Int: Set<Int>]()
+                                releaseYear = calendar.component(.year, from: game.nextExpansionReleaseDate!)
+                                releaseMonth = calendar.component(.month, from: game.nextExpansionReleaseDate!)
+                                releaseDay = calendar.component(.day, from: game.nextExpansionReleaseDate!)
+                            }
+                            
+                            if self.gamesByYear[releaseYear] == nil {
+                                self.gamesByYear[releaseYear] = [Int:[Int: Set<Int>]]()
+                            }
+                            
+                            if self.gamesByYear[releaseYear]![releaseMonth] == nil {
+                                self.gamesByYear[releaseYear]![releaseMonth] = [Int: Set<Int>]()
+                            }
+                            
+                            if self.gamesByYear[releaseYear]![releaseMonth]![releaseDay] == nil {
+                                self.gamesByYear[releaseYear]![releaseMonth]![releaseDay] = Set<Int>()
+                            }
+                            
+                            self.gamesByYear[releaseYear]![releaseMonth]![releaseDay]!.insert(game.id)
+                        }
+                        
+                        
+                        for (year, _) in self.gamesByYear {
+                            for (month, _) in self.gamesByYear[year]! {
+                                if self.sortedDaysListByMonthYear[year] == nil {
+                                    self.sortedDaysListByMonthYear[year] = [:]
                                 }
                                 
-                                if self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)]![calendar.component(.day, from: game.nextExpansionReleaseDate!)] == nil {
-                                    self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)]![calendar.component(.day, from: game.nextExpansionReleaseDate!)] = Set<Int>()
+                                self.sortedDaysListByMonthYear[year]![month] = Array(self.gamesByYear[year]![month]!.keys).sorted{$0 < $1}
+
+                                for (day, _) in self.gamesByYear[year]![month]! {
+                                    
+                                    if self.sortedGamesListByDayMonthYear[year] == nil {
+                                        self.sortedGamesListByDayMonthYear[year] = [:]
+                                    }
+                                    
+                                    if self.sortedGamesListByDayMonthYear[year]![month] == nil {
+                                        self.sortedGamesListByDayMonthYear[year]![month] = [:]
+                                    }
+                                    
+                                    self.sortedGamesListByDayMonthYear[year]![month]![day] = Array(self.gamesByYear[year]![month]![day]!).sorted()
                                 }
-                                
-                                self.gamesByYear[calendar.component(.year, from: game.nextExpansionReleaseDate!)]![calendar.component(.month, from: game.nextExpansionReleaseDate!)]![calendar.component(.day, from: game.nextExpansionReleaseDate!)]!.insert(game.id)
-                            } else {
-                                if self.gamesByYear[calendar.component(.year, from: game.releaseDate)] == nil {
-                                    self.gamesByYear[calendar.component(.year, from: game.releaseDate)] = [Int:[Int: Set<Int>]]()
-                                }
-                                if self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)] == nil {
-                                    self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)] = [Int: Set<Int>]()
-                                }
-                                if self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)]![calendar.component(.day, from: game.releaseDate)] == nil {
-                                    self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)]![calendar.component(.day, from: game.releaseDate)] = Set<Int>()
-                                }
-                                 self.gamesByYear[calendar.component(.year, from: game.releaseDate)]![calendar.component(.month, from: game.releaseDate)]![calendar.component(.day, from: game.releaseDate)]!.insert(game.id)
                             }
                         }
+                        
                         print("----- Done fetching games ----- ", self.games)
                         taskGroup.leave()
                     }

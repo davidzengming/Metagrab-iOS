@@ -21,6 +21,6 @@ struct Thread: Hashable, Codable, Identifiable {
     var forum: Forum
     var numChilds: Int
     var numSubtreeNodes: Int
-    var imageUrl: String
+    var imageUrls: ImageUrls
     var created: Date
 }

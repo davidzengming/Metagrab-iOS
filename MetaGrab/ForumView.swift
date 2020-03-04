@@ -39,33 +39,61 @@ struct ForumView : View {
         UITableView.appearance().separatorStyle = .none
     }
     
+    func fetchNextPage() {
+        self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!)
+    }
+    
     var body: some View {
         GeometryReader { a in
             VStack(spacing: 0) {
-                if self.gameDataStore.gameBannerImage[self.gameId] != nil {
-                    Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
-                    .resizable()
-                    .cornerRadius(20, corners: [.topLeft, .topRight])
-                        .frame(height: a.size.height * 0.15)
-                }
-                
-                List {
-                    ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
-                        VStack {
-                            ThreadRow(threadId: threadId, gameId: self.gameId)
-                                    .frame(width: a.size.width, height: self.gameDataStore.threadsDesiredHeight[threadId] != nil ? self.gameDataStore.threadsDesiredHeight[threadId]!: 200, alignment: .center)
-                                    .padding(.vertical, 10)
-                            
-                            if self.gameDataStore.threadsDesiredHeight[threadId] != nil {
-                                Text(String(Double(self.gameDataStore.threadsDesiredHeight[threadId]!)))
+                ScrollView(.vertical) {
+                    VStack {
+                        HStack {
+                            if self.gameDataStore.gameBannerImage[self.gameId] != nil {
+                                Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
+                                    .resizable()
+                                    .frame(width: a.size.width * 0.15, height: a.size.width * 0.15, alignment: .leading)
+                                    .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
+                            }
+                            Text(self.gameDataStore.games[self.gameId]!.name)
+                                .foregroundColor(Color.white)
+                        }
+                    }
+                    .frame(width: a.size.width, height: a.size.height * 0.2)
+                    .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
+                    
+                    VStack {
+                        if !self.gameDataStore.threadListByGameId[self.gameId]!.isEmpty {
+                            ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
+                                VStack {
+                                    ThreadRow(threadId: threadId, gameId: self.gameId, width: a.size.width * 0.9, height: a.size.height)
+                                            .background(Color.white)
+                                    Divider()
+                                }
                             }
                         }
-                    }.background(Color.yellow)
+                    }
+                    .frame(width: a.size.width)
+                }
+                .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
+                                
+                if self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 {
+                    Image(uiImage: UIImage(systemName: "chevron.compact.down")!)
+                        .onTapGesture {
+                            self.fetchNextPage()
+                        }
+                        .padding(.top, 10)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 30)
+                    .background(Color.yellow)
+                    .frame(height: a.size.height * 0.05)
                 }
             }
-            .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
-            .edgesIgnoringSafeArea(.bottom)
-            .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Forum"), displayMode: .inline)
+            .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Board"), displayMode: .inline)
             .onAppear() {
                 if self.gameDataStore.isBackToGamesView {
                     self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, refresh: true)
@@ -76,12 +104,12 @@ struct ForumView : View {
             
             NavigationLink(destination: NewThreadView(forumId: self.gameId)) {
                 NewThreadButton()
-                .frame(width: min(a.size.width, a.size.height) * 0.10, height: min(a.size.width, a.size.height) * 0.10, alignment: .center)
-                .shadow(radius: 5)
-                    
+                .frame(width: min(a.size.width, a.size.height) * 0.12, height: min(a.size.width, a.size.height) * 0.12, alignment: .center)
+                .shadow(radius: 10)
             }
-            .position(x: a.size.width * 0.87, y: a.size.height * 0.90)
+            .position(x: a.size.width * 0.88, y: a.size.height * 0.85)
         }
+        .edgesIgnoringSafeArea(.bottom)
     }
 }
 

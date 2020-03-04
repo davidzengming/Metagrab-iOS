@@ -20,7 +20,6 @@ struct ThreadView : View {
     @State var isEditable = false
     @State var replyContent = NSTextStorage(string: "")
     @State var test = NSTextStorage(string: "")
-    @State var desiredHeight: CGFloat = 0
     
     func toggleReplyBoxOpen() {
         self.replyBoxOpen = !self.replyBoxOpen
@@ -43,70 +42,78 @@ struct ThreadView : View {
     }
     
     var body: some View {
-        VStack {
-            ScrollView() {
-                VStack {
-                    Text(getRelativeDate(postedDate: self.gameDataStore.threads[threadId]!.created))
-                    Text(self.gameDataStore.users[self.gameDataStore.threads[threadId]!.author]!.username)
-                    
-                    if (self.gameDataStore.threadsImage[threadId] != nil) {
-                        Image(uiImage: self.gameDataStore.threadsImage[threadId]!)
-                            .resizable()
-                            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
-                            .aspectRatio(contentMode:.fit)
-                            .padding(5)
-                    } else {
-                        FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: $isEditable, isNewContent: false, isThread: true, threadId: threadId, isFirstResponder: false)
-                            .frame(width: 300, height: self.desiredHeight)
-                        Button(action: toggleEditMode) {
-                            Text("Edit Thread")
-                        }
-                    }
-                    
-                    Button(action: toggleReplyBoxOpen) {
-                        Text("Reply")
-                    }
-                    
-                    if self.replyBoxOpen {
-                        VStack {
-                            FancyPantsEditorView(newTextStorage: $replyContent, isEditable: .constant(true), isNewContent: true, isThread: false, isFirstResponder: false)
-                            .background(Color.white)
-                            .cornerRadius(5)
-                            .overlay(RoundedRectangle(cornerRadius: 3)
-                                     .stroke(Color.black, lineWidth: 1))
-                            .padding(.horizontal, 10)
-                            
-                            HStack {
-                                Spacer()
-                                Button(action: postPrimaryComment) {
-                                    Text("Submit")
+        GeometryReader { a in
+            VStack {
+                ScrollView() {
+                    VStack(alignment: .leading) {
+                        Text(self.getRelativeDate(postedDate: self.gameDataStore.threads[self.threadId]!.created))
+                            .frame(width: a.size.width, height: a.size.height * 0.025, alignment: .leading)
+                        Text(self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.username)
+                            .frame(width: a.size.width, height: a.size.height * 0.025, alignment: .leading)
+                        
+                        FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isNewContent: false, isThread: true, threadId: self.threadId, isFirstResponder: false)
+                            .frame(width: a.size.width, height: self.gameDataStore.threadsDesiredHeight[self.threadId]!)
+                        
+                        if (self.gameDataStore.threadsImages[self.threadId] != nil) {
+                            HStack(spacing: 0) {
+                                ForEach(self.gameDataStore.threadsImages[self.threadId]!, id: \.self) { image in
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .cornerRadius(5)
+                                        .frame(minWidth: a.size.width * 0.05, maxWidth: a.size.width * 0.25, minHeight: a.size.height * 0.1, maxHeight: a.size.height * 0.15)
+                                        .background(Color.pink)
+                                        .padding(5)
                                 }
                             }
                         }
-                    }
-                    
-                    Divider()
-                    
-                    VStack {
-                        ForEach(self.gameDataStore.mainCommentListByThreadId[threadId]!, id: \.self) { key in
-                            CommentView(commentId: key)
+                        
+                        HStack {
+                            Button(action: self.toggleEditMode) {
+                                Text("Edit Thread")
+                            }
+                            Button(action: self.toggleReplyBoxOpen) {
+                                Text("Reply")
+                            }
+                        }
+                        .frame(width: a.size.width, height: a.size.height * 0.05, alignment: .leading)
+                        
+                        if self.replyBoxOpen {
+                            VStack {
+                                FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isNewContent: true, isThread: false, isFirstResponder: false)
+                                    .cornerRadius(5)
+                                    .overlay(RoundedRectangle(cornerRadius: 3)
+                                    .stroke(Color.black, lineWidth: 1))
+                                    .frame(width: a.size.width * 0.9, height: a.size.height * 0.15)
+                                
+                                HStack {
+                                    Spacer()
+                                    Button(action: self.postPrimaryComment) {
+                                        Text("Submit")
+                                    }
+                                }
+                                .frame(width: a.size.width, height: a.size.height * 0.05, alignment: .center)
+                            }
+                        }
+                        
+                        if !self.gameDataStore.mainCommentListByThreadId[self.threadId]!.isEmpty {
+                            ForEach(self.gameDataStore.mainCommentListByThreadId[self.threadId]!, id: \.self) { commentId in
+                                CommentView(commentId: commentId, width: a.size.width, height: a.size.height, leadPadding: 0)
+                            }
                         }
                     }
-                    .padding(5)
                 }
                 
-            }
-            
-            if self.gameDataStore.moreCommentsByThreadId[threadId] != nil && self.gameDataStore.moreCommentsByThreadId[threadId]!.count > 0 {
-                Button(action: fetchNextPage) {
-                    Text("More comments ->")
+                if self.gameDataStore.moreCommentsByThreadId[self.threadId] != nil && self.gameDataStore.moreCommentsByThreadId[self.threadId]!.count > 0 {
+                    Button(action: self.fetchNextPage) {
+                        Text("More comments ->")
+                    }
+                    .frame(width: a.size.width, height: a.size.height * 0.05, alignment: .leading)
                 }
             }
-            
         }.onAppear() {
-
             self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId, refresh: true)
-            self.gameDataStore.loadThreadIcon(thread: self.gameDataStore.threads[self.threadId]!)
+            self.gameDataStore.loadThreadIcons(thread: self.gameDataStore.threads[self.threadId]!)
         }
         .navigationBarTitle(Text(self.gameDataStore.threads[threadId]!.title))
     }
