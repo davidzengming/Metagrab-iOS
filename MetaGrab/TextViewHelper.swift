@@ -57,7 +57,7 @@ class TextViewHelper {
             
             let endOfLine = index == lines.count - 1 ? NSMutableAttributedString(string: "") : NSMutableAttributedString(string: "\n", attributes: [NSAttributedString.Key.font: getHelveticaNeueFont(isBold: false)])
             let attributedLine = NSMutableAttributedString(string: isNumbered ? getBulletListIndentStr() : getDashBulletListIndentStr(), attributes: [ NSAttributedString.Key.font: getHelveticaNeueFont(isBold: false)])
-        
+            
             attributedLine.append(line)
             attributedLine.append(endOfLine)
             
@@ -71,7 +71,7 @@ class TextViewHelper {
         } else {
             attributedRes.addAttributes([NSAttributedString.Key.paragraphStyle: getBulletListParagraphStyle(), NSAttributedString.Key.dashListAttribute: true], range: NSMakeRange(0, attributedRes.length))
         }
-
+        
         return attributedRes
     }
     
@@ -87,7 +87,7 @@ class TextViewHelper {
         var replacementTextAndOffset: (replacementText: NSAttributedString, offset: Int)
         if endOfList >= leftCaretPos {
             replacementTextAndOffset = getReplacementListNumbersTextAndInsertCursorOffset(isNumbered: isNumbered, s: textStorage.attributedSubstring(from: NSMakeRange(leftCaretPos, endOfList - leftCaretPos)), counter: currLineNum, isInsertingNewLine: true)
-
+            
             textStorage.replaceCharacters(in: NSMakeRange(leftCaretPos, endOfList - leftCaretPos), with: replacementTextAndOffset.replacementText)
         } else {
             replacementTextAndOffset = getReplacementListNumbersTextAndInsertCursorOffset(isNumbered: isNumbered, s: NSAttributedString(string: ""), counter: currLineNum, isInsertingNewLine: true)
@@ -105,7 +105,7 @@ class TextViewHelper {
         let startOfList = getListStart(index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage, enumerateKey: enumerateKey)
         
         let currLineNum = isNumbered ? convertAttributeStrToInt(s: textStorage.attributedSubstring(from: NSMakeRange(lineNumberRangeTuple.start, lineNumberRangeTuple.end - lineNumberRangeTuple.start + 1))) : -1
-
+        
         let currentLineString: NSMutableAttributedString
         if endOfLine < leftCaretPos {
             currentLineString = NSMutableAttributedString(string: "")
@@ -121,7 +121,7 @@ class TextViewHelper {
             
         } else {
             currentLineString = NSMutableAttributedString(attributedString: textStorage.attributedSubstring(from: NSMakeRange(leftCaretPos, endOfLine != endOfList ? endOfLine - leftCaretPos: endOfLine - leftCaretPos + 1)))
-                
+            
             currentLineString.addAttributes([NSAttributedString.Key.paragraphStyle: TextViewHelper.getBulletListParagraphStyle()], range: NSMakeRange(0, currentLineString.length))
             
             if isNumbered {
@@ -130,7 +130,7 @@ class TextViewHelper {
                 currentLineString.addAttributes([NSAttributedString.Key.dashListAttribute: true], range: NSMakeRange(0, currentLineString.length))
             }
         }
-
+        
         var replacementTextAndCursorOffsetTuple: (replacementText: NSMutableAttributedString, offset: Int)
         
         if endOfList > endOfLine {
@@ -171,7 +171,7 @@ class TextViewHelper {
         let enumerateHeaderKey = isNumberedList ? NSAttributedString.Key.numberHeaderInBulletList : NSAttributedString.Key.dashHeaderInBulletList
         
         let indentStrLength = isNumberedList ? getBulletListIndentStr().count : getDashBulletListIndentStr().count
-    
+        
         let lineStartIndex = TextViewHelper.getListLineStart(index: leftCaretPos, isRightSideCaret: false, textStorage: textStorage, enumerateHeaderKey: enumerateHeaderKey)
         let lineNumStartEnd = TextViewHelper.getLineHeaderRange(enumerateHeaderKey: enumerateHeaderKey, index: lineStartIndex, textStorage: textStorage)
         
@@ -217,7 +217,7 @@ class TextViewHelper {
             let newLineCharFoundRange = uiView.textStorage.mutableString.range(of: "\n", range: NSMakeRange(pos, uiView.textStorage.length - pos))
             lineEndIndex = newLineCharFoundRange.location != NSNotFound ? newLineCharFoundRange.location : uiView.textStorage.length - 1
         }
-
+        
         let replacementText = TextViewHelper.getFormattedBulletListAttributedString(isNumbered: isNumbered, selectedStr: uiView.textStorage.attributedSubstring(from: NSMakeRange(lineStartIndex, lineEndIndex - lineStartIndex + 1)))
         
         if uiView.textStorage.length - 1 > lineEndIndex {
@@ -265,7 +265,7 @@ class TextViewHelper {
     
     static func prepareTypingAttributesSetting(textView: UITextView, isBold: Bool, isItalic: Bool, isStrikethrough: Bool, isBulletList: Bool, isNumberedList: Bool) {
         var defaultAttributes: [NSAttributedString.Key: Any] = [NSAttributedString.Key.font: getHelveticaNeueFont(isBold: isBold, isItalic: isItalic)]
-
+        
         if isStrikethrough == true {
             defaultAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
@@ -279,7 +279,7 @@ class TextViewHelper {
         } else {
             defaultAttributes[.paragraphStyle] = getPlainParagraphStyle()
         }
-
+        
         textView.typingAttributes = defaultAttributes
     }
     
@@ -318,7 +318,7 @@ class TextViewHelper {
         } else {
             res.addAttributes([NSAttributedString.Key.dashListAttribute: true], range: NSMakeRange(0, res.length))
         }
-
+        
         return (res, moveCursorOffset)
     }
     
@@ -399,7 +399,7 @@ class TextViewHelper {
         
         var endOfLine = -1
         let currIndex = isRightSideCaret ? index - 1 : index
-
+        
         textStorage.enumerateAttribute(enumerateHeaderKey, in: NSMakeRange(currIndex, textStorage.length - currIndex), options: [.longestEffectiveRangeNotRequired]) {
             value, range, stop in
             if value == nil {
@@ -528,7 +528,7 @@ class TextViewHelper {
             endOfNumberIndex = range.location + range.length - 1
             stop.pointee = true // return early
         }
-
+        
         return (startOfNumberIndex, endOfNumberIndex)
     }
     
@@ -558,7 +558,7 @@ class TextViewHelper {
             return Int(pow(2.0, 0)) + Int(pow(2.0, 1)) // 3
         }
         return 0
-     }
+    }
     
     static func parseTextStorageAttributesAsBitRep(content: NSTextStorage) -> [[Int]] {
         let attrCheckList = getAttrCheckList()
@@ -614,7 +614,7 @@ class TextViewHelper {
                 } else {
                     attributesToBeApplied = attributesToBeApplied.merging(TextViewHelper.getAttrCheckList()[counter] as! [NSAttributedString.Key : Any]) {(_, last) in last} // overwrite existing keys with new val in closure
                 }
-
+                
                 if counter >= 3 && counter <= 6 {
                     
                     // specific paragraph styles for lists

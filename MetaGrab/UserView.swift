@@ -58,12 +58,12 @@ struct LoginUserView: View {
             Button(action: submit) {
                 Text("Submit")
             }
-//            .onAppear() {
-//                self.userDataStore.onStart()
-//                if self.userDataStore.username != nil {
-//                    self.userDataStore.autologin()
-//                }
-//            }
+            .onAppear() {
+                self.userDataStore.onStart()
+                if self.userDataStore.username != nil {
+                    self.userDataStore.autologin()
+                }
+            }
         }
     }
 }

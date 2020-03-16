@@ -25,16 +25,16 @@ struct ThreadRow : View {
     let threadsFromBottomToGetReadyToLoadNextPage = 1
     let threadsPerNewPageCount = 10
     
-//    func fetchNextPage() {
-//        DispatchQueue.main.async {
-//            if self.gameDataStore.forumsNextPageStartIndex[self.gameId] == nil || self.gameDataStore.forumsNextPageStartIndex[self.gameId]! == -1 || self.gameDataStore.isLoadingNextPageInForum[self.gameId] == nil || self.gameDataStore.isLoadingNextPageInForum[self.gameId]! == true || self.gameDataStore.threadsIndexInGameList[self.threadId] == nil || self.gameDataStore.threadsIndexInGameList[self.threadId]! < self.gameDataStore.threadListByGameId[self.gameId]!.count - self.threadsFromBottomToGetReadyToLoadNextPage {
-//                return
-//            }
-//
-//            self.gameDataStore.isLoadingNextPageInForum[self.gameId] = true
-//            self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!)
-//        }
-//    }
+    //    func fetchNextPage() {
+    //        DispatchQueue.main.async {
+    //            if self.gameDataStore.forumsNextPageStartIndex[self.gameId] == nil || self.gameDataStore.forumsNextPageStartIndex[self.gameId]! == -1 || self.gameDataStore.isLoadingNextPageInForum[self.gameId] == nil || self.gameDataStore.isLoadingNextPageInForum[self.gameId]! == true || self.gameDataStore.threadsIndexInGameList[self.threadId] == nil || self.gameDataStore.threadsIndexInGameList[self.threadId]! < self.gameDataStore.threadListByGameId[self.gameId]!.count - self.threadsFromBottomToGetReadyToLoadNextPage {
+    //                return
+    //            }
+    //
+    //            self.gameDataStore.isLoadingNextPageInForum[self.gameId] = true
+    //            self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!)
+    //        }
+    //    }
     
     func onClickUpvoteButton() {
         if self.gameDataStore.voteThreadMapping[threadId] != nil {
@@ -96,18 +96,34 @@ struct ThreadRow : View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.username)
-                .frame(width: self.width, height: self.height * 0.025, alignment: .leading)
-            
-            Text(self.getRelativeDate(postedDate: self.gameDataStore.threads[self.threadId]!.created))
-                .frame(width: self.width, height: self.height * 0.025, alignment: .leading)
+            HStack {
+                VStack(spacing: 0) {
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundColor(Color.orange)
+                }
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.username)
+                        .frame(height: self.height * 0.025, alignment: .leading)
+                    
+                    Text(self.getRelativeDate(postedDate: self.gameDataStore.threads[self.threadId]!.created))
+                        .font(.system(size: 14))
+                        .frame(height: self.height * 0.02, alignment: .leading)
+                        .foregroundColor(Color(.darkGray))
+                }
+            }
+            .frame(width: self.width, height: self.height * 0.045, alignment: .leading)
+            .padding(.bottom, 10)
             
             NavigationLink(destination: ThreadView(threadId: self.threadId)) {
-                VStack {
+                VStack(alignment: .leading) {
                     HStack {
                         if self.gameDataStore.threads[self.threadId]!.title.count > 0 {
                             Text(self.gameDataStore.threads[self.threadId]!.title)
-                                .font(.system(size: 18))
+                                .fontWeight(.medium)
+                                .font(.system(size: 16))
                             Spacer()
                         }
                     }
@@ -120,46 +136,43 @@ struct ThreadRow : View {
             .buttonStyle(PlainButtonStyle())
             
             if self.gameDataStore.threadsImages[self.threadId] != nil && self.gameDataStore.threadsImages[self.threadId]!.count != 0 {
-                HStack(spacing: 0) {
+                HStack(spacing: 10) {
                     ForEach(self.gameDataStore.threadsImages[self.threadId]!, id: \.self) { uiImage in
                         Image(uiImage: uiImage)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .cornerRadius(5)
-                            .frame(minWidth: self.width * 0.05, maxWidth: self.width * 0.25, minHeight: self.height * 0.1, maxHeight: self.height * 0.15)
-                            .padding(5)
+                            .frame(minWidth: self.width * 0.05, maxWidth: self.width * 0.25, minHeight: self.height * 0.1, maxHeight: self.height * 0.15, alignment: .center)
                     }
-                    Spacer()
                 }
+                .padding(.vertical, 20)
             }
             
-            HStack {
+            HStack(spacing: 20) {
                 HStack {
                     Image(uiImage: UIImage(systemName: "bubble.left")!)
                     Text(String(self.gameDataStore.threads[self.threadId]!.numSubtreeNodes))
-                    .font(.system(size: 18))
+                        .font(.system(size: 16))
                 }
-                .frame(width: self.width * 0.125, height: self.height * 0.025, alignment: .center)
+                .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
                 
                 HStack {
                     Image(uiImage: UIImage(systemName: self.isVotedUp() ? "hand.thumbsup.fill" : "hand.thumbsup")!)
                         .onTapGesture {
                             self.onClickUpvoteButton()
-                        }
+                    }
                     Text(self.transformVotesString(points: self.gameDataStore.threads[self.threadId]!.upvotes))
-                    .font(.system(size: 18))
+                        .font(.system(size: 16))
                 }
-                .frame(width: self.width * 0.125, height: self.height * 0.025, alignment: .center)
-
+                .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
+                
                 HStack {
                     Image(uiImage: UIImage(systemName: self.isVotedDown() ? "hand.thumbsdown.fill" : "hand.thumbsdown")!)
                         .onTapGesture {
                             self.onClickDownvoteButton()
-                        }
-                    Text(self.transformVotesString(points: self.gameDataStore.threads[self.threadId]!.downvotes))
-                    .font(.system(size: 18))
+                    }
                 }
-                .frame(width: self.width * 0.125, height: self.height * 0.025, alignment: .center)
+                .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
                 
                 Spacer()
             }

@@ -84,7 +84,7 @@ struct TextView: UIViewRepresentable {
                 }
             }
         }
-        
+    
         return myTextView
     }
     
@@ -183,7 +183,7 @@ struct TextView: UIViewRepresentable {
         var parent: TextView
         var textStorage: NSTextStorage
         var didBecomeFirstResponder = false
-
+        
         init(_ textView: TextView, textStorage: NSTextStorage) {
             self.parent = textView
             self.textStorage = textStorage
@@ -249,18 +249,18 @@ struct TextView: UIViewRepresentable {
                     }
                 }
             }
-
-//            not needed - textStorage state already receives update via binding
-//            DispatchQueue.main.async {
-//                self.parent.textStorage = textView.textStorage
-//            }
+            
+            //            not needed - textStorage state already receives update via binding
+            //            DispatchQueue.main.async {
+            //                self.parent.textStorage = textView.textStorage
+            //            }
         }
-
+        
         func textViewDidChangeSelection(_ textView: UITextView) {
             if parent.isEditable == false {
                 return
             }
-
+            
             let leftCaretPos = textView.selectedRange.location
             let k = textView.selectedRange.length
             let rightCaretPos = leftCaretPos + k
@@ -280,7 +280,7 @@ struct TextView: UIViewRepresentable {
                 
                 nextNumberedListState = TextViewHelper.isAllContainAttributeInSubstring(enumerateKey: NSAttributedString.Key.numberedListAttribute, s: textStorage.attributedSubstring(from: NSMakeRange(leftCaretPos, k))) ? true : false
                 nextDashListState = TextViewHelper.isAllContainAttributeInSubstring(enumerateKey: NSAttributedString.Key.dashListAttribute, s: textStorage.attributedSubstring(from: NSMakeRange(leftCaretPos, k))) ? true : false
-
+                
                 let isLeftSelectInNumberedList = TextViewHelper.isLastCharAttribute(attribute: NSAttributedString.Key.numberedListAttribute, index: leftCaretPos, isRightSideCaret: false, textStorage: textStorage) ? true : false
                 let isRightSelectInNumberedList = TextViewHelper.isLastCharAttribute(attribute: NSAttributedString.Key.numberedListAttribute, index: rightCaretPos, isRightSideCaret: true, textStorage: textStorage) ? true : false
                 
@@ -302,7 +302,7 @@ struct TextView: UIViewRepresentable {
                 if isRightSelectInDashList == true {
                     TextViewHelper.adjustRightCursorFromForbiddenSpace(rightCaretPos: rightCaretPos, textStorage: textStorage, k: k, textView: textView, isNumberedList: false)
                 }
-
+                
             } else {
                 nextBoldState = TextViewHelper.isLastCharBold(index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage) ? true : false
                 nextItalicState = TextViewHelper.isLastCharItalic(index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage) ? true : false
@@ -335,7 +335,7 @@ struct TextView: UIViewRepresentable {
                 TextViewHelper.prepareTypingAttributesSetting(textView: textView, isBold: self.parent.isBold, isItalic: self.parent.isItalic, isStrikethrough: self.parent.isStrikethrough, isBulletList: self.parent.isDashBulletList, isNumberedList: self.parent.isNumberedBulletList)
             }
         }
-    
+        
         func setDidChangeBold(to status: Bool) {
             DispatchQueue.main.async {
                 self.parent.didChangeBold = status

@@ -22,6 +22,7 @@
 		3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9E286323A834100012CD6F /* TimelineGamesView.swift */; };
 		3EB04615240980BD00C7AC98 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB04614240980BD00C7AC98 /* MonthView.swift */; };
 		3EB10A2723E0936D0079D80D /* TextViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB10A2623E0936D0079D80D /* TextViewHelper.swift */; };
+		3EC604DF241966C000F0197B /* MoreCommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EC604DE241966C000F0197B /* MoreCommentsView.swift */; };
 		3ECA00B123905BCF001FB0B6 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECA00B023905BCF001FB0B6 /* TextView.swift */; };
 		3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECF12C3238ECAE000A7160B /* KeyChain.swift */; };
 		3ED871A423E8CEDD0089F946 /* NewThreadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */; };
@@ -78,6 +79,7 @@
 		3E9E286323A834100012CD6F /* TimelineGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineGamesView.swift; sourceTree = "<group>"; };
 		3EB04614240980BD00C7AC98 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 		3EB10A2623E0936D0079D80D /* TextViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewHelper.swift; sourceTree = "<group>"; };
+		3EC604DE241966C000F0197B /* MoreCommentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreCommentsView.swift; sourceTree = "<group>"; };
 		3ECA00B023905BCF001FB0B6 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		3ECF12C3238ECAE000A7160B /* KeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
 		3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadButton.swift; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				3EF6213723086B00002DE02E /* ThreadRow.swift */,
 				3EFCE177230EF22A000FD392 /* ThreadView.swift */,
 				3EFCE179230F010F000FD392 /* CommentView.swift */,
+				3EC604DE241966C000F0197B /* MoreCommentsView.swift */,
 				3EF6213923086B17002DE02E /* ImageLoader.swift */,
 				3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */,
 				3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */,
@@ -355,6 +358,7 @@
 				3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */,
 				3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */,
 				3E6C619023EC9126009015B7 /* UploadDashPlaceholderButton.swift in Sources */,
+				3EC604DF241966C000F0197B /* MoreCommentsView.swift in Sources */,
 				3EF6214123086B6F002DE02E /* Developer.swift in Sources */,
 				3EF6213F23086B5A002DE02E /* Game.swift in Sources */,
 				3EEA4738238D79BB00171396 /* ImagePicker.swift in Sources */,

@@ -46,21 +46,26 @@ struct GameHubView: View {
         NavigationView {
             TabView {
                 PopularGamesView()
-                .tabItem {
-                    Text("Popular Games")
+                    .tabItem {
+                        Image(systemName: "flame.fill")
+                        Text("Popular")
                 }
                 TimelineGamesView()
-                .tabItem {
-                    Text("Upcoming Games")
+                    .tabItem {
+                        Image(systemName: "gamecontroller.fill")
+                        Text("Upcoming")
                 }
                 FollowedGamesView()
-                .tabItem {
-                    Text("Followed Games")
+                    .tabItem {
+                        Image(systemName: "star.circle.fill")
+                        Text("Favourites")
                 }
             }
+            .edgesIgnoringSafeArea(.top)
             .onAppear() {
                 self.gameDataStore.fetchFollowGames(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }

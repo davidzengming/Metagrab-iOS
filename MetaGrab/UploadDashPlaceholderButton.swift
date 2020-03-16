@@ -20,9 +20,9 @@ struct UploadDashPlaceholderButton: View {
                 let top = CGFloat(0)
                 let bot = height
                 
-//                let midX = rightBound / 2
-//                let midY = bot / 2
-//                let plusSignScale = CGFloat(0.5)
+                //                let midX = rightBound / 2
+                //                let midY = bot / 2
+                //                let plusSignScale = CGFloat(0.5)
                 
                 path.move(to: CGPoint(x: leftBound, y: top))
                 path.addLine(to: CGPoint(x: rightBound, y: top))
@@ -36,16 +36,16 @@ struct UploadDashPlaceholderButton: View {
                 let width = a.size.width
                 let height = a.size.height
                 
-//                let leftBound = CGFloat(0)
+                //                let leftBound = CGFloat(0)
                 let rightBound = width
-//                let top = CGFloat(0)
+                //                let top = CGFloat(0)
                 let bot = height
                 
                 let midX = rightBound / 2
                 let midY = bot / 2
                 
                 let plusSignScale = CGFloat(0.5)
-
+                
                 path.move(to: CGPoint(x: midX, y: midY))
                 path.addLine(to: CGPoint(x: midX, y: midY - midY * plusSignScale))
                 path.move(to: CGPoint(x: midX, y: midY))

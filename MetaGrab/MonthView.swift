@@ -17,7 +17,7 @@ struct MonthView: View {
     var width: CGFloat
     var height: CGFloat
     
-    let MONTH_ABBREV = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    let MONTH_ABBREV = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     
     func checkHasGames(year: Int, month: Int) -> Bool {
         return self.gameDataStore.gamesByYear[year] != nil && self.gameDataStore.gamesByYear[year]![month] != nil
@@ -31,13 +31,14 @@ struct MonthView: View {
         VStack(alignment: .leading, spacing: 0) {
             if self.checkHasGames(year: year, month: month) {
                 Text(String(self.MONTH_ABBREV[month - 1]))
-                    .font(.headline)
-                    
+                    .font(.system(size: 60))
+                    .padding()
+                
                 ForEach(0..<self.gameDataStore.sortedDaysListByMonthYear[year]![month]!.count, id: \.self) { dayArrIndex in
                     HStack(alignment: .top, spacing: 0) {
                         Text(String(self.gameDataStore.sortedDaysListByMonthYear[self.year]![self.month]![dayArrIndex]))
+                            .font(.system(size: 30))
                             .frame(width: 100)
-                        
                         VStack(spacing: 0) {
                             ForEach(0..<self.gameDataStore.sortedGamesListByDayMonthYear[self.year]![self.month]![self.gameDataStore.sortedDaysListByMonthYear[self.year]![self.month]![dayArrIndex]]!.count, id: \.self) { gameArrIndex in
                                 HStack {

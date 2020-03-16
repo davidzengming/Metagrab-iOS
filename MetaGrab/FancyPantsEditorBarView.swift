@@ -141,7 +141,7 @@ struct FancyPantsEditorView: View {
                         }.frame(alignment: .leading)
                     }
                     .frame(width: a.size.width, height: self.isThread == true ? a.size.height * 0.1 : a.size.height * 0.3, alignment: .leading)
-                    .background(Color.yellow)
+                    .background(self.isNewContent && self.isThread ? Color.yellow : Color(red: 225 / 255, green: 225 / 255, blue: 225 / 255))
                 }
                 
                 TextView(
@@ -163,6 +163,7 @@ struct FancyPantsEditorView: View {
                     commentId: self.commentId,
                     isFirstResponder: self.isFirstResponder
                 )
+                    .padding(.all, self.isEditable || self.isNewContent ? 10 : 0)
             }
         }
     }

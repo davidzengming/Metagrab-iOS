@@ -33,7 +33,7 @@ struct NewThreadView: View {
     var flairs = ["Update", "Discussion", "Meme"]
     var imageThread = ["Text", "Image"]
     let placeholder = Image(systemName: "photo")
-
+    
     func submitThread() {
         self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: dataDict, imagesArray: imagesArray)
         self.presentationMode.wrappedValue.dismiss()
@@ -43,11 +43,11 @@ struct NewThreadView: View {
         GeometryReader { a in
             VStack {
                 TextField("Add a title! (Optional)", text: self.$title)
-                .autocapitalization(.none)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.top, 30)
-                .padding(.bottom, 20)
-                .padding(.horizontal, 20)
+                    .autocapitalization(.none)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.top, 30)
+                    .padding(.bottom, 20)
+                    .padding(.horizontal, 20)
                 
                 HStack {
                     ForEach(self.imagesArray, id: \.self) { id in
@@ -63,9 +63,9 @@ struct NewThreadView: View {
                                 }
                             }) {
                                 UploadDashPlaceholderButton()
-                                .foregroundColor(Color.gray)
-                                .frame(width: 100, height: 100, alignment: .leading)
-                                .opacity(self.imagesDict[id] != nil ? 0.5 : 1)
+                                    .foregroundColor(Color.gray)
+                                    .frame(width: 100, height: 100, alignment: .leading)
+                                    .opacity(self.imagesDict[id] != nil ? 0.5 : 1)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -76,17 +76,17 @@ struct NewThreadView: View {
                     ImagePicker(image: self.$imagesDict[self.imagesArray[self.clickedImageIndex!]], data: self.$dataDict[self.imagesArray[self.clickedImageIndex!]], currentImages: self.$imagesArray, imagesDict: self.$imagesDict, dataDict: self.$dataDict)
                 }
                 .padding(.horizontal, 20)
-
+                
                 FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isNewContent: true, isThread: true, isFirstResponder: true)
                     .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.5, alignment: .leading)
                     .cornerRadius(5, corners: [.bottomLeft, .bottomRight, .topLeft, .topRight])
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
                             .stroke(Color.black, lineWidth: 2)
-                    )
+                )
                     .padding(.vertical, 25)
                     .padding(.horizontal, 20)
-
+                
                 Spacer()
             }
             .edgesIgnoringSafeArea(.bottom)

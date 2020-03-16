@@ -17,7 +17,7 @@ extension View {
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
-
+    
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
         return Path(path.cgPath)
@@ -57,7 +57,7 @@ struct ForumView : View {
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 5)
                                             .stroke(Color.white, lineWidth: 2)
-                                    )
+                                )
                             }
                             Text(self.gameDataStore.games[self.gameId]!.name)
                                 .foregroundColor(Color.white)
@@ -71,7 +71,7 @@ struct ForumView : View {
                             ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
                                 VStack {
                                     ThreadRow(threadId: threadId, gameId: self.gameId, width: a.size.width * 0.9, height: a.size.height)
-                                            .background(Color.white)
+                                        .background(Color.white)
                                     Divider()
                                 }
                             }
@@ -80,19 +80,20 @@ struct ForumView : View {
                     .frame(width: a.size.width)
                 }
                 .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
-                                
+                
                 if self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 {
                     Image(uiImage: UIImage(systemName: "chevron.compact.down")!)
                         .onTapGesture {
                             self.fetchNextPage()
-                        }
-                        .padding(.top, 10)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 30)
+                    }
+                    .padding(.top, 10)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
                     .background(Color.yellow)
                     .frame(height: a.size.height * 0.05)
                 }
             }
+            
             .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Board"), displayMode: .inline)
             .onAppear() {
                 if self.gameDataStore.isBackToGamesView {
@@ -104,8 +105,8 @@ struct ForumView : View {
             
             NavigationLink(destination: NewThreadView(forumId: self.gameId)) {
                 NewThreadButton()
-                .frame(width: min(a.size.width, a.size.height) * 0.12, height: min(a.size.width, a.size.height) * 0.12, alignment: .center)
-                .shadow(radius: 10)
+                    .frame(width: min(a.size.width, a.size.height) * 0.12, height: min(a.size.width, a.size.height) * 0.12, alignment: .center)
+                    .shadow(radius: 10)
             }
             .position(x: a.size.width * 0.88, y: a.size.height * 0.85)
         }

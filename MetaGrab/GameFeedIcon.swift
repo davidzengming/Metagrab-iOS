@@ -14,11 +14,11 @@ struct GameFeedIcon : View {
     @EnvironmentObject var userDataStore: UserDataStore
     
     let placeholder = Image(systemName: "photo")
-
+    
     init(game: Game) {
         self.game = game
     }
-
+    
     func followGame() {
         self.gameDataStore.followGame(access: userDataStore.token!.access, game: game)
     }
@@ -65,7 +65,7 @@ struct GameFeedIcon : View {
                     .buttonStyle(PlainButtonStyle())
                     .frame(width: a.size.width, height: a.size.height * 0.10)
                     .background(self.gameDataStore.isFollowed[self.game.id] == true ? Color.green : Color.red)
-
+                    
                     HStack {
                         NavigationLink(destination: ForumView(gameId: self.game.id)) {
                             Text("Discuss")
@@ -81,9 +81,9 @@ struct GameFeedIcon : View {
             }
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
-                .stroke(Color.black, lineWidth: 1)
+                    .stroke(Color.black, lineWidth: 1)
             )
-            .shadow(radius: 5)
+                .shadow(radius: 5)
         }
     }
 }

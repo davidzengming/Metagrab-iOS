@@ -154,8 +154,13 @@ final class GameDataStore: ObservableObject {
             objectWillChange.send()
         }
     }
+    var visibleChildCommentsNum = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
     
-
+    
     // Follow Game States
     var followedGames = [Int]() {
         willSet {
@@ -200,11 +205,11 @@ final class GameDataStore: ObservableObject {
             objectWillChange.send()
         }
     }
-
+    
     var attributesEncodingCache: [Int: Any] = [:]
     func generateTextStorageFromJson(isThread: Bool, id: Int) -> NSTextStorage {
         let generatedTextStorage = NSTextStorage(string: isThread ? self.threads[id]!.contentString : self.comments[id]!.contentString)
-
+        
         for attribute in isThread ? self.threads[id]!.contentAttributes.attributes : self.comments[id]!.contentAttributes.attributes {
             let encode = attribute[0]
             let location = attribute[1]
@@ -233,16 +238,16 @@ final class GameDataStore: ObservableObject {
                 }
                 
                 taskGroup.enter()
-                    let preprocessChain = CLDImagePreprocessChain()
+                let preprocessChain = CLDImagePreprocessChain()
                     .addStep(CLDPreprocessHelpers.limit(width: 500, height: 500))
                     .addStep(CLDPreprocessHelpers.dimensionsValidator(minWidth: 10, maxWidth: 500, minHeight: 10, maxHeight: 500))
-                    _ = cloudinary.createUploader().upload(data: imageData[id]!, uploadPreset: "cyr1nlwn", preprocessChain: preprocessChain)
+                _ = cloudinary.createUploader().upload(data: imageData[id]!, uploadPreset: "cyr1nlwn", preprocessChain: preprocessChain)
                     .response({response, error in
                         if error == nil {
                             imageUrls.append(response!.secureUrl!)
                             taskGroup.leave()
-                    }
-                })
+                        }
+                    })
             }
         }
         
@@ -258,7 +263,7 @@ final class GameDataStore: ObservableObject {
             let authString: String? = "Bearer \(access)"
             sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
             let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
-
+            
             session.dataTask(with: request) {(data, response, error) in
                 if let data = data {
                     if let jsonString = String(data: data, encoding: .utf8) {
@@ -266,7 +271,7 @@ final class GameDataStore: ObservableObject {
                         let tempThread = tempNewThreadResponse.threadResponse
                         let vote = tempNewThreadResponse.voteResponse
                         let user = tempNewThreadResponse.userResponse
-
+                        
                         DispatchQueue.main.async {
                             self.users[user.id] = user
                             self.threads[tempThread.id] = tempThread
@@ -319,7 +324,7 @@ final class GameDataStore: ObservableObject {
         
         let json: [String: Any] = ["content_string": content.string, "content_attributes": ["attributes": TextViewHelper.parseTextStorageAttributesAsBitRep(content: content)]]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = jsonData
@@ -383,11 +388,17 @@ final class GameDataStore: ObservableObject {
                         self.commentsTextStorage[tempChildComment.id] = content
                         self.commentsDesiredHeight[tempChildComment.id] = 0
                         self.childCommentListByParentCommentId[tempChildComment.id] = [Int]()
-                        self.commentNextPageStartIndex[tempChildComment.parentPost!]! += 1
+                        
+                        if self.commentNextPageStartIndex[tempChildComment.parentPost!]! != -1 {
+                            self.commentNextPageStartIndex[tempChildComment.parentPost!]! += 1
+                        }
+                        
                         self.incrementTreeNodes(node: tempChildComment)
                         self.votes[tempVote.id] = tempVote
                         self.voteCommentMapping[tempChildComment.id] = tempVote.id
                         
+                        self.visibleChildCommentsNum[tempChildComment.parentPost!]! += 1
+                        self.commentNextPageStartIndex[tempChildComment.id] = -1
                         self.childCommentListByParentCommentId[tempChildComment.parentPost!]!.insert(tempChildComment.id, at: 0)
                     }
                 }
@@ -412,7 +423,7 @@ final class GameDataStore: ObservableObject {
                 roots += "&roots=" + String(comment_id)
             }
         }
-
+        
         guard let url = URL(string: "http://127.0.0.1:8000/comments/get_comment_tree_by_thread_id/" + params + roots) else { return }
         
         var request = URLRequest(url: url)
@@ -447,11 +458,15 @@ final class GameDataStore: ObservableObject {
                                 self.childCommentListByParentCommentId[comment.id] = [Int]()
                                 self.threadsNextPageStartIndex[threadId]! += 1
                                 self.commentNextPageStartIndex[comment.id] = 0
+                                self.visibleChildCommentsNum[comment.id] = 0
                             } else {
                                 if commentListToBeAppendedToComment[comment.parentPost!] == nil {
                                     commentListToBeAppendedToComment[comment.parentPost!] = []
                                 }
                                 commentListToBeAppendedToComment[comment.parentPost!]!.append(comment.id)
+                                self.visibleChildCommentsNum[comment.parentPost!]! += 1
+                                self.visibleChildCommentsNum[comment.id] = 0
+                                
                                 self.childCommentListByParentCommentId[comment.id] = [Int]()
                                 self.commentNextPageStartIndex[comment.id] = 0
                                 self.commentNextPageStartIndex[comment.parentPost!]! += 1
@@ -537,9 +552,12 @@ final class GameDataStore: ObservableObject {
                                 self.commentsDesiredHeight[comment.id] = 0
                             }
                             
+                            self.visibleChildCommentsNum[comment.parentPost!]! += 1
+                            self.visibleChildCommentsNum[comment.id] = 0
+                            
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
-
+                        
                         self.moreCommentsByParentCommentId[parentCommentId]! = [Int]()
                         for comment in commentLoadTree.moreComments {
                             self.moreCommentsByParentCommentId[comment.parentPost!]!.append(comment.id)
@@ -581,7 +599,7 @@ final class GameDataStore: ObservableObject {
                             self.commentNextPageStartIndex[parentCommentId] = -1
                             return
                         }
-
+                        
                         for comment in tempSecondaryComments {
                             if self.comments[comment.id] == nil {
                                 self.comments[comment.id] = comment
@@ -591,7 +609,7 @@ final class GameDataStore: ObservableObject {
                                 self.comments[comment.id] = comment
                             }
                         }
-
+                        
                         self.commentNextPageStartIndex[parentCommentId] = start + count
                     }
                 }
@@ -624,7 +642,7 @@ final class GameDataStore: ObservableObject {
                     
                     DispatchQueue.main.async {
                         if self.threadListByGameId[game.id] == nil {
-                             self.threadListByGameId[game.id] = [Int]()
+                            self.threadListByGameId[game.id] = [Int]()
                         }
                         
                         if tempThreadsResponse.threadsResponse.count == 0 && self.forumsNextPageStartIndex[game.id] == nil {
@@ -916,7 +934,7 @@ final class GameDataStore: ObservableObject {
                                 }
                                 
                                 self.sortedDaysListByMonthYear[year]![month] = Array(self.gamesByYear[year]![month]!.keys).sorted{$0 < $1}
-
+                                
                                 for (day, _) in self.gamesByYear[year]![month]! {
                                     
                                     if self.sortedGamesListByDayMonthYear[year] == nil {
@@ -1170,7 +1188,7 @@ final class GameDataStore: ObservableObject {
                     self.threads[thread.id]!.downvotes += 1
                 }
             }
-
+            
         }.resume()
     }
     
@@ -1266,13 +1284,13 @@ final class GameDataStore: ObservableObject {
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
         let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
         session.dataTask(with: request) { (data, response, error) in
-             if error == nil {
-                 DispatchQueue.main.async {
-                     self.votes[self.voteCommentMapping[comment.id]!]!.direction = -1
-                     self.comments[comment.id]!.upvotes -= 1
-                     self.comments[comment.id]!.downvotes += 1
-                 }
-             }
+            if error == nil {
+                DispatchQueue.main.async {
+                    self.votes[self.voteCommentMapping[comment.id]!]!.direction = -1
+                    self.comments[comment.id]!.upvotes -= 1
+                    self.comments[comment.id]!.downvotes += 1
+                }
+            }
         }.resume()
     }
     

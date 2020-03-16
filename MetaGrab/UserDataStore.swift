@@ -35,17 +35,17 @@ final class UserDataStore: ObservableObject {
     }
     
     func onStart() {
-//        if let usernameData = KeyChain.load(key: "metagrabusername"), let passwordData = KeyChain.load(key: "metagrabpassword"), let tokenaccessData = KeyChain.load(key: "metagrabtokenaccess"), let tokenrefreshData = KeyChain.load(key: "metagrabtokenrefresh") {
-////            self.username = String(data: usernameData, encoding: String.Encoding.utf8) as String?
-////            self.password = String(data: passwordData, encoding: String.Encoding.utf8) as String?
-////            self.token = Token(refresh: String(data: tokenrefreshData, encoding: String.Encoding.utf8)!, access: String(data: tokenaccessData, encoding: String.Encoding.utf8)!)
-//        }
+        if let usernameData = KeyChain.load(key: "metagrabusername"), let passwordData = KeyChain.load(key: "metagrabpassword"), let tokenaccessData = KeyChain.load(key: "metagrabtokenaccess"), let tokenrefreshData = KeyChain.load(key: "metagrabtokenrefresh") {
+            self.username = String(data: usernameData, encoding: String.Encoding.utf8) as String?
+            self.password = String(data: passwordData, encoding: String.Encoding.utf8) as String?
+            self.token = Token(refresh: String(data: tokenrefreshData, encoding: String.Encoding.utf8)!, access: String(data: tokenaccessData, encoding: String.Encoding.utf8)!)
+        }
     }
     
     func autologin() {
         acquireToken()
     }
-
+    
     func login(username: String, password: String) {
         self.username = username
         self.password = password
@@ -55,11 +55,11 @@ final class UserDataStore: ObservableObject {
         self.acquireToken(taskGroup: taskGroup)
         
         taskGroup.notify(queue: DispatchQueue.global()) {
-//            print("saved to keychain credentials")
-//            let status1 = KeyChain.save(key: "metagrabusername", data: username.data(using: String.Encoding.utf8)!)
-//            let status2 = KeyChain.save(key: "metagrabpassword", data: password.data(using: String.Encoding.utf8)!)
-//            let status3 = KeyChain.save(key: "metagrabtokenaccess", data: self.token!.access.data(using: String.Encoding.utf8)!)
-//            let status4 = KeyChain.save(key: "metagrabtokenrefresh", data: self.token!.refresh.data(using: String.Encoding.utf8)!)
+            print("saved to keychain credentials")
+            let status1 = KeyChain.save(key: "metagrabusername", data: username.data(using: String.Encoding.utf8)!)
+            let status2 = KeyChain.save(key: "metagrabpassword", data: password.data(using: String.Encoding.utf8)!)
+            let status3 = KeyChain.save(key: "metagrabtokenaccess", data: self.token!.access.data(using: String.Encoding.utf8)!)
+            let status4 = KeyChain.save(key: "metagrabtokenrefresh", data: self.token!.refresh.data(using: String.Encoding.utf8)!)
         }
     }
     
@@ -85,7 +85,7 @@ final class UserDataStore: ObservableObject {
     func acquireToken(taskGroup: DispatchGroup? = nil) {
         guard let url = URL(string: "http://127.0.0.1:8000/api/token/") else { return }
         var request = URLRequest(url: url)
-
+        
         let bodyData = "username=\(self.username!)&password=\(self.password!)"
         request.httpMethod = "POST"
         request.httpBody = bodyData.data(using: .utf8)

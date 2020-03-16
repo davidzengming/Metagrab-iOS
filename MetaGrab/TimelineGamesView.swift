@@ -62,6 +62,7 @@ struct TimelineGamesView: View {
                         }
                         
                         Text(String(self.getCurrentYear()))
+                        .font(.system(size: 120))
                         // Current year
                         ForEach(self.months, id: \.self) { month in
                             MonthView(year: self.getCurrentYear(), month: month, width: a.size.width, height: a.size.height)

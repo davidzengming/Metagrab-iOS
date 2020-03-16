@@ -46,7 +46,7 @@ struct BulletListEditorButton: View {
             Path { path in
                 let height = g.size.height
                 let width = g.size.width
-
+                
                 let midY = height * 0.5
                 let midX = width * 0.5
                 
@@ -59,7 +59,7 @@ struct BulletListEditorButton: View {
                 
                 let leftBound = midX - diff
                 let rightBound = midX + diff
-
+                
                 let firstLeftStopPoint = leftBound + (rightBound - leftBound) * 0.1
                 let secondLeftStopPoint = leftBound + (rightBound - leftBound) * 0.25
                 
@@ -99,7 +99,7 @@ func useProxy(_ proxy: GeometryProxy) -> some View {
     
     let leftBound = midX - diff
     let rightBound = midX + diff
-
+    
     let firstLeftStopPoint = leftBound + (rightBound - leftBound) * 0.1
     
     return ZStack {
@@ -122,12 +122,12 @@ struct NumberedBulletListEditorButton: View {
             GeometryReader { proxy in
                 useProxy(proxy)
             }
-
+            
             GeometryReader { g in
                 Path { path in
                     let height = g.size.height
                     let width = g.size.width
-
+                    
                     let midY = height * 0.5
                     let midX = width * 0.5
                     
@@ -140,15 +140,15 @@ struct NumberedBulletListEditorButton: View {
                     
                     let leftBound = midX - diff
                     let rightBound = midX + diff
-
+                    
                     let secondLeftStopPoint = leftBound + (rightBound - leftBound) * 0.25
                     
                     path.move(to: CGPoint(x: secondLeftStopPoint, y: topY))
                     path.addLine(to: CGPoint(x: rightBound, y: topY))
-
+                    
                     path.move(to: CGPoint(x: secondLeftStopPoint, y: midY))
                     path.addLine(to: CGPoint(x: rightBound, y: midY))
-
+                    
                     path.move(to: CGPoint(x: secondLeftStopPoint, y: botY))
                     path.addLine(to: CGPoint(x: rightBound, y: botY))
                 }
