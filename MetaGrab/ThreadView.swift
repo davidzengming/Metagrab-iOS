@@ -8,10 +8,49 @@
 
 import Foundation
 import SwiftUI
+import Combine
+
+struct KeyboardAwareModifier: ViewModifier {
+    @EnvironmentObject var gameDataStore: GameDataStore
+    
+    private var keyboardHeightPublisher: AnyPublisher<CGFloat, Never> {
+        Publishers.Merge(
+            NotificationCenter.default
+                .publisher(for: UIResponder.keyboardWillShowNotification)
+                .compactMap { $0.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue }
+                .map { $0.cgRectValue.height },
+            NotificationCenter.default
+                .publisher(for: UIResponder.keyboardWillHideNotification)
+                .map { _ in CGFloat(0) }
+        ).eraseToAnyPublisher()
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .padding(.bottom, self.gameDataStore.keyboardHeight)
+            .edgesIgnoringSafeArea(self.gameDataStore.keyboardHeight == 0 ? [] : .bottom)
+            .onReceive(keyboardHeightPublisher) {
+                self.gameDataStore.keyboardHeight = $0
+        }
+    }
+}
+
+extension View {
+    func KeyboardAwarePadding() -> some View {
+        ModifiedContent(content: self, modifier: KeyboardAwareModifier())
+    }
+}
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
 
 struct ThreadView : View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
+    
     var threadId: Int
     let placeholder = Image(systemName: "photo")
     let formatter = RelativeDateTimeFormatter()
@@ -22,6 +61,12 @@ struct ThreadView : View {
     @State var replyContent = NSTextStorage(string: "")
     @State var test = NSTextStorage(string: "")
     @State var isReplyingToThread = true
+    
+    @ObservedObject var fancyPantsBarStateObject = FancyPantsBarStateObject()
+    
+    func endEditing() {
+        UIApplication.shared.endEditing()
+    }
     
     func toggleReplyBoxOpen() {
         self.replyBoxOpen = !self.replyBoxOpen
@@ -72,7 +117,7 @@ struct ThreadView : View {
                                 .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height * 0.045, alignment: .leading)
                                 .padding(.bottom, 20)
                                 
-                                FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isNewContent: false, isThread: true, threadId: self.threadId, isFirstResponder: false)
+                                FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isNewContent: false, isThread: true, threadId: self.threadId, isFirstResponder: false, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
                                     .frame(width: a.size.width - self.outerPadding * 2, height: self.gameDataStore.threadsDesiredHeight[self.threadId]! + (self.isEditable ? 20 : 0))
                                     .padding(.bottom, 20)
                                 
@@ -98,24 +143,6 @@ struct ThreadView : View {
                                 }
                                 .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height * 0.05)
                                 
-                                if self.replyBoxOpen {
-                                    VStack {
-                                        FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isNewContent: true, isThread: false, isFirstResponder: false)
-                                            .cornerRadius(5)
-                                            .overlay(RoundedRectangle(cornerRadius: 3)
-                                                .stroke(Color.black, lineWidth: 1))
-                                            .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height * 0.15)
-                                        
-                                        HStack {
-                                            Spacer()
-                                            Button(action: self.postPrimaryComment) {
-                                                Text("Submit")
-                                            }
-                                        }
-                                        .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height * 0.05)
-                                    }
-                                }
-                                
                                 if !self.gameDataStore.mainCommentListByThreadId[self.threadId]!.isEmpty {
                                     VStack(spacing: 0) {
                                         ForEach(self.gameDataStore.mainCommentListByThreadId[self.threadId]!, id: \.self) { commentId in
@@ -137,36 +164,24 @@ struct ThreadView : View {
                         .padding(.all, self.outerPadding)
                     }
                 }
-                .frame(width: a.size.width, height: a.size.height * 0.9)
+                .frame(width: a.size.width)
                 
                 VStack(spacing: 0) {
-                    GeometryReader { b in
-                        VStack(spacing: 0) {
-                            VStack(alignment: .center, spacing: 0) {
-                                FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isNewContent: true, isThread: true, isFirstResponder: false)
-                                .frame(width: b.size.width * 0.9, height: (b.size.height - b.safeAreaInsets.bottom) * 0.9)
-                                
-                            }
-                            .frame(width: b.size.width, height: b.size.height - b.safeAreaInsets.bottom)
-                                
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25, style: .continuous)
-                                .stroke(lineWidth: 2)
-                            )
-                            .background(Color.white)
-                            
-                            
-                            Color.gray
-                                .frame(width: b.size.width, height: b.safeAreaInsets.bottom)
-                        }
-
-                    }
+                    FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isNewContent: true, isThread: false, isFirstResponder: false, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
+                        .frame(width: a.size.width * 0.5, height: a.size.height * 0.1 * 0.8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 25, style: .continuous)
+                                .stroke(lineWidth: 1)
+                    )
+                    .background(self.gameDataStore.keyboardHeight == 0 ? Color.white : Color.red)
                 }
-                .frame(width: a.size.width, height: a.size.height * 0.1)
+                .frame(width: a.size.width, height: a.size.height * 0.1, alignment: .leading)
             }
-            
+            .onTapGesture {
+                self.endEditing()
+            }
+            .KeyboardAwarePadding()
         }
-        .edgesIgnoringSafeArea(.bottom)
         .onAppear() {
             self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId, refresh: true)
             self.gameDataStore.loadThreadIcons(thread: self.gameDataStore.threads[self.threadId]!)

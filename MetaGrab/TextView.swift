@@ -10,7 +10,6 @@ import Foundation
 import SwiftUI
 
 struct TextView: UIViewRepresentable {
-    
     @EnvironmentObject var gameDataStore: GameDataStore
     @Binding var newTextStorage: NSTextStorage
     

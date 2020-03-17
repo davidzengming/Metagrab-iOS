@@ -27,6 +27,8 @@
 		3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECF12C3238ECAE000A7160B /* KeyChain.swift */; };
 		3ED871A423E8CEDD0089F946 /* NewThreadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */; };
 		3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */; };
+		3EE149B72421408200AF9BD5 /* FancyPantsBarStateObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE149B62421408200AF9BD5 /* FancyPantsBarStateObject.swift */; };
+		3EE149B92421443400AF9BD5 /* FancyPantsBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE149B82421443400AF9BD5 /* FancyPantsBarView.swift */; };
 		3EEA4738238D79BB00171396 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA4737238D79BB00171396 /* ImagePicker.swift */; };
 		3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210C23086963002DE02E /* AppDelegate.swift */; };
 		3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210E23086963002DE02E /* SceneDelegate.swift */; };
@@ -84,6 +86,8 @@
 		3ECF12C3238ECAE000A7160B /* KeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
 		3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadButton.swift; sourceTree = "<group>"; };
 		3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadView.swift; sourceTree = "<group>"; };
+		3EE149B62421408200AF9BD5 /* FancyPantsBarStateObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FancyPantsBarStateObject.swift; sourceTree = "<group>"; };
+		3EE149B82421443400AF9BD5 /* FancyPantsBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FancyPantsBarView.swift; sourceTree = "<group>"; };
 		3EEA4737238D79BB00171396 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		3EF6210923086963002DE02E /* MetaGrab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetaGrab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EF6210C23086963002DE02E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -172,7 +176,9 @@
 				3EC604DE241966C000F0197B /* MoreCommentsView.swift */,
 				3EF6213923086B17002DE02E /* ImageLoader.swift */,
 				3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */,
+				3EE149B62421408200AF9BD5 /* FancyPantsBarStateObject.swift */,
 				3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */,
+				3EE149B82421443400AF9BD5 /* FancyPantsBarView.swift */,
 				3ECA00B023905BCF001FB0B6 /* TextView.swift */,
 				3EB10A2623E0936D0079D80D /* TextViewHelper.swift */,
 				3E5AC80023E34668008AAB17 /* TextEditorButtons.swift */,
@@ -356,6 +362,7 @@
 			files = (
 				3E1AB15D23FAEE7800D59EDD /* ThreadImages.swift in Sources */,
 				3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */,
+				3EE149B72421408200AF9BD5 /* FancyPantsBarStateObject.swift in Sources */,
 				3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */,
 				3E6C619023EC9126009015B7 /* UploadDashPlaceholderButton.swift in Sources */,
 				3EC604DF241966C000F0197B /* MoreCommentsView.swift in Sources */,
@@ -372,6 +379,7 @@
 				3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */,
 				3EF6214323086B81002DE02E /* User.swift in Sources */,
 				3EFCE174230EEA31000FD392 /* Comment.swift in Sources */,
+				3EE149B92421443400AF9BD5 /* FancyPantsBarView.swift in Sources */,
 				3E7C01AE237B26110074BD19 /* CommentLoadTree.swift in Sources */,
 				3ED871A423E8CEDD0089F946 /* NewThreadButton.swift in Sources */,
 				3E9E286223A833D70012CD6F /* PopularGamesView.swift in Sources */,

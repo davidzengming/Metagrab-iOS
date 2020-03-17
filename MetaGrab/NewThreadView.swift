@@ -28,15 +28,28 @@ struct NewThreadView: View {
     @State var dataDict: [UUID: Data] = [:]
     @State var imagesArray: [UUID] = [UUID()]
     @State var clickedImageIndex : Int?
+    @ObservedObject var fancyPantsBarStateObject = FancyPantsBarStateObject()
     
     var forumId: Int
     var flairs = ["Update", "Discussion", "Meme"]
     var imageThread = ["Text", "Image"]
     let placeholder = Image(systemName: "photo")
+    let maxNumImages = 3
     
     func submitThread() {
         self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: dataDict, imagesArray: imagesArray)
         self.presentationMode.wrappedValue.dismiss()
+    }
+    
+    func removeImage() {
+        let removedImageUUID = imagesArray[clickedImageIndex!]
+        imagesArray.remove(at: clickedImageIndex!)
+        imagesDict.removeValue(forKey: removedImageUUID)
+        dataDict.removeValue(forKey: removedImageUUID)
+        
+        if imagesDict[imagesArray.last!] != nil {
+            imagesArray.append(UUID())
+        }
     }
     
     var body: some View {
@@ -49,7 +62,7 @@ struct NewThreadView: View {
                     .padding(.bottom, 20)
                     .padding(.horizontal, 20)
                 
-                HStack {
+                HStack(spacing: 25) {
                     ForEach(self.imagesArray, id: \.self) { id in
                         ZStack {
                             if self.imagesDict[id] != nil {
@@ -68,6 +81,20 @@ struct NewThreadView: View {
                                     .opacity(self.imagesDict[id] != nil ? 0.5 : 1)
                             }
                             .buttonStyle(PlainButtonStyle())
+                            
+                            if self.imagesDict[id] != nil {
+                                Button(action: {
+                                    self.clickedImageIndex = self.imagesArray.firstIndex(of: id)!
+                                    self.removeImage()
+                                }) {
+                                    Image(uiImage: UIImage(systemName: "minus.circle.fill")!)
+                                        .resizable()
+                                        .frame(width: 25, height: 25)
+                                }
+                                .foregroundColor(Color.red)
+                                .offset(x: 50, y: -50)
+                            }
+                            
                         }
                     }
                     Spacer()
@@ -77,7 +104,9 @@ struct NewThreadView: View {
                 }
                 .padding(.horizontal, 20)
                 
-                FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isNewContent: true, isThread: true, isFirstResponder: true)
+                FancyPantsBarView(fancyPantsBarStateObject: self.fancyPantsBarStateObject)
+                    .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.25, alignment: .leading)
+                FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isNewContent: true, isThread: true, isFirstResponder: true, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
                     .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.5, alignment: .leading)
                     .cornerRadius(5, corners: [.bottomLeft, .bottomRight, .topLeft, .topRight])
                     .overlay(

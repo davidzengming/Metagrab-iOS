@@ -46,44 +46,29 @@ struct GameFeedIcon : View {
                     self.gameDataStore.isBackToGamesView = true
                 }
                 
-                VStack {
-                    Button(action: {
-                        if self.gameDataStore.isFollowed[self.game.id] == true {
-                            self.unfollowGame()
-                        } else {
-                            self.followGame()
-                        }
-                    }) {
-                        if self.gameDataStore.isFollowed[self.game.id] == true {
-                            Text("Followed")
-                                .font(.system(size: a.size.height / 15))
-                        } else {
-                            Text("Follow")
-                                .font(.system(size: a.size.height / 15))
-                        }
+                HStack(spacing: 0) {
+                    Image(systemName: self.gameDataStore.isFollowed[self.game.id] == true ? "star.fill" : "star")
+                        .foregroundColor(Color.yellow)
+                        .frame(width: a.size.width / 2, height: a.size.height * 0.2)
+                        .onTapGesture {
+                            if self.gameDataStore.isFollowed[self.game.id] == true {
+                                self.unfollowGame()
+                            } else {
+                                self.followGame()
+                            }
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(width: a.size.width, height: a.size.height * 0.10)
-                    .background(self.gameDataStore.isFollowed[self.game.id] == true ? Color.green : Color.red)
                     
-                    HStack {
-                        NavigationLink(destination: ForumView(gameId: self.game.id)) {
-                            Text("Discuss")
-                                .font(.system(size: a.size.height / 15))
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding()
+                    NavigationLink(destination: ForumView(gameId: self.game.id)) {
+                        Image(uiImage: UIImage(systemName: "text.bubble.fill")!)
+                            .frame(width: a.size.width / 2, height: a.size.height * 0.2)
                     }
-                    .frame(width: a.size.width, height: a.size.height * 0.10)
-                    .background(Color.orange)
-                    .cornerRadius(5, corners: [.bottomLeft, .bottomRight])
                 }
             }
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color.black, lineWidth: 1)
             )
-                .shadow(radius: 5)
+            .shadow(radius: 5)
         }
     }
 }

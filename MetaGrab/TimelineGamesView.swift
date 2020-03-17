@@ -11,6 +11,7 @@ import SwiftUI
 struct TimelineGamesView: View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
+    
     let date = Date()
     let calendar = Calendar.current
     

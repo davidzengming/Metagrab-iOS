@@ -13,6 +13,7 @@ import SwiftUI
 struct CommentView : View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
+    
     var commentId: Int
     let formatter = RelativeDateTimeFormatter()
     var width: CGFloat
@@ -23,25 +24,15 @@ struct CommentView : View {
     let leadLineWidth: CGFloat = 5
     let verticalPadding: CGFloat = 15
     
-    @State var replyBoxOpen: Bool = false
-    @State var replyContent: NSTextStorage = NSTextStorage(string: "")
     @State var isEditable: Bool = false
-    @State var desiredHeight: CGFloat = 0
-    
+    @ObservedObject var fancyPantsBarStateObject = FancyPantsBarStateObject()
+
     func isVotedUp() -> Bool {
         return self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1
     }
     
     func isVotedDown() -> Bool {
         return self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1
-    }
-    
-    func toggleReplyBoxOpen() {
-        self.replyBoxOpen = !self.replyBoxOpen
-    }
-    
-    func postChildComment() {
-        self.gameDataStore.postChildComment(access: self.userDataStore.token!.access, parentCommentId: commentId, content: replyContent)
     }
     
     func transformVotesString(points: Int) -> String {
@@ -159,37 +150,15 @@ struct CommentView : View {
                                 }
                                 
                                 if self.gameDataStore.commentsDesiredHeight[self.commentId] != nil {
-                                    FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isNewContent: false, isThread: false, commentId: self.commentId, isFirstResponder: false)
+                                    FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isNewContent: false, isThread: false, commentId: self.commentId, isFirstResponder: false, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
                                         .frame(width: self.width - self.leadPadding - staticPadding * 2 - 30 - 10 - (self.level > 0 ? 10 + self.leadLineWidth: 0), height: self.gameDataStore.commentsDesiredHeight[self.commentId]! + (self.isEditable ? 20 : 0), alignment: .leading)
-                                        .onTapGesture() {
-                                            self.toggleReplyBoxOpen()
-                                    }
                                 }
                             }
                         }
                         .frame(width: self.width - self.leadPadding - staticPadding * 2 - (self.level > 0 ? 10 + self.leadLineWidth: 0), height: 30 + self.gameDataStore.commentsDesiredHeight[self.commentId]! + (self.isEditable ? 20 : 0), alignment: .leading)
-//                        .background(Color.purple)
-                        
-                        if self.replyBoxOpen {
-                            VStack(spacing: 0) {
-                                FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isNewContent: true, isThread: false, isFirstResponder: false)
-                                    .cornerRadius(5)
-                                    .overlay(RoundedRectangle(cornerRadius: 3)
-                                        .stroke(Color.black, lineWidth: 1))
-                                    .frame(width: self.width - self.leadPadding - staticPadding * 2 - 10 - self.leadLineWidth, height: 100, alignment: .leading)
-                            }
-                            
-                            HStack {
-                                Button(action: self.postChildComment) {
-                                    Text("Submit")
-                                }
-                            }
-                            .frame(width: self.width * 0.2, height: 20, alignment: .trailing)
-                        }
                     }
                     .padding(.horizontal, self.staticPadding)
                     .padding(.vertical, self.verticalPadding)
-//                    .background(Color.white)
                 }
             }
             
@@ -205,7 +174,6 @@ struct CommentView : View {
                 }
             }
         }
-//        .background(Color.yellow)
         .onAppear() {
             if self.gameDataStore.commentNextPageStartIndex[self.commentId] != nil {
                 return

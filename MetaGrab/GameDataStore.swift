@@ -160,6 +160,12 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    // Keyboard state
+    var keyboardHeight: CGFloat = 0 {
+        willSet {
+            objectWillChange.send()
+        }
+    }
     
     // Follow Game States
     var followedGames = [Int]() {

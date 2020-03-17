@@ -25,6 +25,8 @@ struct ThreadRow : View {
     let threadsFromBottomToGetReadyToLoadNextPage = 1
     let threadsPerNewPageCount = 10
     
+    @ObservedObject var fancyPantsBarStateObject = FancyPantsBarStateObject()
+    
     //    func fetchNextPage() {
     //        DispatchQueue.main.async {
     //            if self.gameDataStore.forumsNextPageStartIndex[self.gameId] == nil || self.gameDataStore.forumsNextPageStartIndex[self.gameId]! == -1 || self.gameDataStore.isLoadingNextPageInForum[self.gameId] == nil || self.gameDataStore.isLoadingNextPageInForum[self.gameId]! == true || self.gameDataStore.threadsIndexInGameList[self.threadId] == nil || self.gameDataStore.threadsIndexInGameList[self.threadId]! < self.gameDataStore.threadListByGameId[self.gameId]!.count - self.threadsFromBottomToGetReadyToLoadNextPage {
@@ -128,7 +130,7 @@ struct ThreadRow : View {
                         }
                     }
                     if self.gameDataStore.threadsTextStorage[self.threadId] != nil {
-                        FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isFirstResponder: false)
+                        FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isFirstResponder: false, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
                             .frame(width: self.width * 0.9, height: min(self.gameDataStore.threadsDesiredHeight[threadId]!, 200), alignment: .leading)
                     }
                 }
