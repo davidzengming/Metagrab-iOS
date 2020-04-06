@@ -9,7 +9,8 @@ struct MainView: View {
             if self.userDataStore.isAuthenticated == false {
                 UserView()
             } else {
-                GameHubView().environmentObject(GameDataStore())
+                GameHubView()
+                    .environmentObject(GameDataStore())
             }
         }
     }

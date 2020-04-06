@@ -8,8 +8,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct ThreadRow : View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
@@ -25,7 +23,10 @@ struct ThreadRow : View {
     let threadsFromBottomToGetReadyToLoadNextPage = 1
     let threadsPerNewPageCount = 10
     
-    @ObservedObject var fancyPantsBarStateObject = FancyPantsBarStateObject()
+    @State var smileyFaceCounter = 0
+    @State var upvoteCounter = 0
+    @State var downvoteCounter = 0
+    @State var showEmojiModal = false
     
     //    func fetchNextPage() {
     //        DispatchQueue.main.async {
@@ -66,34 +67,16 @@ struct ThreadRow : View {
         }
     }
     
-    func transformVotesString(points: Int) -> String {
-        let isNegative = false
-        let numPoints = points
-        
-        var concatVotesStr = ""
-        if numPoints > 1000000 {
-            concatVotesStr = String((Double(numPoints) / 1000000 * 10).rounded() / 10)
-            concatVotesStr += " M"
-        } else if numPoints > 1000 {
-            concatVotesStr = String((Double(numPoints) / 1000 * 10).rounded() / 10)
-            concatVotesStr += " K"
-        } else {
-            concatVotesStr += String(numPoints)
-        }
-        
-        return ((isNegative ? "-" : "" ) + concatVotesStr)
-    }
-    
-    func getRelativeDate(postedDate: Date) -> String {
-        return formatter.localizedString(for: postedDate, relativeTo: Date())
-    }
-    
     func isVotedUp() -> Bool {
         return self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 1
     }
     
     func isVotedDown() -> Bool {
         return self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == -1
+    }
+    
+    func addOrRemoveEmoji(emojiId: Int) {
+        self.gameDataStore.addEmojiByThreadId(access: self.userDataStore.token!.access, threadId: threadId, emojiId: emojiId, userId: self.userDataStore.token!.userId)
     }
     
     var body: some View {
@@ -110,7 +93,7 @@ struct ThreadRow : View {
                     Text(self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.username)
                         .frame(height: self.height * 0.025, alignment: .leading)
                     
-                    Text(self.getRelativeDate(postedDate: self.gameDataStore.threads[self.threadId]!.created))
+                    Text(self.gameDataStore.relativeDateStringByThreadId[self.threadId]!)
                         .font(.system(size: 14))
                         .frame(height: self.height * 0.02, alignment: .leading)
                         .foregroundColor(Color(.darkGray))
@@ -130,7 +113,7 @@ struct ThreadRow : View {
                         }
                     }
                     if self.gameDataStore.threadsTextStorage[self.threadId] != nil {
-                        FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isFirstResponder: false, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
+                        FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: .constant(false), isFirstResponder: .constant(false), didBecomeFirstResponder: .constant(false), showFancyPantsEditorBar: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isOmniBar: false)
                             .frame(width: self.width * 0.9, height: min(self.gameDataStore.threadsDesiredHeight[threadId]!, 200), alignment: .leading)
                     }
                 }
@@ -158,23 +141,47 @@ struct ThreadRow : View {
                 }
                 .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
                 
-                HStack {
-                    Image(uiImage: UIImage(systemName: self.isVotedUp() ? "hand.thumbsup.fill" : "hand.thumbsup")!)
-                        .onTapGesture {
-                            self.onClickUpvoteButton()
+                HStack(spacing: 5) {
+                    ForEach(self.gameDataStore.emojiArrByThreadId[threadId]!, id: \.self) { emojiId in
+                        HStack {
+                            Image(uiImage: self.gameDataStore.emojis[emojiId]!)
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                            Text(String(self.gameDataStore.emojiCountByThreadId[self.threadId]![emojiId]!))
+                        }
+                        .frame(width: 40, height: 20)
+                        .background(self.gameDataStore.didReactToEmojiByThreadId[self.threadId]![emojiId]! == true ? Color.gray : Color.white)
                     }
-                    Text(self.transformVotesString(points: self.gameDataStore.threads[self.threadId]!.upvotes))
-                        .font(.system(size: 16))
                 }
-                .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
                 
                 HStack {
-                    Image(uiImage: UIImage(systemName: self.isVotedDown() ? "hand.thumbsdown.fill" : "hand.thumbsdown")!)
-                        .onTapGesture {
-                            self.onClickDownvoteButton()
+                    Button(action: {
+                        self.addOrRemoveEmoji(emojiId: 0)
+                    }) {
+                        Text("Add to emoji 1")
+                    }.buttonStyle(PlainButtonStyle())
+                    .background(Color(red: 238 / 255, green: 238 / 255, blue: 238 / 255))
+                    .cornerRadius(5)
+                    
+                    Button(action: {
+                        self.showEmojiModal.toggle()
+                    }) {
+                        Image(systemName: "plus.bubble.fill")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                        .padding(.all, 5)
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    .sheet(isPresented: $showEmojiModal) {
+                        EmojiModalView(showModal: self.$showEmojiModal)
+                            .environmentObject(self.gameDataStore)
+                    }
+                    .background(Color(red: 238 / 255, green: 238 / 255, blue: 238 / 255))
+                    .cornerRadius(5)
                 }
-                .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
+                .padding(.vertical, 2)
+                .padding(.horizontal, 5)
+                .frame(alignment: .leading)
                 
                 Spacer()
             }

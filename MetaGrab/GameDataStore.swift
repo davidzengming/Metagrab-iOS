@@ -113,6 +113,42 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    var threadViewReplyBarDesiredHeight = [Int: CGFloat]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isReplyBarReplyingToThreadByThreadId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var replyTargetCommentIdByThreadId = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var relativeDateStringByThreadId = [Int: String]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var threadsVoteStringByThreadId = [Int: String]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var threadsDownvoteStringByThreadId = [Int: String]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     // Comments
     var comments = [Int: Comment]() {
         willSet {
@@ -155,6 +191,18 @@ final class GameDataStore: ObservableObject {
         }
     }
     var visibleChildCommentsNum = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var relativeDateStringByCommentId = [Int: String]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var commentsVoteStringByCommentId = [Int: String]() {
         willSet {
             objectWillChange.send()
         }
@@ -210,6 +258,191 @@ final class GameDataStore: ObservableObject {
         willSet {
             objectWillChange.send()
         }
+    }
+    
+    let emojiNames = [
+        ":thumbs_up:",
+        ":thumbs_down:",
+        ":tongue_out:",
+        ":sweat:",
+        ":sunglasses:",
+        ":laugh_out_loud:",
+        ":hearts:",
+        ":ecks_dee:",
+        ":ecks_dee_tongue:",
+        ":cry:"
+    ]
+    
+    // Emojis
+    let maxEmojisPerThread = 10
+    let maxEmojisPerComment = 10
+    
+    var emojis = [Int: UIImage]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var emojiArray = [Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var emojiArrByThreadId = [Int: [Int]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var emojiArrByCommentId = [Int: [Int]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var emojiCountByThreadId = [Int: [Int: Int]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var emojiCountByCommentId = [Int: [Int: Int]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var usersArrReactToEmojiByThreadId = [Int: [Int: [Int]]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var usersArrReactToEmojiByCommentId = [Int: [Int: [Int]]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var usersSetReactToEmojiByThreadId = [Int: [Int: Set<Int>]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var usersSetReactToEmojiByCommentId = [Int: [Int: Set<Int>]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var didReactToEmojiByThreadId = [Int: [Int: Bool]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var didReactToEmojiByCommentId = [Int: [Int: Bool]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    func loadEmojis() {
+        for index in (0..<emojiNames.count) {
+            emojis[index] = UIImage(named: emojiNames[index])
+            emojiArray.append(index)
+        }
+    }
+    
+    func addEmojiByThreadId(access: String, threadId: Int,  emojiId: Int, userId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/emojis/add_new_emoji_by_thread_id/") else { return }
+        let json: [String: Any] = ["thread_id": threadId, "emoji_id": emojiId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    let emojiResponse: EmojiResponse = load(jsonData: jsonString.data(using: .utf8)!)
+                    
+                    if emojiResponse.isSuccess == false {
+                        return
+                    }
+                    
+                    DispatchQueue.main.async {
+                        self.emojiCountByThreadId[threadId]![emojiId] = emojiResponse.newEmojiCount
+                        if self.usersSetReactToEmojiByThreadId[threadId]![emojiId] == nil {
+                            self.usersSetReactToEmojiByThreadId[threadId]![emojiId] = []
+                            self.usersSetReactToEmojiByThreadId[threadId]![emojiId]!.insert(userId)
+                            self.usersArrReactToEmojiByThreadId[threadId]![emojiId] = [userId]
+                        }
+                        
+                        self.didReactToEmojiByThreadId[threadId]![emojiId] = true
+                    }
+                }
+            }
+        }.resume()
+    }
+    
+    func addEmojiByCommentId(commentId: Int, emojiName: String) {
+        
+    }
+    
+    // Only thread and comment authors can delete
+    func removeEmojiByThreadId(threadId: Int, emojiId: Int, userId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/emojis/reove_new_emoji_by_thread_id/") else { return }
+        let json: [String: Any] = ["thread_id": threadId, "emoji_id": emojiId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    let emojiResponse: EmojiResponse = load(jsonData: jsonString.data(using: .utf8)!)
+                    
+                    if emojiResponse.isSuccess == false {
+                        return
+                    }
+                    
+                    DispatchQueue.main.async {
+                        self.emojiCountByThreadId[threadId]![emojiId] = emojiResponse.newEmojiCount
+                        if self.emojiCountByThreadId[threadId]![emojiId] == 0 {
+                            self.emojiCountByThreadId.removeValue(forKey: emojiId)
+                        }
+                        
+                        if self.usersSetReactToEmojiByThreadId[threadId]![emojiId] == nil {
+                            self.usersSetReactToEmojiByThreadId[threadId]![emojiId] = []
+                            self.usersSetReactToEmojiByThreadId[threadId]![emojiId]!.insert(userId)
+                            self.usersArrReactToEmojiByThreadId[threadId]![emojiId] = [userId]
+                        }
+                        
+                        self.didReactToEmojiByThreadId[threadId]![emojiId] = true
+                    }
+                }
+            }
+        }.resume()
+    }
+    
+    func removeEmojiByCommentId(commentId: Int, emojiName: String) {
+        
     }
     
     var attributesEncodingCache: [Int: Any] = [:]
@@ -288,6 +521,10 @@ final class GameDataStore: ObservableObject {
                             self.voteThreadMapping[tempThread.id] = vote.id
                             self.threadsTextStorage[tempThread.id] = content
                             
+                            self.relativeDateStringByThreadId[tempThread.id] = RelativeDateTimeFormatter().localizedString(for: tempThread.created, relativeTo: Date())
+                            self.threadsVoteStringByThreadId[tempThread.id] = self.transformVotesString(points: self.threads[tempThread.id]!.upvotes)
+                            self.threadsDownvoteStringByThreadId[tempThread.id] = self.transformVotesString(points: self.threads[tempThread.id]!.downvotes)
+                            
                             self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
                             
                             for id in imagesArray {
@@ -350,7 +587,7 @@ final class GameDataStore: ObservableObject {
                     DispatchQueue.main.async {
                         self.users[user.id] = user
                         self.comments[tempMainComment.id] = tempMainComment
-                        self.commentsTextStorage[tempMainComment.id] = content
+                        self.commentsTextStorage[tempMainComment.id] = self.generateTextStorageFromJson(isThread: false, id: tempMainComment.id)
                         self.commentsDesiredHeight[tempMainComment.id] = 0
                         self.threadsNextPageStartIndex[tempMainComment.parentThread!]! += 1
                         self.commentNextPageStartIndex[tempMainComment.id] = 0
@@ -358,7 +595,9 @@ final class GameDataStore: ObservableObject {
                         self.incrementTreeNodes(node: tempMainComment)
                         self.votes[tempVote.id] = tempVote
                         self.voteCommentMapping[tempMainComment.id] = tempVote.id
+                        self.relativeDateStringByCommentId[tempMainComment.id] = RelativeDateTimeFormatter().localizedString(for: tempMainComment.created, relativeTo: Date())
                         
+                        self.commentsVoteStringByCommentId[tempMainComment.id] = self.transformVotesString(points: self.comments[tempMainComment.id]!.upvotes)
                         self.mainCommentListByThreadId[tempMainComment.parentThread!]!.insert(tempMainComment.id, at: 0)
                     }
                 }
@@ -391,7 +630,7 @@ final class GameDataStore: ObservableObject {
                     DispatchQueue.main.async {
                         self.users[user.id] = user
                         self.comments[tempChildComment.id] = tempChildComment
-                        self.commentsTextStorage[tempChildComment.id] = content
+                        self.commentsTextStorage[tempChildComment.id] = self.generateTextStorageFromJson(isThread: false, id: tempChildComment.id)
                         self.commentsDesiredHeight[tempChildComment.id] = 0
                         self.childCommentListByParentCommentId[tempChildComment.id] = [Int]()
                         
@@ -405,6 +644,7 @@ final class GameDataStore: ObservableObject {
                         
                         self.visibleChildCommentsNum[tempChildComment.parentPost!]! += 1
                         self.commentNextPageStartIndex[tempChildComment.id] = -1
+                        self.commentsVoteStringByCommentId[tempChildComment.id] = self.transformVotesString(points: self.comments[tempChildComment.id]!.upvotes)
                         self.childCommentListByParentCommentId[tempChildComment.parentPost!]!.insert(tempChildComment.id, at: 0)
                     }
                 }
@@ -412,7 +652,7 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func fetchCommentTreeByThreadId(access: String, threadId: Int, start:Int = 0, count:Int = 10, size:Int = 50, refresh: Bool = false) {
+    func fetchCommentTreeByThreadId(access: String, threadId: Int, start:Int = 0, count:Int = 10, size:Int = 50, refresh: Bool = false, userId: Int) {
         if refresh == true {
             DispatchQueue.main.async {
                 self.mainCommentListByThreadId[threadId] = [Int]()
@@ -484,6 +724,30 @@ final class GameDataStore: ObservableObject {
                                 self.commentsDesiredHeight[comment.id] = 0
                             }
                             
+                            self.relativeDateStringByCommentId[comment.id] = RelativeDateTimeFormatter().localizedString(for: comment.created, relativeTo: Date())
+                            self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
+                            
+                            self.emojiArrByCommentId[comment.id] = comment.emojis!.emojisIdArr
+                            self.emojiCountByCommentId[comment.id] = comment.emojis!.emojiReactionCountDict
+                            self.usersArrReactToEmojiByCommentId[comment.id] = [:]
+                            self.didReactToEmojiByCommentId[comment.id] = [:]
+                            
+                            self.usersSetReactToEmojiByCommentId[comment.id] = [:]
+                            
+                            for emojiId in self.emojiArrByCommentId[comment.id]! {
+                                self.usersArrReactToEmojiByCommentId[comment.id]![emojiId] = comment.emojis!.userIdsArrPerEmojiDict[emojiId]
+                                self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
+                                self.usersSetReactToEmojiByCommentId[comment.id]![emojiId] = []
+                                for reactedUserId in self.usersArrReactToEmojiByCommentId[comment.id]![emojiId]! {
+                                    self.usersSetReactToEmojiByCommentId[comment.id]![emojiId]!.insert(reactedUserId)
+                                    
+                                    
+                                    if userId == reactedUserId {
+                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = true
+                                    }
+                                }
+                            }
+                            
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
                         
@@ -515,7 +779,7 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func fetchCommentTreeByParentComment(access: String, parentCommentId: Int, start:Int = 0, count:Int = 10, size:Int = 50) {
+    func fetchCommentTreeByParentComment(access: String, parentCommentId: Int, start:Int = 0, count:Int = 10, size:Int = 50, userId: Int) {
         let params: String = "?parent_comment_id=" + String(parentCommentId) + "&start=" + String(start) + "&count=" + String(count) + "&size=" + String(size)
         var roots: String = ""
         for comment_id in self.moreCommentsByParentCommentId[parentCommentId]! {
@@ -561,7 +825,31 @@ final class GameDataStore: ObservableObject {
                             self.visibleChildCommentsNum[comment.parentPost!]! += 1
                             self.visibleChildCommentsNum[comment.id] = 0
                             
+                            self.relativeDateStringByCommentId[comment.id] = RelativeDateTimeFormatter().localizedString(for: comment.created, relativeTo: Date())
+                            self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
+                            
+                            self.emojiArrByCommentId[comment.id] = comment.emojis!.emojisIdArr
+                            self.emojiCountByCommentId[comment.id] = comment.emojis!.emojiReactionCountDict
+                            
+                            self.usersArrReactToEmojiByCommentId[comment.id] = [:]
+                            self.usersSetReactToEmojiByCommentId[comment.id] = [:]
+                            
+                            self.didReactToEmojiByCommentId[comment.id] = [:]
+                            
+                            for emojiId in self.emojiArrByCommentId[comment.id]! {
+                                self.usersArrReactToEmojiByCommentId[comment.id]![emojiId] = comment.emojis!.userIdsArrPerEmojiDict[emojiId]
+                                self.usersSetReactToEmojiByCommentId[comment.id]![emojiId] = []
+                                self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
+                                
+                                for reactedUserId in self.usersArrReactToEmojiByCommentId[comment.id]![emojiId]! {
+                                    self.usersSetReactToEmojiByCommentId[comment.id]![emojiId]!.insert(reactedUserId)
+                                    
+                                    if userId == reactedUserId {
+                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = true
+                                    }
+                                }
+                            }
                         }
                         
                         self.moreCommentsByParentCommentId[parentCommentId]! = [Int]()
@@ -623,7 +911,25 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func fetchThreads(access: String, game: Game, start:Int = 0, count:Int = 10, refresh: Bool = false) {
+    func transformVotesString(points: Int) -> String {
+        let isNegative = false
+        let numPoints = points
+        
+        var concatVotesStr = ""
+        if numPoints > 1000000 {
+            concatVotesStr = String((Double(numPoints) / 1000000 * 10).rounded() / 10)
+            concatVotesStr += " M"
+        } else if numPoints > 1000 {
+            concatVotesStr = String((Double(numPoints) / 1000 * 10).rounded() / 10)
+            concatVotesStr += " K"
+        } else {
+            concatVotesStr += String(numPoints)
+        }
+        
+        return ((isNegative ? "-" : "" ) + concatVotesStr)
+    }
+    
+    func fetchThreads(access: String, game: Game, start:Int = 0, count:Int = 10, refresh: Bool = false, userId: Int) {
         
         DispatchQueue.main.async {
             if refresh == true {
@@ -667,6 +973,38 @@ final class GameDataStore: ObservableObject {
                             
                             if self.threadsDesiredHeight[thread.id] == nil {
                                 self.threadsDesiredHeight[thread.id] = 0
+                            }
+                            
+                            if self.threadViewReplyBarDesiredHeight[thread.id] == nil {
+                                self.threadViewReplyBarDesiredHeight[thread.id] = 0
+                            }
+                            
+                            self.isReplyBarReplyingToThreadByThreadId[thread.id] = true
+                            self.replyTargetCommentIdByThreadId[thread.id] = -1
+                            self.relativeDateStringByThreadId[thread.id] = RelativeDateTimeFormatter().localizedString(for: thread.created, relativeTo: Date())
+                            self.threadsVoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.upvotes)
+                            self.threadsDownvoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.downvotes)
+                            
+                            self.emojiArrByThreadId[thread.id] = thread.emojis.emojisIdArr
+                            self.emojiCountByThreadId[thread.id] = thread.emojis.emojiReactionCountDict
+                            self.usersArrReactToEmojiByThreadId[thread.id] = [:]
+                            self.didReactToEmojiByThreadId[thread.id] = [:]
+                            self.usersSetReactToEmojiByThreadId[thread.id] = [:]
+                            self.usersArrReactToEmojiByThreadId[thread.id] = [:]
+                            
+                            for emojiId in self.emojiArrByThreadId[thread.id]! {
+                                self.usersArrReactToEmojiByThreadId[thread.id]![emojiId] = thread.emojis.userIdsArrPerEmojiDict[emojiId]
+                                self.usersSetReactToEmojiByThreadId[thread.id]![emojiId] = []
+                                
+                                self.didReactToEmojiByThreadId[thread.id]![emojiId] = false
+                                
+                                for reactedUserId in self.usersArrReactToEmojiByThreadId[thread.id]![emojiId]! {
+                                    self.usersSetReactToEmojiByThreadId[thread.id]![emojiId]!.insert(reactedUserId)
+                                    
+                                    if userId == reactedUserId {
+                                        self.didReactToEmojiByThreadId[thread.id]![emojiId] = true
+                                    }
+                                }
                             }
                         }
                         
@@ -1021,6 +1359,8 @@ final class GameDataStore: ObservableObject {
                 DispatchQueue.main.async {
                     self.threads[thread.id]!.upvotes += 1
                     self.votes[voteId]!.direction = 1
+                    
+                    self.threadsVoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.upvotes)
                 }
             }
         }.resume()
@@ -1044,6 +1384,8 @@ final class GameDataStore: ObservableObject {
                 DispatchQueue.main.async {
                     self.threads[thread.id]!.downvotes += 1
                     self.votes[voteId]!.direction = -1
+                    
+                    self.threadsDownvoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.downvotes)
                 }
             }
         }.resume()
@@ -1067,6 +1409,7 @@ final class GameDataStore: ObservableObject {
                 DispatchQueue.main.async {
                     self.comments[comment.id]!.upvotes += 1
                     self.votes[voteId]!.direction = 1
+                    self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -1116,6 +1459,8 @@ final class GameDataStore: ObservableObject {
                         self.votes[newVote.id] = newVote
                         self.voteThreadMapping[thread.id] = newVote.id
                         self.threads[thread.id]!.upvotes += 1
+                        
+                        self.threadsVoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.upvotes)
                     }
                 }
             }
@@ -1141,6 +1486,9 @@ final class GameDataStore: ObservableObject {
                     self.votes[self.voteThreadMapping[thread.id]!]!.direction = 1
                     self.threads[thread.id]!.upvotes += 1
                     self.threads[thread.id]!.downvotes -= 1
+                    
+                    self.threadsVoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.upvotes)
+                    self.threadsDownvoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.downvotes)
                 }
             }
         }.resume()
@@ -1167,6 +1515,8 @@ final class GameDataStore: ObservableObject {
                         self.votes[newVote.id] = newVote
                         self.voteThreadMapping[thread.id] = newVote.id
                         self.threads[thread.id]!.downvotes += 1
+                        
+                        self.threadsDownvoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.downvotes)
                     }
                 }
             }
@@ -1192,6 +1542,9 @@ final class GameDataStore: ObservableObject {
                     self.votes[self.voteThreadMapping[thread.id]!]!.direction = -1
                     self.threads[thread.id]!.upvotes -= 1
                     self.threads[thread.id]!.downvotes += 1
+                    
+                    self.threadsVoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.upvotes)
+                    self.threadsDownvoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.downvotes)
                 }
             }
             
@@ -1219,6 +1572,7 @@ final class GameDataStore: ObservableObject {
                         self.votes[newVote.id] = newVote
                         self.voteCommentMapping[comment.id] = newVote.id
                         self.comments[comment.id]!.upvotes += 1
+                        self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
                     }
                 }
             }
@@ -1244,6 +1598,7 @@ final class GameDataStore: ObservableObject {
                     self.votes[self.voteCommentMapping[comment.id]!]!.direction = 1
                     self.comments[comment.id]!.upvotes += 1
                     self.comments[comment.id]!.downvotes -= 1
+                    self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -1295,6 +1650,7 @@ final class GameDataStore: ObservableObject {
                     self.votes[self.voteCommentMapping[comment.id]!]!.direction = -1
                     self.comments[comment.id]!.upvotes -= 1
                     self.comments[comment.id]!.downvotes += 1
+                    self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -1317,11 +1673,14 @@ final class GameDataStore: ObservableObject {
         session.dataTask(with: request) { (data, response, error) in
             if error == nil {
                 DispatchQueue.main.async {
+                    let commentId = vote.comment!
                     if vote.direction == 1 {
-                        self.comments[vote.comment!]!.upvotes -= 1
+                        self.comments[commentId]!.upvotes -= 1
                     } else {
-                        self.comments[vote.comment!]!.downvotes -= 1
+                        self.comments[commentId]!.downvotes -= 1
                     }
+                    
+                    self.commentsVoteStringByCommentId[commentId] = self.transformVotesString(points: self.comments[commentId]!.upvotes)
                     
                     self.votes[vote.id]!.direction = 0
                 }
@@ -1345,11 +1704,16 @@ final class GameDataStore: ObservableObject {
         session.dataTask(with: request) { (data, response, error) in
             if error == nil {
                 DispatchQueue.main.async {
+                    let threadId = vote.thread!
+                    
                     if vote.direction == 1 {
-                        self.threads[vote.thread!]!.upvotes -= 1
+                        self.threads[threadId]!.upvotes -= 1
                     } else {
-                        self.threads[vote.thread!]!.downvotes -= 1
+                        self.threads[threadId]!.downvotes -= 1
                     }
+
+                    self.threadsVoteStringByThreadId[threadId] = self.transformVotesString(points: self.threads[threadId]!.upvotes)
+                    self.threadsDownvoteStringByThreadId[threadId] = self.transformVotesString(points: self.threads[threadId]!.downvotes)
                     
                     self.votes[vote.id]!.direction = 0
                 }

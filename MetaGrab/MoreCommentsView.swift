@@ -30,7 +30,7 @@ struct MoreCommentsView: View {
     }
     
     func fetchNextPage() {
-        self.gameDataStore.fetchCommentTreeByParentComment(access: self.userDataStore.token!.access, parentCommentId: commentId, start: self.gameDataStore.commentNextPageStartIndex[commentId]!)
+        self.gameDataStore.fetchCommentTreeByParentComment(access: self.userDataStore.token!.access, parentCommentId: commentId, start: self.gameDataStore.commentNextPageStartIndex[commentId]!, userId: self.userDataStore.token!.userId)
     }
     
     var body: some View {

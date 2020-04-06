@@ -35,10 +35,10 @@ final class UserDataStore: ObservableObject {
     }
     
     func onStart() {
-        if let usernameData = KeyChain.load(key: "metagrabusername"), let passwordData = KeyChain.load(key: "metagrabpassword"), let tokenaccessData = KeyChain.load(key: "metagrabtokenaccess"), let tokenrefreshData = KeyChain.load(key: "metagrabtokenrefresh") {
+        if let usernameData = KeyChain.load(key: "metagrabusername"), let passwordData = KeyChain.load(key: "metagrabpassword"), let tokenaccessData = KeyChain.load(key: "metagrabtokenaccess"), let tokenrefreshData = KeyChain.load(key: "metagrabtokenrefresh"), let userId = KeyChain.load(key: "userid") {
             self.username = String(data: usernameData, encoding: String.Encoding.utf8) as String?
             self.password = String(data: passwordData, encoding: String.Encoding.utf8) as String?
-            self.token = Token(refresh: String(data: tokenrefreshData, encoding: String.Encoding.utf8)!, access: String(data: tokenaccessData, encoding: String.Encoding.utf8)!)
+            self.token = Token(refresh: String(data: tokenrefreshData, encoding: String.Encoding.utf8)!, access: String(data: tokenaccessData, encoding: String.Encoding.utf8)!, userId: Int(String(data: userId, encoding: String.Encoding.utf8)!)!)
         }
     }
     
@@ -60,6 +60,7 @@ final class UserDataStore: ObservableObject {
             let status2 = KeyChain.save(key: "metagrabpassword", data: password.data(using: String.Encoding.utf8)!)
             let status3 = KeyChain.save(key: "metagrabtokenaccess", data: self.token!.access.data(using: String.Encoding.utf8)!)
             let status4 = KeyChain.save(key: "metagrabtokenrefresh", data: self.token!.refresh.data(using: String.Encoding.utf8)!)
+            let status5 = KeyChain.save(key: "userid", data: String(self.token!.userId).data(using: String.Encoding.utf8)!)
         }
     }
     
@@ -93,6 +94,8 @@ final class UserDataStore: ObservableObject {
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let data = data {
                 if let jsonString = String(data: data, encoding: .utf8) {
+                    
+                    print(jsonString, "test")
                     DispatchQueue.main.async {
                         self.token = load(jsonData: jsonString.data(using: .utf8)!)
                         self.isAuthenticated = true

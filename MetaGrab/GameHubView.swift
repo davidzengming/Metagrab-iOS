@@ -61,9 +61,10 @@ struct GameHubView: View {
                         Text("Favourites")
                 }
             }
-            .edgesIgnoringSafeArea(.top)
+            //.edgesIgnoringSafeArea(.top)
             .onAppear() {
                 self.gameDataStore.fetchFollowGames(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
+                self.gameDataStore.loadEmojis()
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())

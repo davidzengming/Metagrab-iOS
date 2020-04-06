@@ -14,6 +14,7 @@ struct CommentView : View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
     
+    var ancestorThreadId: Int
     var commentId: Int
     let formatter = RelativeDateTimeFormatter()
     var width: CGFloat
@@ -21,18 +22,14 @@ struct CommentView : View {
     var leadPadding: CGFloat
     let staticPadding: CGFloat = 5
     let level: Int
-    let leadLineWidth: CGFloat = 5
+    let leadLineWidth: CGFloat = 3
     let verticalPadding: CGFloat = 15
     
     @State var isEditable: Bool = false
-    @ObservedObject var fancyPantsBarStateObject = FancyPantsBarStateObject()
-
-    func isVotedUp() -> Bool {
-        return self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1
-    }
     
-    func isVotedDown() -> Bool {
-        return self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1
+    func setReplyTargetToCommentId() {
+        self.gameDataStore.isReplyBarReplyingToThreadByThreadId[ancestorThreadId] = false
+        self.gameDataStore.replyTargetCommentIdByThreadId[ancestorThreadId] = commentId
     }
     
     func transformVotesString(points: Int) -> String {
@@ -50,7 +47,7 @@ struct CommentView : View {
             concatVotesStr += String(numPoints)
         }
         
-        return ((isNegative ? "-" : "") + concatVotesStr)
+        return ((isNegative ? "-" : "" ) + concatVotesStr)
     }
     
     func onClickUpvoteButton() {
@@ -79,10 +76,6 @@ struct CommentView : View {
         } else {
             self.gameDataStore.addNewDownvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
         }
-    }
-    
-    func getRelativeDate(postedDate: Date) -> String {
-        return formatter.localizedString(for: postedDate, relativeTo: Date())
     }
     
     var body: some View {
@@ -120,20 +113,20 @@ struct CommentView : View {
                                             Spacer()
                                             
                                             HStack {
-                                                Image(systemName: self.isVotedUp() ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                                Image(systemName: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .onTapGesture() {
                                                         self.onClickUpvoteButton()
                                                 }
-                                                Text(self.transformVotesString(points: self.gameDataStore.comments[self.commentId]!.upvotes))
+                                                Text(self.gameDataStore.commentsVoteStringByCommentId[self.commentId]!)
                                                     .font(.system(size: 14))
                                             }
                                             .frame(height: 16, alignment: .trailing)
                                             .padding(.trailing, 20)
                                             
                                             HStack {
-                                                Image(systemName: self.isVotedDown() ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                                Image(systemName: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .onTapGesture() {
@@ -142,7 +135,7 @@ struct CommentView : View {
                                             }
                                             .frame(height: 16, alignment: .trailing)
                                         }
-                                        Text(self.getRelativeDate(postedDate: self.gameDataStore.comments[self.commentId]!.created))
+                                        Text(self.gameDataStore.relativeDateStringByCommentId[self.commentId]!)
                                             .foregroundColor(Color(.darkGray))
                                             .font(.system(size: 14))
                                             .padding(.bottom, 5)
@@ -150,8 +143,12 @@ struct CommentView : View {
                                 }
                                 
                                 if self.gameDataStore.commentsDesiredHeight[self.commentId] != nil {
-                                    FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isNewContent: false, isThread: false, commentId: self.commentId, isFirstResponder: false, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
+                                    FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isFirstResponder: .constant(false), didBecomeFirstResponder: .constant(false), showFancyPantsEditorBar: .constant(false), isNewContent: false, isThread: false, commentId: self.commentId, isOmniBar: false)
                                         .frame(width: self.width - self.leadPadding - staticPadding * 2 - 30 - 10 - (self.level > 0 ? 10 + self.leadLineWidth: 0), height: self.gameDataStore.commentsDesiredHeight[self.commentId]! + (self.isEditable ? 20 : 0), alignment: .leading)
+                                    
+                                        .onTapGesture {
+                                            self.setReplyTargetToCommentId()
+                                    }
                                 }
                             }
                         }
@@ -169,7 +166,7 @@ struct CommentView : View {
                     }
                     
                     ForEach(self.gameDataStore.childCommentListByParentCommentId[self.commentId]!, id: \.self) { key in
-                        CommentView(commentId: key, width: self.width, height: self.height, leadPadding: self.leadPadding + 20, level: self.level + 1)
+                        CommentView(ancestorThreadId: self.ancestorThreadId, commentId: key, width: self.width, height: self.height, leadPadding: self.leadPadding + 20, level: self.level + 1)
                     }
                 }
             }

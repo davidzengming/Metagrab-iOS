@@ -15,9 +15,18 @@ class TextViewHelper {
     
     static func calculateTextViewHeight(textView: UITextView) -> CGFloat {
         // Compute the desired height for the content
-        let fixedWidth = textView.frame.size.width
-        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
-        return newSize.height
+        
+//        let startTime1 = CFAbsoluteTimeGetCurrent()
+        let newSize1 = textView.contentSize.height
+//        let timeElapsed1 = CFAbsoluteTimeGetCurrent() - startTime1
+        
+//        let startTime2 = CFAbsoluteTimeGetCurrent()
+//        let fixedWidth = textView.frame.size.width
+//        let newSize2 = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+//        let timeElapsed2 = CFAbsoluteTimeGetCurrent() - startTime2
+//        print("contentsize: ", timeElapsed1, " ||||||| sizethatfits: ", timeElapsed2)
+        
+        return newSize1
     }
     
     // external func
@@ -232,55 +241,130 @@ class TextViewHelper {
         uiView.selectedRange = NSMakeRange(lineStartIndex + (isNumbered ? getBulletListIndentStr().count + 1 : getDashBulletListIndentStr().count + 1), 0)
     }
     
+    static var boldItalicFont = UIFont(name: "HelveticaNeue-BoldItalic", size: 16)!
+    static var italicFont = UIFont(name: "HelveticaNeue-Italic", size: 16)!
+    static var boldFont = UIFont(name: "HelveticaNeue-Bold", size: 16)!
+    static var normalFont = UIFont(name: "HelveticaNeue", size: 16)!
+    
     static func getHelveticaNeueFont(isBold: Bool, isItalic: Bool = false) -> UIFont {
         if isItalic == true {
-            return isBold ? UIFont(name: "HelveticaNeue-BoldItalic", size: 16)! : UIFont(name: "HelveticaNeue-Italic", size: 16)!
+            return isBold ? self.boldItalicFont : self.italicFont
         } else {
-            return isBold ? UIFont(name: "HelveticaNeue-Bold", size: 16)! : UIFont(name: "HelveticaNeue", size: 16)!
+            return isBold ? self.boldFont : self.normalFont
         }
     }
     
-    static func getBulletListParagraphStyle() -> NSMutableParagraphStyle {
+    
+    static var bulletListParagraphStyle: NSMutableParagraphStyle = initBulletListParagraphStyle()
+    static func initBulletListParagraphStyle() -> NSMutableParagraphStyle {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.firstLineHeadIndent = 10
         paragraphStyle.headIndent = 25
         paragraphStyle.lineSpacing = 3
         paragraphStyle.paragraphSpacing = 2
         paragraphStyle.paragraphSpacingBefore = 2
+        
         return paragraphStyle
     }
     
-    static func getPlainParagraphStyle() -> NSMutableParagraphStyle {
+    static func getBulletListParagraphStyle() -> NSMutableParagraphStyle {
+        return bulletListParagraphStyle
+    }
+    
+    static var plainParagraphStyle: NSMutableParagraphStyle = initPlainParagraphStyle()
+    static func initPlainParagraphStyle() -> NSMutableParagraphStyle {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = 5
         return paragraphStyle
     }
     
+    static func getPlainParagraphStyle() -> NSMutableParagraphStyle {
+        return plainParagraphStyle
+    }
+    
     static func isRightSideCaret(at index: Int, textStorage: NSTextStorage) -> Bool {
-        if index == 0 || textStorage.attributedSubstring(from: NSMakeRange(index - 1, 1)).string == "\t" || textStorage.attributedSubstring(from: NSMakeRange(index - 1, 1)).string == "\n" {
+        if index == 0 {
+            return false
+        }
+        let prevChar = textStorage.attributedSubstring(from: NSMakeRange(index - 1, 1)).string
+        
+        if prevChar == "\t" || prevChar == "\n" {
             return false
         }
         return true
     }
     
+    static var typingAttributes: [Int: [NSAttributedString.Key : Any]] = initTypingAttributesSettings()
+    
+    static func initTypingAttributesSettings() -> [Int: [NSAttributedString.Key : Any]] {
+        var typingAttributes = [Int: [NSAttributedString.Key : Any]]()
+        
+        func dfs(mask: Int, i: Int, curAttributes: [NSAttributedString.Key : Any]) {
+            
+            typingAttributes[mask] = curAttributes
+            
+            if i == 5 {
+                return
+            }
+            
+            for j in i..<5 {
+                var curAttributes2 = curAttributes
+                
+                if j == 0 {
+                    curAttributes2[NSAttributedString.Key.font] = getHelveticaNeueFont(isBold: true, isItalic: false)
+                } else if j == 1 {
+                    if (mask >> 0) & 1 == 1 {
+                        curAttributes2[NSAttributedString.Key.font] = getHelveticaNeueFont(isBold: true, isItalic: true)
+                    } else {
+                        curAttributes2[NSAttributedString.Key.font] = getHelveticaNeueFont(isBold: false, isItalic: true)
+                    }
+                } else if j == 2 {
+                    curAttributes2[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+                } else if j == 3 {
+                    curAttributes2[.paragraphStyle] = getBulletListParagraphStyle()
+                    curAttributes2[NSAttributedString.Key.numberedListAttribute] = true
+                } else if j == 4 {
+                    curAttributes2[.paragraphStyle] = getBulletListParagraphStyle()
+                } else {
+                    print("Error")
+                }
+                
+                dfs(mask: mask | (1 << i), i: j + 1, curAttributes: curAttributes2)
+            }
+        }
+        
+        var initAttributes = [NSAttributedString.Key : Any]()
+        initAttributes[NSAttributedString.Key.font] = getHelveticaNeueFont(isBold: false, isItalic: false)
+        
+        dfs(mask: 0, i: 0, curAttributes: initAttributes)
+        return typingAttributes
+    }
+    
     static func prepareTypingAttributesSetting(textView: UITextView, isBold: Bool, isItalic: Bool, isStrikethrough: Bool, isBulletList: Bool, isNumberedList: Bool) {
-        var defaultAttributes: [NSAttributedString.Key: Any] = [NSAttributedString.Key.font: getHelveticaNeueFont(isBold: isBold, isItalic: isItalic)]
+        var mask = 0
+        
+        if isBold == true {
+            mask = mask | (1 << 0)
+        }
+        
+        if isItalic == true {
+            mask = mask | (1 << 1)
+        }
         
         if isStrikethrough == true {
-            defaultAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+            mask = mask | (1 << 2)
         }
         
         if isBulletList == true {
-            defaultAttributes[.paragraphStyle] = getBulletListParagraphStyle()
-            defaultAttributes[NSAttributedString.Key.dashListAttribute] = true
-        } else if isNumberedList == true {
-            defaultAttributes[.paragraphStyle] = getBulletListParagraphStyle()
-            defaultAttributes[NSAttributedString.Key.numberedListAttribute] = true
-        } else {
-            defaultAttributes[.paragraphStyle] = getPlainParagraphStyle()
+            mask = mask | (1 << 3)
         }
         
-        textView.typingAttributes = defaultAttributes
+        if isNumberedList == true {
+            mask = mask | (1 << 4)
+        }
+        
+        textView.typingAttributes = typingAttributes[mask]!
+        return
     }
     
     static func getReplacementListNumbersTextAndInsertCursorOffset(isNumbered: Bool, s: NSAttributedString, counter: Int, isInsertingNewLine: Bool) -> (NSMutableAttributedString, Int) {
@@ -412,10 +496,29 @@ class TextViewHelper {
         return endOfLine
     }
     
+    static func getLastChar(index: Int, isRightSideCaret: Bool, textStorage: NSTextStorage) -> NSAttributedString? {
+        if textStorage.length == 0 {
+            return nil
+        }
+        
+        if isRightSideCaret == false && index == textStorage.length {
+            if textStorage.attributedSubstring(from: NSMakeRange(index - 1, 1)).string == "\n" {
+                return nil
+            }
+            
+            return getLastChar(index: index - 1, isRightSideCaret: false, textStorage: textStorage)
+        }
+
+        let currChar = textStorage.attributedSubstring(from: NSMakeRange(isRightSideCaret ? index - 1 : index, 1))
+        
+        return currChar
+    }
+    
     static func isLastCharAttribute(attribute: NSAttributedString.Key, index: Int, isRightSideCaret: Bool, textStorage: NSTextStorage) -> Bool {
         if textStorage.length == 0 {
             return false
         }
+        
         if isRightSideCaret == false && index == textStorage.length {
             if textStorage.attributedSubstring(from: NSMakeRange(index - 1, 1)).string == "\n" {
                 return false
@@ -423,9 +526,10 @@ class TextViewHelper {
             
             return isLastCharAttribute(attribute: attribute, index: index - 1, isRightSideCaret: false, textStorage: textStorage)
         }
-        
+
         let currChar = textStorage.attributedSubstring(from: NSMakeRange(isRightSideCaret ? index - 1 : index, 1))
         let hasNumberedListAttr = currChar.attribute(attribute, at: 0, effectiveRange: nil)
+        
         return hasNumberedListAttr != nil ? true : false
     }
     

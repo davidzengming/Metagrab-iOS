@@ -28,9 +28,11 @@ struct NewThreadView: View {
     @State var dataDict: [UUID: Data] = [:]
     @State var imagesArray: [UUID] = [UUID()]
     @State var clickedImageIndex : Int?
-    @ObservedObject var fancyPantsBarStateObject = FancyPantsBarStateObject()
+    @State var isFirstResponder = true
+    @State var didBecomeFirstResponder = false
     
     var forumId: Int
+    
     var flairs = ["Update", "Discussion", "Meme"]
     var imageThread = ["Text", "Image"]
     let placeholder = Image(systemName: "photo")
@@ -94,7 +96,6 @@ struct NewThreadView: View {
                                 .foregroundColor(Color.red)
                                 .offset(x: 50, y: -50)
                             }
-                            
                         }
                     }
                     Spacer()
@@ -104,9 +105,7 @@ struct NewThreadView: View {
                 }
                 .padding(.horizontal, 20)
                 
-                FancyPantsBarView(fancyPantsBarStateObject: self.fancyPantsBarStateObject)
-                    .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.25, alignment: .leading)
-                FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isNewContent: true, isThread: true, isFirstResponder: true, fancyPantsBarStateObject: self.fancyPantsBarStateObject)
+                FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: .constant(false), isNewContent: true, isThread: true, isOmniBar: false)
                     .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.5, alignment: .leading)
                     .cornerRadius(5, corners: [.bottomLeft, .bottomRight, .topLeft, .topRight])
                     .overlay(
@@ -115,10 +114,9 @@ struct NewThreadView: View {
                 )
                     .padding(.vertical, 25)
                     .padding(.horizontal, 20)
-                
                 Spacer()
             }
-            .edgesIgnoringSafeArea(.bottom)
+            .KeyboardAwarePadding()
             .navigationBarTitle(Text("Post to \(self.gameDataStore.games[self.forumId]!.name)"))
             .navigationBarItems(trailing: Button(action: self.submitThread) {
                 Text("Submit")

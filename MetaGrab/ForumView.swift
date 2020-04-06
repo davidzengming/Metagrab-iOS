@@ -24,7 +24,6 @@ struct RoundedCorner: Shape {
     }
 }
 
-
 struct ForumView : View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
@@ -40,44 +39,84 @@ struct ForumView : View {
     }
     
     func fetchNextPage() {
-        self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!)
+        self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!, userId: self.userDataStore.token!.userId)
     }
     
     var body: some View {
         GeometryReader { a in
             VStack(spacing: 0) {
                 ScrollView(.vertical) {
-                    VStack {
-                        HStack {
-                            if self.gameDataStore.gameBannerImage[self.gameId] != nil {
-                                Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
-                                    .resizable()
-                                    .frame(width: a.size.width * 0.15, height: a.size.width * 0.15, alignment: .leading)
-                                    .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .stroke(Color.white, lineWidth: 2)
-                                )
-                            }
-                            Text(self.gameDataStore.games[self.gameId]!.name)
-                                .foregroundColor(Color.white)
-                        }
-                    }
-                    .frame(width: a.size.width, height: a.size.height * 0.2)
-                    .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
-                    
-                    VStack {
-                        if !self.gameDataStore.threadListByGameId[self.gameId]!.isEmpty {
-                            ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
+                    VStack(spacing: 0) {
+                        VStack {
+                            HStack {
+                                if self.gameDataStore.gameBannerImage[self.gameId] != nil {
+                                    Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: a.size.width * 0.13, height: a.size.width * 0.13, alignment: .leading)
+                                        .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 5)
+                                                .stroke(Color.white, lineWidth: 2)
+                                    )
+                                }
                                 VStack {
-                                    ThreadRow(threadId: threadId, gameId: self.gameId, width: a.size.width * 0.9, height: a.size.height)
-                                        .background(Color.white)
-                                    Divider()
+                                    Text(self.gameDataStore.games[self.gameId]!.name)
+                                    .foregroundColor(Color.white)
+                                    .bold()
+                                    
+                                    Text(self.gameDataStore.games[self.gameId]!.developer.name)
+                                    .foregroundColor(Color.white)
+                                    .bold()
+                                }
+                                Spacer()
+                            }
+                            .frame(width: a.size.width * 0.8)
+                        }
+                        .frame(width: a.size.width, height: a.size.width * 0.13)
+                        .padding(.top, 30)
+                        
+                        ZStack {
+                            VStack {
+                                Spacer()
+                                VStack {
+                                    Text("hi")
+                                }
+                                    .frame(width: a.size.width, height: a.size.height * 0.06)
+                                .background(Color(.lightGray))
+                            }
+                            
+                            VStack {
+                                Spacer()
+                                VStack {
+                                    Text("bye")
+                                }
+                                .frame(width: a.size.width * 0.8, height: a.size.height * 0.075)
+                                .background(Color.white)
+                                    .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
+                                    
+                                Spacer()
+                            }
+                        }
+                        .frame(width: a.size.width, height: a.size.height * 0.12)
+                        
+                        VStack {
+                            if !self.gameDataStore.threadListByGameId[self.gameId]!.isEmpty {
+                                ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
+                                    VStack {
+                                        ThreadRow(threadId: threadId, gameId: self.gameId, width: a.size.width * 0.9, height: a.size.height)
+                                            .background(Color.white)
+                                        Divider()
+                                    }
                                 }
                             }
                         }
+                        .background(Color.white)
+                        .frame(width: a.size.width)
+                        .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
+                        .background(Color(.lightGray))
                     }
-                    .frame(width: a.size.width)
+                    
                 }
                 .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
                 
@@ -97,7 +136,7 @@ struct ForumView : View {
             .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Board"), displayMode: .inline)
             .onAppear() {
                 if self.gameDataStore.isBackToGamesView {
-                    self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, refresh: true)
+                    self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, refresh: true, userId: self.userDataStore.token!.userId)
                     self.gameDataStore.loadGameBanner(game: self.gameDataStore.games[self.gameId]!)
                     self.gameDataStore.isBackToGamesView = false
                 }
@@ -110,6 +149,7 @@ struct ForumView : View {
             }
             .position(x: a.size.width * 0.88, y: a.size.height * 0.85)
         }
+        .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
         .edgesIgnoringSafeArea(.bottom)
     }
 }

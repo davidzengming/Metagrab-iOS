@@ -14,4 +14,6 @@ extension NSAttributedString.Key {
     
     static let dashListAttribute = NSAttributedString.Key(rawValue: "DashListAttribute")
     static let dashHeaderInBulletList = NSAttributedString.Key(rawValue: "DashHeaderInBulletListAttribute")
+    
+    static let mask = NSAttributedString.Key(rawValue: "Mask")
 }

@@ -13,4 +13,5 @@ struct ThreadsResponse: Hashable, Codable {
     var hasNextPage: Bool
     var votesResponse: [Vote]
     var usersResponse: [User]
+    var userId: Int
 }

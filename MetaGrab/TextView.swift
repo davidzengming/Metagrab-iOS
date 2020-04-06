@@ -6,6 +6,16 @@
 //  Copyright © 2019 David Zeng. All rights reserved.
 //
 
+extension UIFont {
+    var isBold: Bool {
+        return (fontDescriptor.symbolicTraits.rawValue & UIFontDescriptor.SymbolicTraits.traitBold.rawValue) > 0
+    }
+    
+    var isItalic: Bool {
+        return (fontDescriptor.symbolicTraits.rawValue & UIFontDescriptor.SymbolicTraits.traitItalic.rawValue) > 0
+    }
+}
+
 import Foundation
 import SwiftUI
 
@@ -26,12 +36,14 @@ struct TextView: UIViewRepresentable {
     @Binding var didChangeNumberedBulletList: Bool
     
     @Binding var isEditable: Bool
+    @Binding var isFirstResponder: Bool
+    @Binding var didBecomeFirstResponder: Bool
     
     var isNewContent: Bool
     var isThread: Bool
     var threadId: Int?
     var commentId: Int?
-    var isFirstResponder: Bool = false
+    var isOmniBar: Bool
     
     func makeCoordinator() -> Coordinator {
         if isNewContent {
@@ -77,20 +89,27 @@ struct TextView: UIViewRepresentable {
         DispatchQueue.main.async {
             if self.isNewContent == false {
                 if self.isThread == true {
-                    self.gameDataStore.threadsDesiredHeight[self.threadId!] = TextViewHelper.calculateTextViewHeight(textView: myTextView)
+                    self.gameDataStore.threadsDesiredHeight[self.threadId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: myTextView))
                 } else {
-                    self.gameDataStore.commentsDesiredHeight[self.commentId!] = TextViewHelper.calculateTextViewHeight(textView: myTextView)
+                    self.gameDataStore.commentsDesiredHeight[self.commentId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: myTextView))
+                }
+            } else {
+                if self.isOmniBar {
+                    self.gameDataStore.threadViewReplyBarDesiredHeight[self.threadId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: myTextView))
                 }
             }
         }
-    
+        
         return myTextView
     }
     
     func updateUIView(_ uiView: UITextView, context: Context) {
-        if isFirstResponder && !context.coordinator.didBecomeFirstResponder  {
-            uiView.becomeFirstResponder()
-            context.coordinator.didBecomeFirstResponder = true
+        DispatchQueue.main.async {
+            if self.didBecomeFirstResponder && !self.isFirstResponder {
+                uiView.becomeFirstResponder()
+                self.isFirstResponder = true
+                self.didBecomeFirstResponder = false
+            }
         }
         
         let leftCaretPos = uiView.selectedRange.location
@@ -103,29 +122,52 @@ struct TextView: UIViewRepresentable {
         if didChangeBold == true {
             if isBold == true {
                 uiView.textStorage.addAttributes([.font: TextViewHelper.getHelveticaNeueFont(isBold: true, isItalic: isItalic)], range: uiView.selectedRange)
+                if isItalic == true {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: true, isItalic: true)
+                } else {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: true, isItalic: false)
+                }
             } else {
                 uiView.textStorage.addAttributes([.font: TextViewHelper.getHelveticaNeueFont(isBold: false, isItalic: isItalic)], range: uiView.selectedRange)
+                
+                if isItalic == true {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: false, isItalic: true)
+                } else {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: false, isItalic: false)
+                }
             }
-            
             setDidChangeBold(to: false)
         }
         
         if didChangeItalic == true {
             if isItalic == true {
                 uiView.textStorage.addAttributes([.font: TextViewHelper.getHelveticaNeueFont(isBold: isBold, isItalic: true)], range: uiView.selectedRange)
+                
+                if isBold == true {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: true, isItalic: true)
+                } else {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: false, isItalic: true)
+                }
             } else {
                 uiView.textStorage.addAttributes([.font: TextViewHelper.getHelveticaNeueFont(isBold: isBold, isItalic: false)], range: uiView.selectedRange)
+                
+                if isBold == true {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: true, isItalic: false)
+                } else {
+                    uiView.typingAttributes[NSAttributedString.Key.font] = TextViewHelper.getHelveticaNeueFont(isBold: false, isItalic: false)
+                }
             }
             
             setDidChangeItalic(to: false)
         }
         
         if didChangeStrikethrough == true {
-            
             if isStrikethrough == true {
                 uiView.textStorage.addAttributes([.strikethroughStyle: NSUnderlineStyle.single.rawValue], range: uiView.selectedRange)
+                uiView.typingAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
             } else {
                 uiView.textStorage.removeAttribute(.strikethroughStyle, range: uiView.selectedRange)
+                uiView.typingAttributes.removeValue(forKey: NSAttributedString.Key.strikethroughStyle)
             }
             
             setDidChangeStrikethrough(to: false)
@@ -134,10 +176,16 @@ struct TextView: UIViewRepresentable {
         if didChangeNumberedBulletList == true {
             if leftCaretPos == rightCaretPos {
                 TextViewHelper.findLineAndReplaceWithBulletLine(isNumbered: true, leftCaretPos: leftCaretPos, textStorage: uiView.textStorage, uiView: uiView)
+                
+                uiView.typingAttributes[.paragraphStyle] = TextViewHelper.getBulletListParagraphStyle()
+                uiView.typingAttributes[NSAttributedString.Key.numberedListAttribute] = true
                 setDidChangeNumberedBulletList(to: false)
             } else {
                 let selectedStr = uiView.textStorage.attributedSubstring(from: uiView.selectedRange)
                 uiView.textStorage.replaceCharacters(in: uiView.selectedRange, with: TextViewHelper.getFormattedBulletListAttributedString(isNumbered: true, selectedStr: selectedStr))
+                
+                uiView.typingAttributes[.paragraphStyle] = TextViewHelper.getBulletListParagraphStyle()
+                uiView.typingAttributes[NSAttributedString.Key.numberedListAttribute] = true
                 setDidChangeNumberedBulletList(to: false)
             }
         }
@@ -145,10 +193,14 @@ struct TextView: UIViewRepresentable {
         if didChangeBulletList == true {
             if leftCaretPos == rightCaretPos {
                 TextViewHelper.findLineAndReplaceWithBulletLine(isNumbered: false, leftCaretPos: leftCaretPos, textStorage: uiView.textStorage, uiView: uiView)
+                
+                uiView.typingAttributes[.paragraphStyle] = TextViewHelper.getBulletListParagraphStyle()
                 setDidChangeNumberedBulletList(to: false)
             } else {
                 let selectedStr = uiView.textStorage.attributedSubstring(from: uiView.selectedRange)
                 uiView.textStorage.replaceCharacters(in: uiView.selectedRange, with: TextViewHelper.getFormattedBulletListAttributedString(isNumbered: false, selectedStr: selectedStr))
+                
+                uiView.typingAttributes[.paragraphStyle] = TextViewHelper.getBulletListParagraphStyle()
                 setDidChangeNumberedBulletList(to: false)
             }
         }
@@ -181,7 +233,6 @@ struct TextView: UIViewRepresentable {
     class Coordinator: NSObject, UITextViewDelegate {
         var parent: TextView
         var textStorage: NSTextStorage
-        var didBecomeFirstResponder = false
         
         init(_ textView: TextView, textStorage: NSTextStorage) {
             self.parent = textView
@@ -193,14 +244,13 @@ struct TextView: UIViewRepresentable {
             let k = textView.selectedRange.length
             //let rightCaretPos = leftCaretPos + k - 1
             
-            TextViewHelper.prepareTypingAttributesSetting(textView: textView, isBold: self.parent.isBold, isItalic: self.parent.isItalic, isStrikethrough: self.parent.isStrikethrough, isBulletList: self.parent.isDashBulletList, isNumberedList: self.parent.isNumberedBulletList)
-            
             if self.parent.isNumberedBulletList == true {
                 let enumerateKey = NSAttributedString.Key.numberedListAttribute
                 let enumerateHeaderKey = NSAttributedString.Key.numberHeaderInBulletList
                 
                 if text == "\n" { // new line
                     TextViewHelper.formatNewLineAndAdjustCursor(isNumbered: true, leftCaretPos: leftCaretPos, enumerateKey: enumerateKey, enumerateHeaderKey: enumerateHeaderKey, textStorage: self.textStorage, textView: textView)
+                    updateTextViewHeight(textView: textView)
                     return false
                 } else if text == "" && range.length == 1 && k == 0 {
                     let isRightSideCaret = TextViewHelper.isRightSideCaret(at: leftCaretPos, textStorage: self.textStorage)
@@ -209,7 +259,7 @@ struct TextView: UIViewRepresentable {
                     
                     if leftCaretPos == lineNumberRangeTuple.end + TextViewHelper.getBulletListIndentStr().count + 1 {
                         TextViewHelper.deleteLineBackspace(isNumbered: true, leftCaretPos: leftCaretPos, enumerateKey: enumerateKey, enumerateHeaderKey: enumerateHeaderKey, textStorage: self.textStorage, textView: textView, isRightSideCaret: isRightSideCaret, lineNumberRangeTuple: lineNumberRangeTuple)
-                        
+                        updateTextViewHeight(textView: textView)
                         return false
                     }
                 }
@@ -221,6 +271,8 @@ struct TextView: UIViewRepresentable {
                 
                 if text == "\n" {
                     TextViewHelper.formatNewLineAndAdjustCursor(isNumbered: false, leftCaretPos: leftCaretPos, enumerateKey: enumerateKey, enumerateHeaderKey: enumerateHeaderKey, textStorage: self.textStorage, textView: textView)
+
+                    updateTextViewHeight(textView: textView)
                     return false
                 } else if text == "" && range.length == 1 && k == 0 {
                     let isRightSideCaret = TextViewHelper.isRightSideCaret(at: leftCaretPos, textStorage: self.textStorage)
@@ -229,26 +281,34 @@ struct TextView: UIViewRepresentable {
                     
                     if leftCaretPos == lineNumberRangeTuple.end + TextViewHelper.getDashBulletListIndentStr().count + 1 {
                         TextViewHelper.deleteLineBackspace(isNumbered: false, leftCaretPos: leftCaretPos, enumerateKey: enumerateKey , enumerateHeaderKey: enumerateHeaderKey, textStorage: self.textStorage, textView: textView, isRightSideCaret: isRightSideCaret, lineNumberRangeTuple: lineNumberRangeTuple)
+                        
+                        updateTextViewHeight(textView: textView)
                         return false
                     }
                 }
             }
-            
+
             return true
         }
         
-        
-        func textViewDidChange(_ textView: UITextView) {
+        func updateTextViewHeight(textView: UITextView) {
             DispatchQueue.main.async {
                 if self.parent.isNewContent == false {
                     if self.parent.isThread == true {
-                        self.parent.gameDataStore.threadsDesiredHeight[self.parent.threadId!] = TextViewHelper.calculateTextViewHeight(textView: textView)
+                        self.parent.gameDataStore.threadsDesiredHeight[self.parent.threadId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
                     } else {
-                        self.parent.gameDataStore.commentsDesiredHeight[self.parent.commentId!] = TextViewHelper.calculateTextViewHeight(textView: textView)
+                        self.parent.gameDataStore.commentsDesiredHeight[self.parent.commentId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
+                    }
+                } else {
+                    if self.parent.isOmniBar == true {
+                        self.parent.gameDataStore.threadViewReplyBarDesiredHeight[self.parent.threadId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
                     }
                 }
             }
-            
+        }
+        
+        func textViewDidChange(_ textView: UITextView) {
+            updateTextViewHeight(textView: textView)
             //            not needed - textStorage state already receives update via binding
             //            DispatchQueue.main.async {
             //                self.parent.textStorage = textView.textStorage
@@ -264,14 +324,16 @@ struct TextView: UIViewRepresentable {
             let k = textView.selectedRange.length
             let rightCaretPos = leftCaretPos + k
             
+//            let startTime1 = CFAbsoluteTimeGetCurrent()
             let isRightSideCaret = TextViewHelper.isRightSideCaret(at: leftCaretPos, textStorage: self.textStorage)
+            
             var nextBoldState = false
             var nextItalicState = false
             var nextStrikethroughState = false
             
             var nextNumberedListState = false
             var nextDashListState = false
-            
+
             if k > 0 {
                 nextBoldState = TextViewHelper.isAllBoldInSubstring(s: textStorage.attributedSubstring(from: NSMakeRange(leftCaretPos, k))) ? true : false
                 nextItalicState = TextViewHelper.isAllItalicInSubstring(s: textStorage.attributedSubstring(from: NSMakeRange(leftCaretPos, k))) ? true : false
@@ -303,15 +365,19 @@ struct TextView: UIViewRepresentable {
                 }
                 
             } else {
-                nextBoldState = TextViewHelper.isLastCharBold(index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage) ? true : false
-                nextItalicState = TextViewHelper.isLastCharItalic(index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage) ? true : false
-                nextStrikethroughState = TextViewHelper.isLastCharAttribute(attribute: NSAttributedString.Key.strikethroughStyle , index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage) ? true : false
+                let lastAttributedChar = TextViewHelper.getLastChar(index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage)
                 
-                nextNumberedListState = TextViewHelper.isLastCharAttribute(attribute: NSAttributedString.Key.numberedListAttribute, index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage) ? true : false
-                nextDashListState = TextViewHelper.isLastCharAttribute(attribute: NSAttributedString.Key.dashListAttribute, index: leftCaretPos, isRightSideCaret: isRightSideCaret, textStorage: textStorage) ? true : false
-                
-                if nextNumberedListState == true || nextDashListState == true {
-                    TextViewHelper.adjustLeftCursorFromForbiddenSpace(leftCaretPos: leftCaretPos, textStorage: textStorage, k: k, textView: textView, isNumberedList: nextNumberedListState ? true : false)
+                if lastAttributedChar != nil {
+                    let font = lastAttributedChar!.attribute(.font, at: 0, effectiveRange: nil) as! UIFont
+                    nextBoldState = font.isBold ? true : false
+                    nextItalicState = font.isItalic ? true : false
+                    nextStrikethroughState = lastAttributedChar!.attribute(NSAttributedString.Key.strikethroughStyle, at: 0, effectiveRange: nil) != nil ? true : false
+                    nextNumberedListState = lastAttributedChar!.attribute(NSAttributedString.Key.numberedListAttribute, at: 0, effectiveRange: nil) != nil ? true : false
+                    nextDashListState = lastAttributedChar!.attribute(NSAttributedString.Key.dashListAttribute, at: 0, effectiveRange: nil) != nil ? true : false
+                    
+                    if nextNumberedListState == true || nextDashListState == true {
+                        TextViewHelper.adjustLeftCursorFromForbiddenSpace(leftCaretPos: leftCaretPos, textStorage: textStorage, k: k, textView: textView, isNumberedList: nextNumberedListState ? true : false)
+                    }
                 }
             }
             
@@ -330,26 +396,34 @@ struct TextView: UIViewRepresentable {
             setDashBulletListState(to: nextDashListState)
             setDidChangeDashBulletList(to: false)
             
-            DispatchQueue.main.async {
-                TextViewHelper.prepareTypingAttributesSetting(textView: textView, isBold: self.parent.isBold, isItalic: self.parent.isItalic, isStrikethrough: self.parent.isStrikethrough, isBulletList: self.parent.isDashBulletList, isNumberedList: self.parent.isNumberedBulletList)
-            }
+//            let timeElapsed1 = CFAbsoluteTimeGetCurrent() - startTime1
         }
         
         func setDidChangeBold(to status: Bool) {
+            if self.parent.didChangeBold == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.didChangeBold = status
             }
-            
         }
         
         func setDidChangeItalic(to status: Bool) {
+            if self.parent.didChangeBold == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.didChangeBold = status
             }
-            
         }
         
         func setDidChangeStrikethrough(to status: Bool) {
+            if self.parent.didChangeStrikethrough == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.didChangeStrikethrough = status
             }
@@ -357,42 +431,70 @@ struct TextView: UIViewRepresentable {
         
         
         func setDidChangeNumberedBulletList(to status: Bool) {
+            if self.parent.didChangeNumberedBulletList == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.didChangeNumberedBulletList = status
             }
         }
         
         func setDidChangeDashBulletList(to status: Bool) {
+            if self.parent.didChangeBulletList == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.didChangeBulletList = status
             }
         }
         
         func setBoldState(to status: Bool) {
+            if self.parent.isBold == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.isBold = status
             }
         }
         
         func setItalicState(to status: Bool) {
+            if self.parent.isItalic == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.isItalic = status
             }
         }
         
         func setStrikethroughState(to status: Bool) {
+            if self.parent.isStrikethrough == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.isStrikethrough = status
             }
         }
         
         func setNumberedBulletListState(to status: Bool) {
+            if self.parent.isNumberedBulletList == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.isNumberedBulletList = status
             }
         }
         
         func setDashBulletListState(to status: Bool) {
+            if self.parent.isDashBulletList == status {
+                return
+            }
+            
             DispatchQueue.main.async {
                 self.parent.isDashBulletList = status
             }

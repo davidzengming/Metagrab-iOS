@@ -48,6 +48,9 @@ struct GameFeedIcon : View {
                 
                 HStack(spacing: 0) {
                     Image(systemName: self.gameDataStore.isFollowed[self.game.id] == true ? "star.fill" : "star")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .padding(10)
                         .foregroundColor(Color.yellow)
                         .frame(width: a.size.width / 2, height: a.size.height * 0.2)
                         .onTapGesture {
@@ -60,6 +63,9 @@ struct GameFeedIcon : View {
                     
                     NavigationLink(destination: ForumView(gameId: self.game.id)) {
                         Image(uiImage: UIImage(systemName: "text.bubble.fill")!)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .padding(10)
                             .frame(width: a.size.width / 2, height: a.size.height * 0.2)
                     }
                 }
@@ -68,7 +74,7 @@ struct GameFeedIcon : View {
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color.black, lineWidth: 1)
             )
-            .shadow(radius: 5)
+                .shadow(radius: 5)
         }
     }
 }
