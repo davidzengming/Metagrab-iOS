@@ -31,6 +31,7 @@
 		3ED871A423E8CEDD0089F946 /* NewThreadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */; };
 		3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */; };
 		3EEA4738238D79BB00171396 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA4737238D79BB00171396 /* ImagePicker.swift */; };
+		3EF1B3F82444B685000AB3D4 /* EmojiListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF1B3F72444B685000AB3D4 /* EmojiListView.swift */; };
 		3EF6210D23086963002DE02E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210C23086963002DE02E /* AppDelegate.swift */; };
 		3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6210E23086963002DE02E /* SceneDelegate.swift */; };
 		3EF6211223086963002DE02E /* MetaGrab.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3EF6211023086963002DE02E /* MetaGrab.xcdatamodeld */; };
@@ -91,6 +92,7 @@
 		3ED871A323E8CEDD0089F946 /* NewThreadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadButton.swift; sourceTree = "<group>"; };
 		3EDCEADB231E9B6900D94E4B /* NewThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadView.swift; sourceTree = "<group>"; };
 		3EEA4737238D79BB00171396 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		3EF1B3F72444B685000AB3D4 /* EmojiListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiListView.swift; sourceTree = "<group>"; };
 		3EF6210923086963002DE02E /* MetaGrab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetaGrab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EF6210C23086963002DE02E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3EF6210E23086963002DE02E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				3EB04614240980BD00C7AC98 /* MonthView.swift */,
 				3EF6213523086AEC002DE02E /* ForumView.swift */,
 				3EF6213723086B00002DE02E /* ThreadRow.swift */,
+				3EF1B3F72444B685000AB3D4 /* EmojiListView.swift */,
 				3EFCE177230EF22A000FD392 /* ThreadView.swift */,
 				3EFCE179230F010F000FD392 /* CommentView.swift */,
 				3EC604DE241966C000F0197B /* MoreCommentsView.swift */,
@@ -406,6 +409,7 @@
 				3EFCE178230EF22A000FD392 /* ThreadView.swift in Sources */,
 				3E747DDC2385BB4200B807CE /* Vote.swift in Sources */,
 				3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */,
+				3EF1B3F82444B685000AB3D4 /* EmojiListView.swift in Sources */,
 				3EF6213423086ADB002DE02E /* GameDataStore.swift in Sources */,
 				3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */,
 				3ECA00B123905BCF001FB0B6 /* TextView.swift in Sources */,

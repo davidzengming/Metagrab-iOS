@@ -42,28 +42,28 @@ struct ThreadRow : View {
     func onClickUpvoteButton() {
         if self.gameDataStore.voteThreadMapping[threadId] != nil {
             if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 1 {
-                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!)
+                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!, userId: self.userDataStore.token!.userId)
             } else if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 0 {
-                self.gameDataStore.upvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.upvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             } else {
-                self.gameDataStore.switchUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.switchUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             }
         } else {
-            self.gameDataStore.addNewUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+            self.gameDataStore.addNewUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
         }
     }
     
     func onClickDownvoteButton() {
         if self.gameDataStore.voteThreadMapping[threadId] != nil {
             if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == -1 {
-                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!)
+                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!, userId: self.userDataStore.token!.userId)
             } else if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 0 {
-                self.gameDataStore.downvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.downvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             } else {
-                self.gameDataStore.switchDownvoteThread(access:  self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.switchDownvoteThread(access:  self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             }
         } else {
-            self.gameDataStore.addNewDownvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+            self.gameDataStore.addNewDownvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
         }
     }
     
@@ -73,10 +73,6 @@ struct ThreadRow : View {
     
     func isVotedDown() -> Bool {
         return self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == -1
-    }
-    
-    func addOrRemoveEmoji(emojiId: Int) {
-        self.gameDataStore.addEmojiByThreadId(access: self.userDataStore.token!.access, threadId: threadId, emojiId: emojiId, userId: self.userDataStore.token!.userId)
     }
     
     var body: some View {
@@ -102,7 +98,7 @@ struct ThreadRow : View {
             .frame(width: self.width, height: self.height * 0.045, alignment: .leading)
             .padding(.bottom, 10)
             
-            NavigationLink(destination: ThreadView(threadId: self.threadId)) {
+            NavigationLink(destination: ThreadView(threadId: self.threadId, gameId: self.gameId)) {
                 VStack(alignment: .leading) {
                     HStack {
                         if self.gameDataStore.threads[self.threadId]!.title.count > 0 {
@@ -114,12 +110,13 @@ struct ThreadRow : View {
                     }
                     if self.gameDataStore.threadsTextStorage[self.threadId] != nil {
                         FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: .constant(false), isFirstResponder: .constant(false), didBecomeFirstResponder: .constant(false), showFancyPantsEditorBar: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isOmniBar: false)
-                            .frame(width: self.width * 0.9, height: min(self.gameDataStore.threadsDesiredHeight[threadId]!, 200), alignment: .leading)
+                            .frame(width: self.width * 0.9, height: min(self.gameDataStore.threadsDesiredHeight[self.threadId]!, 200), alignment: .leading)
                     }
                 }
             }
             .buttonStyle(PlainButtonStyle())
-            
+            .padding(.bottom, 10)
+
             if self.gameDataStore.threadsImages[self.threadId] != nil && self.gameDataStore.threadsImages[self.threadId]!.count != 0 {
                 HStack(spacing: 10) {
                     ForEach(self.gameDataStore.threadsImages[self.threadId]!, id: \.self) { uiImage in
@@ -130,62 +127,21 @@ struct ThreadRow : View {
                             .frame(minWidth: self.width * 0.05, maxWidth: self.width * 0.25, minHeight: self.height * 0.1, maxHeight: self.height * 0.15, alignment: .center)
                     }
                 }
-                .padding(.vertical, 20)
+                .padding(.vertical, 10)
             }
             
-            HStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 20) {
                 HStack {
-                    Image(uiImage: UIImage(systemName: "bubble.left")!)
-                    Text(String(self.gameDataStore.threads[self.threadId]!.numSubtreeNodes))
-                        .font(.system(size: 16))
-                }
-                .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
-                
-                HStack(spacing: 5) {
-                    ForEach(self.gameDataStore.emojiArrByThreadId[threadId]!, id: \.self) { emojiId in
-                        HStack {
-                            Image(uiImage: self.gameDataStore.emojis[emojiId]!)
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            Text(String(self.gameDataStore.emojiCountByThreadId[self.threadId]![emojiId]!))
-                        }
-                        .frame(width: 40, height: 20)
-                        .background(self.gameDataStore.didReactToEmojiByThreadId[self.threadId]![emojiId]! == true ? Color.gray : Color.white)
+                    HStack {
+                        Image(uiImage: UIImage(systemName: "bubble.left")!)
+                        Text(String(self.gameDataStore.threads[self.threadId]!.numSubtreeNodes))
+                            .font(.system(size: 16))
                     }
+                    .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
                 }
                 
-                HStack {
-                    Button(action: {
-                        self.addOrRemoveEmoji(emojiId: 0)
-                    }) {
-                        Text("Add to emoji 1")
-                    }.buttonStyle(PlainButtonStyle())
-                    .background(Color(red: 238 / 255, green: 238 / 255, blue: 238 / 255))
-                    .cornerRadius(5)
-                    
-                    Button(action: {
-                        self.showEmojiModal.toggle()
-                    }) {
-                        Image(systemName: "plus.bubble.fill")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                        .padding(.all, 5)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .sheet(isPresented: $showEmojiModal) {
-                        EmojiModalView(showModal: self.$showEmojiModal)
-                            .environmentObject(self.gameDataStore)
-                    }
-                    .background(Color(red: 238 / 255, green: 238 / 255, blue: 238 / 255))
-                    .cornerRadius(5)
-                }
-                .padding(.vertical, 2)
-                .padding(.horizontal, 5)
-                .frame(alignment: .leading)
-                
-                Spacer()
+                EmojiListView(threadId: threadId, isInThreadView: false)
             }
-            .padding(.top, 10)
         }
         .padding(.all, 20)
         .onAppear() {

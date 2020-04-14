@@ -53,28 +53,28 @@ struct CommentView : View {
     func onClickUpvoteButton() {
         if self.gameDataStore.voteCommentMapping[commentId] != nil {
             if self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1 {
-                self.gameDataStore.deleteCommentVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!)
+                self.gameDataStore.deleteCommentVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!, userId: self.userDataStore.token!.userId)
             }  else if self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 0 {
-                self.gameDataStore.upvoteByExistingVoteIdComment(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteCommentMapping[commentId]!, comment: self.gameDataStore.comments[commentId]!)
+                self.gameDataStore.upvoteByExistingVoteIdComment(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteCommentMapping[commentId]!, comment: self.gameDataStore.comments[commentId]!, userId: self.userDataStore.token!.userId)
             } else {
-                self.gameDataStore.switchUpvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+                self.gameDataStore.switchUpvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!, userId: self.userDataStore.token!.userId)
             }
         } else {
-            self.gameDataStore.addNewUpvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+            self.gameDataStore.addNewUpvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!, userId: self.userDataStore.token!.userId)
         }
     }
     
     func onClickDownvoteButton() {
         if self.gameDataStore.voteCommentMapping[commentId] != nil {
             if self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1 {
-                self.gameDataStore.deleteCommentVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!)
+                self.gameDataStore.deleteCommentVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!, userId: self.userDataStore.token!.userId)
             } else if self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 0 {
-                self.gameDataStore.downvoteByExistingVoteIdComment(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteCommentMapping[commentId]!, comment: self.gameDataStore.comments[commentId]!)
+                self.gameDataStore.downvoteByExistingVoteIdComment(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteCommentMapping[commentId]!, comment: self.gameDataStore.comments[commentId]!, userId: self.userDataStore.token!.userId)
             } else {
-                self.gameDataStore.switchDownvoteComment(access:  self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+                self.gameDataStore.switchDownvoteComment(access:  self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!, userId: self.userDataStore.token!.userId)
             }
         } else {
-            self.gameDataStore.addNewDownvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!)
+            self.gameDataStore.addNewDownvoteComment(access: self.userDataStore.token!.access, comment: self.gameDataStore.comments[commentId]!, userId: self.userDataStore.token!.userId)
         }
     }
     
@@ -113,20 +113,18 @@ struct CommentView : View {
                                             Spacer()
                                             
                                             HStack {
-                                                Image(systemName: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                                Image(systemName: self.gameDataStore.voteCommentMapping[commentId] != nil && self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .onTapGesture() {
                                                         self.onClickUpvoteButton()
                                                 }
-                                                Text(self.gameDataStore.commentsVoteStringByCommentId[self.commentId]!)
-                                                    .font(.system(size: 14))
                                             }
                                             .frame(height: 16, alignment: .trailing)
                                             .padding(.trailing, 20)
                                             
                                             HStack {
-                                                Image(systemName: self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                                Image(systemName: self.gameDataStore.voteCommentMapping[commentId] != nil && self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .onTapGesture() {

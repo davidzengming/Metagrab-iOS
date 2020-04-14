@@ -52,6 +52,7 @@ struct ThreadView : View {
     @EnvironmentObject var userDataStore: UserDataStore
     
     var threadId: Int
+    var gameId: Int
     let placeholder = Image(systemName: "photo")
     let formatter = RelativeDateTimeFormatter()
     let outerPadding : CGFloat = 20
@@ -67,28 +68,28 @@ struct ThreadView : View {
     func onClickUpvoteButton() {
         if self.gameDataStore.voteThreadMapping[threadId] != nil {
             if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 1 {
-                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!)
+                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!, userId: self.userDataStore.token!.userId)
             } else if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 0 {
-                self.gameDataStore.upvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.upvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             } else {
-                self.gameDataStore.switchUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.switchUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             }
         } else {
-            self.gameDataStore.addNewUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+            self.gameDataStore.addNewUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
         }
     }
     
     func onClickDownvoteButton() {
         if self.gameDataStore.voteThreadMapping[threadId] != nil {
             if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == -1 {
-                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!)
+                self.gameDataStore.deleteThreadVote(access: self.userDataStore.token!.access, vote: self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!, userId: self.userDataStore.token!.userId)
             } else if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 0 {
-                self.gameDataStore.downvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.downvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[threadId]!, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             } else {
-                self.gameDataStore.switchDownvoteThread(access:  self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+                self.gameDataStore.switchDownvoteThread(access:  self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
             }
         } else {
-            self.gameDataStore.addNewDownvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!)
+            self.gameDataStore.addNewDownvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[threadId]!, userId: self.userDataStore.token!.userId)
         }
     }
     
@@ -99,7 +100,6 @@ struct ThreadView : View {
     func shareToSocialMedia() {
         
     }
-    
     
     func endEditing() {
         UIApplication.shared.endEditing()
@@ -124,7 +124,6 @@ struct ThreadView : View {
     func setReplyTargetToThread() {
         self.gameDataStore.isReplyBarReplyingToThreadByThreadId[threadId] = true
         self.gameDataStore.replyTargetCommentIdByThreadId[threadId] = -1
-
         self.toggleReplyBarActive()
     }
     
@@ -249,6 +248,8 @@ struct ThreadView : View {
                                     .frame(width: a.size.width - self.outerPadding * 2, height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
                                     .padding(.vertical, 35)
                                     
+                                    EmojiListView(threadId: self.threadId, isInThreadView: true)
+                                    
                                     if !self.gameDataStore.mainCommentListByThreadId[self.threadId]!.isEmpty {
                                         VStack(spacing: 0) {
                                             ForEach(self.gameDataStore.mainCommentListByThreadId[self.threadId]!, id: \.self) { commentId in
@@ -276,14 +277,21 @@ struct ThreadView : View {
                         self.isFirstResponder = false
                     }
                     
-                    VStack(spacing: 0) {
-                        FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: self.$showFancyPantsEditorBar, isNewContent: true, isThread: true, threadId: self.threadId, isOmniBar: true, submit: { self.submit() })
+                    if self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId]! == true {
+                        VStack {
+                            EmojiModalView(forumId: self.gameId, isThreadView: true)
+                        }
+                        .frame(width: a.size.width, height: 50)
+                        .background(Color.white)
+                    } else {
+                        VStack(spacing: 0) {
+                            FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: self.$showFancyPantsEditorBar, isNewContent: true, isThread: true, threadId: self.threadId, isOmniBar: true, submit: { self.submit() })
+                        }
+                        .frame(width: a.size.width, height: self.gameDataStore.keyboardHeight == 0 ? 50 : (self.gameDataStore.threadViewReplyBarDesiredHeight[self.threadId]! + 20 + 20 + 40))
+                        .background(Color.white)
                     }
-                    .frame(width: a.size.width, height: self.gameDataStore.keyboardHeight == 0 ? 50 : (self.gameDataStore.threadViewReplyBarDesiredHeight[self.threadId]! + 20 + 20 + 40))
-                    .background(Color.white)
                 }
                 .KeyboardAwarePadding()
-
             }
             .onAppear() {
                 self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId, refresh: true, userId: self.userDataStore.token!.userId)

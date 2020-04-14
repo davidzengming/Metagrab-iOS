@@ -39,7 +39,7 @@ struct NewThreadView: View {
     let maxNumImages = 3
     
     func submitThread() {
-        self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: dataDict, imagesArray: imagesArray)
+        self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: dataDict, imagesArray: imagesArray, userId: self.userDataStore.token!.userId)
         self.presentationMode.wrappedValue.dismiss()
     }
     

@@ -21,6 +21,7 @@ struct PopularGamesView: View {
     var body: some View {
         GeometryReader { a in
             VStack {
+                Text(self.userDataStore.username!)
                 // There's a bug with scrollview - list, using forEach for now
                 // Bug 2 - If there is only my VStack inside ScrollView, it does not appear until I have clicked/dragged near the area then it appears. Works fine with the HStack inside here for some reason.
                 ScrollView(.vertical, showsIndicators: true) {
