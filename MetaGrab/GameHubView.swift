@@ -8,29 +8,6 @@
 
 import SwiftUI
 
-struct FollowedGamesView: View {
-    @EnvironmentObject var gameDataStore: GameDataStore
-    @EnvironmentObject var userDataStore: UserDataStore
-    
-    var body: some View {
-        GeometryReader { a in
-            VStack {
-                if self.gameDataStore.followedGames.isEmpty != true {
-                    ScrollView {
-                        ForEach(self.gameDataStore.followedGames, id: \.self) { id in
-                            VStack {
-                                GameFeedIcon(game: self.gameDataStore.games[id]!)
-                                    .frame(width: a.size.width * 0.33, height: a.size.width * 0.33 * 0.618 / 0.55)
-                                Divider()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 struct GameHubView: View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
@@ -40,31 +17,48 @@ struct GameHubView: View {
         // UITableView.appearance().tableFooterView = UIView()
         // To remove all separators including the actual ones:
         UITableView.appearance().separatorStyle = .none
+        //        let navBarAppearance = UINavigationBar.appearance()
+        //
+        //        let kern = 2
+        //
+        //        navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white, NSAttributedString.Key.kern: kern]
+        //        navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white, NSAttributedString.Key.kern: kern]
+        //
     }
     
     var body: some View {
         NavigationView {
             TabView {
+                FrontHubView()
+                    .navigationBarTitle("Front")
+                    .navigationBarHidden(true)
+                    .tabItem {
+                        Image(systemName: "square.stack.3d.up.fill")
+                        Text("Front")
+                }
+                
                 PopularGamesView()
+                    .navigationBarTitle("Popular")
+                    .navigationBarHidden(true)
                     .tabItem {
                         Image(systemName: "flame.fill")
                         Text("Popular")
                 }
+                
                 TimelineGamesView()
+                    .navigationBarTitle("Upcoming")
+                    .navigationBarHidden(true)
                     .tabItem {
-                        Image(systemName: "gamecontroller.fill")
+                        Image(systemName: "hourglass.bottomhalf.fill")
                         Text("Upcoming")
                 }
-                FollowedGamesView()
-                    .tabItem {
-                        Image(systemName: "star.circle.fill")
-                        Text("Favourites")
-                }
             }
-            //.edgesIgnoringSafeArea(.top)
-            .onAppear() {
-                self.gameDataStore.fetchFollowGames(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
-                self.gameDataStore.loadEmojis()
+                //.edgesIgnoringSafeArea(.top)
+                .onAppear() {
+                    self.gameDataStore.fetchFollowGames(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
+                    self.gameDataStore.loadEmojis()
+                    self.gameDataStore.loadColors()
+                    self.gameDataStore.loadLeadingLineColors()
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())

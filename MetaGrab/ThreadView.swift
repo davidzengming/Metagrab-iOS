@@ -142,7 +142,8 @@ struct ThreadView : View {
     var body: some View {
         ZStack {
             Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
-                .edgesIgnoringSafeArea(.all)
+                    .edgesIgnoringSafeArea(.all)
+            
             GeometryReader { a in
                 VStack(spacing: 0) {
                     VStack(spacing: 0) {
@@ -172,13 +173,17 @@ struct ThreadView : View {
                                         }
                                     }
                                     .padding(.bottom, 20)
+//                                    .background(self.gameDataStore.isReplyBarReplyingToThreadByThreadId[self.threadId]!
+//                                        == true ? Color.gray : Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255))
                                     
                                     FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isFirstResponder: .constant(false), didBecomeFirstResponder: .constant(false), showFancyPantsEditorBar: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isOmniBar: false)
                                         .frame(width: a.size.width - self.outerPadding * 2, height: self.gameDataStore.threadsDesiredHeight[self.threadId]! + (self.isEditable ? 20 : 0))
-                                        .padding(.bottom, 20)
+                                        .padding(.bottom, 10)
                                         .onTapGesture {
                                             self.setReplyTargetToThread()
                                     }
+//                                    .background(self.gameDataStore.isReplyBarReplyingToThreadByThreadId[self.threadId]!
+//                                        == true ? Color.gray : Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255))
                                     
                                     if (self.gameDataStore.threadsImages[self.threadId] != nil) {
                                         HStack(spacing: 10) {
@@ -192,70 +197,55 @@ struct ThreadView : View {
                                         }
                                     }
                                     
-                                    HStack(spacing: 0) {
-                                        Spacer()
-                                        VStack {
-                                            Button(action: self.shareToSocialMedia) {
-                                                VStack {
-                                                    Image(systemName: "arrowshape.turn.up.right.fill")
-                                                    .resizable()
-                                                    Text("Share")
-                                                }
-                                                
-                                            }
-                                        }
-                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 8), height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
-                                        
-                                        Spacer()
-                                        VStack(alignment: .center) {
-                                            Button(action: self.scrollToOriginalThread) {
-                                                VStack {
-                                                    Image(systemName: "quote.bubble.fill")
-                                                    .resizable()
-                                                    Text(String(self.gameDataStore.threads[self.threadId]!.numChilds))
-                                                }
-                                            }
-                                        }
-                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 8), height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
-                                        
-                                        Spacer()
-                                        VStack(alignment: .center) {
-                                            Button(action: self.onClickUpvoteButton) {
-                                                VStack {
-                                                    Image(systemName: "hand.thumbsup.fill")
-                                                    .resizable()
-                                                    Text(self.gameDataStore.threadsVoteStringByThreadId[self.threadId]!)
-                                                }
-                                            }
-                                        }
-                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 8), height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
-                                        
-                                        Spacer()
-                                        VStack(alignment: .center) {
-                                            Button(action: self.onClickDownvoteButton) {
-                                                VStack {
-                                                    Image(systemName: "hand.thumbsdown.fill")
-                                                    .resizable()
-                                                    Text(self.gameDataStore.threadsDownvoteStringByThreadId[self.threadId]!)
-                                                }
-                                            }
-                                        }
-                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 8), height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
-                                        
-                                        Spacer()
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    .frame(width: a.size.width - self.outerPadding * 2, height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
-                                    .padding(.vertical, 35)
+                                    EmojiBarThreadView(threadId: self.threadId, isInThreadView: true)
+                                        .padding(.vertical, 20)
                                     
-                                    EmojiListView(threadId: self.threadId, isInThreadView: true)
+//                                    HStack(spacing: 0) {
+//                                        Spacer()
+//                                        VStack {
+//                                            Button(action: self.shareToSocialMedia) {
+//                                                VStack {
+//                                                    Image(systemName: "arrowshape.turn.up.right.fill")
+//                                                        .resizable()
+//                                                    Text("Share")
+//                                                }
+//
+//                                            }
+//                                        }
+//                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 16), height: ceil((a.size.width - self.outerPadding * 2) / 16) + 20)
+//
+//                                        Spacer()
+//                                        VStack(alignment: .center) {
+//                                            Button(action: self.scrollToOriginalThread) {
+//                                                VStack {
+//                                                    Image(systemName: "quote.bubble.fill")
+//                                                        .resizable()
+//                                                    Text(String(self.gameDataStore.threads[self.threadId]!.numChilds))
+//                                                }
+//                                            }
+//                                        }
+//                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 16), height: ceil((a.size.width - self.outerPadding * 2) / 16) + 20)
+//
+//                                        Spacer()
+//                                    }
+//                                    .buttonStyle(PlainButtonStyle())
+//                                    .frame(width: a.size.width - self.outerPadding * 2, height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
+//                                    .padding(.vertical, 35)
                                     
                                     if !self.gameDataStore.mainCommentListByThreadId[self.threadId]!.isEmpty {
                                         VStack(spacing: 0) {
                                             ForEach(self.gameDataStore.mainCommentListByThreadId[self.threadId]!, id: \.self) { commentId in
-                                                CommentView(ancestorThreadId: self.threadId, commentId: commentId, width: a.size.width - self.outerPadding * 2, height: a.size.height, leadPadding: 0, level: 0)
+                                                CommentView(ancestorThreadId: self.threadId, commentId: commentId, width: a.size.width - self.outerPadding * 2, height: a.size.height, leadPadding: 0, level: 0, omniBarDidBecomeFirstResponder: self.$didBecomeFirstResponder)
                                             }
                                         }
+                                    } else {
+                                        Divider()
+                                        
+                                        VStack {
+                                            Text("No one's here o__o")
+                                            Text("Be the first one to reply :D")
+                                        }
+                                        .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height / 2)
                                     }
                                     
                                     if self.gameDataStore.moreCommentsByThreadId[self.threadId] != nil && self.gameDataStore.moreCommentsByThreadId[self.threadId]!.count > 0 {
@@ -271,6 +261,7 @@ struct ThreadView : View {
                         }
                     }
                     .frame(width: a.size.width)
+                        
                     .onTapGesture {
                         self.endEditing()
                         self.didBecomeFirstResponder = false
@@ -279,21 +270,28 @@ struct ThreadView : View {
                     
                     if self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId]! == true {
                         VStack {
-                            EmojiModalView(forumId: self.gameId, isThreadView: true)
+                            EmojiPickerPopupView(parentForumId: self.gameId, ancestorThreadId: self.threadId)
                         }
-                        .frame(width: a.size.width, height: 50)
-                        .background(Color.white)
+                       
+                        .frame(width: a.size.width, height: a.size.height * 0.2)
+                        .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                        .cornerRadius(5, corners: [.topLeft, .topRight])
+                        .transition(.move(edge: .bottom))
+                        .animation(.spring())
                     } else {
                         VStack(spacing: 0) {
                             FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: self.$showFancyPantsEditorBar, isNewContent: true, isThread: true, threadId: self.threadId, isOmniBar: true, submit: { self.submit() })
                         }
                         .frame(width: a.size.width, height: self.gameDataStore.keyboardHeight == 0 ? 50 : (self.gameDataStore.threadViewReplyBarDesiredHeight[self.threadId]! + 20 + 20 + 40))
+                        .animation(.spring())
+                        .transition(.slide)
                         .background(Color.white)
                     }
                 }
                 .KeyboardAwarePadding()
             }
             .onAppear() {
+                self.didBecomeFirstResponder = false
                 self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId, refresh: true, userId: self.userDataStore.token!.userId)
                 self.gameDataStore.loadThreadIcons(thread: self.gameDataStore.threads[self.threadId]!)
             }

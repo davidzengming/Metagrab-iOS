@@ -20,5 +20,5 @@ struct Comment: Hashable, Codable, Identifiable {
     var numChilds: Int
     var numSubtreeNodes: Int
     var created: Date
-    var emojis: Emojis?
+//    var emojis: Emojis?
 }

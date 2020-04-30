@@ -17,6 +17,7 @@ struct MoreCommentsView: View {
     var leadLineWidth: CGFloat
     var staticPadding: CGFloat
     var verticalPadding: CGFloat
+    var level: Int
     
     func getNumChildCommentsNotLoaded() -> Int {
         return self.gameDataStore.comments[self.commentId]!.numSubtreeNodes - self.gameDataStore.visibleChildCommentsNum[self.commentId]!
@@ -41,7 +42,7 @@ struct MoreCommentsView: View {
             
             HStack(spacing: 0) {
                 RoundedRectangle(cornerRadius: 25, style: .continuous)
-                    .fill(Color.red)
+                    .fill(self.gameDataStore.leadingLineColors[self.level % self.gameDataStore.leadingLineColors.count])
                     .frame(width: self.leadLineWidth, height: 20)
                     .padding(.trailing, 10)
                 

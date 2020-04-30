@@ -116,7 +116,7 @@ struct ThreadRow : View {
             }
             .buttonStyle(PlainButtonStyle())
             .padding(.bottom, 10)
-
+            
             if self.gameDataStore.threadsImages[self.threadId] != nil && self.gameDataStore.threadsImages[self.threadId]!.count != 0 {
                 HStack(spacing: 10) {
                     ForEach(self.gameDataStore.threadsImages[self.threadId]!, id: \.self) { uiImage in
@@ -140,7 +140,7 @@ struct ThreadRow : View {
                     .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
                 }
                 
-                EmojiListView(threadId: threadId, isInThreadView: false)
+                EmojiBarThreadView(threadId: threadId, isInThreadView: false)
             }
         }
         .padding(.all, 20)

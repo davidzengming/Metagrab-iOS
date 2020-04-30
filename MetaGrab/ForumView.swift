@@ -38,6 +38,14 @@ struct ForumView : View {
         UITableView.appearance().separatorStyle = .none
     }
     
+    func followGame() {
+        self.gameDataStore.followGame(access: userDataStore.token!.access, game: self.gameDataStore.games[gameId]!)
+    }
+    
+    func unfollowGame() {
+        self.gameDataStore.unfollowGame(access: userDataStore.token!.access, game: self.gameDataStore.games[gameId]!)
+    }
+    
     func fetchNextPage() {
         self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!, userId: self.userDataStore.token!.userId)
     }
@@ -51,7 +59,7 @@ struct ForumView : View {
                             VStack {
                                 HStack {
                                     if self.gameDataStore.gameBannerImage[self.gameId] != nil {
-                                        Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
+                                        Image(uiImage: self.gameDataStore.gameIcons[self.gameId]!)
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
                                             .frame(width: a.size.width * 0.13, height: a.size.width * 0.13, alignment: .leading)
@@ -61,16 +69,31 @@ struct ForumView : View {
                                                     .stroke(Color.white, lineWidth: 2)
                                         )
                                     }
-                                    VStack {
+                                    VStack(alignment: .leading) {
                                         Text(self.gameDataStore.games[self.gameId]!.name)
-                                        .foregroundColor(Color.white)
-                                        .bold()
+                                            .foregroundColor(Color.white)
+                                            .bold()
                                         
-                                        Text(self.gameDataStore.games[self.gameId]!.developer.name)
-                                        .foregroundColor(Color.white)
-                                        .bold()
+                                        Text(self.gameDataStore.games[self.gameId]!.genre.name)
+                                            .foregroundColor(Color.white)
+                                            .bold()
                                     }
                                     Spacer()
+                                    
+                                    Text("Follow")
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 10)
+                                        .foregroundColor(self.gameDataStore.isFollowed[self.gameId]! == true ? Color.white : Color.black)
+                                        .background(self.gameDataStore.isFollowed[self.gameId]! == true ? Color.black : Color.white)
+                                        .cornerRadius(30)
+                                        .shadow(radius: 5)
+                                        .onTapGesture {
+                                            if self.gameDataStore.isFollowed[self.gameId]! == true {
+                                                self.unfollowGame()
+                                            } else {
+                                                self.followGame()
+                                            }
+                                    }
                                 }
                                 .frame(width: a.size.width * 0.8)
                             }
@@ -80,22 +103,19 @@ struct ForumView : View {
                             ZStack {
                                 VStack {
                                     Spacer()
-                                    VStack {
-                                        Text("hi")
-                                    }
+                                    Color.gray
                                         .frame(width: a.size.width, height: a.size.height * 0.06)
-                                    .background(Color(.lightGray))
                                 }
                                 
                                 VStack {
                                     Spacer()
                                     VStack {
-                                        Text("Most popular emote of today: XD")
+                                        Text("Number of threads: " + String(self.gameDataStore.games[self.gameId]!.threadCount))
                                     }
                                     .frame(width: a.size.width * 0.8, height: a.size.height * 0.075)
                                     .background(Color.white)
-                                        .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
-                                        
+                                    .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
+                                    
                                     Spacer()
                                 }
                             }
@@ -110,29 +130,53 @@ struct ForumView : View {
                                             Divider()
                                         }
                                     }
+                                } else {
+                                    VStack {
+                                        Text("Be the first explorer to post in this game :D")
+                                    }
+                                    .frame(width: a.size.width, height: a.size.height)
                                 }
                             }
                             .background(Color.white)
                             .frame(width: a.size.width)
-                            .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
-                            .background(Color(.lightGray))
+                            .background(self.gameDataStore.colors["darkButNotBlack"])
+                            
+                            if self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 {
+                                HStack(alignment: .center) {
+                                    Spacer()
+                                    Image(systemName: "chevron.compact.down")
+                                        .foregroundColor(Color.white)
+                                        .padding(.top, 10)
+                                        .padding(.horizontal, 20)
+                                        .padding(.bottom, 10)
+                                    Spacer()
+                                    Image(systemName: "chevron.compact.down")
+                                        .foregroundColor(Color.white)
+                                        .padding(.top, 10)
+                                        .padding(.horizontal, 20)
+                                        .padding(.bottom, 10)
+                                    Spacer()
+                                    Image(systemName: "chevron.compact.down")
+                                        .foregroundColor(Color.white)
+                                        .padding(.top, 10)
+                                        .padding(.horizontal, 20)
+                                        .padding(.bottom, 10)
+                                    Spacer()
+                                }
+                                    
+                                .frame(width: a.size.width, height: a.size.height * 0.05)
+                                .background(Color.yellow)
+                                .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
+                                .shadow(radius: 5)
+                                .onTapGesture {
+                                    self.fetchNextPage()
+                                }
+                            }
                         }
                     }
                     .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
-                    
-                    if self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 {
-                        Image(uiImage: UIImage(systemName: "chevron.compact.down")!)
-                            .onTapGesture {
-                                self.fetchNextPage()
-                        }
-                        .padding(.top, 10)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 30)
-                        .background(Color.yellow)
-                        .frame(height: a.size.height * 0.05)
-                    }
                 }
-                
+                    
                 .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Board"), displayMode: .inline)
                 .onAppear() {
                     if self.gameDataStore.isBackToGamesView {
@@ -151,16 +195,19 @@ struct ForumView : View {
                 
                 if self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameId] == true {
                     VStack {
-                        EmojiModalView(forumId: self.gameId, isThreadView: false)
-                        .frame(width: a.size.width, height: a.size.height * 0.3)
-                        .KeyboardAwarePadding()
+                        EmojiPickerPopupView(parentForumId: self.gameId)
+                            .frame(width: a.size.width, height: a.size.height * 0.2)
+                            .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                            .cornerRadius(5, corners: [.topLeft, .topRight])
+                            .KeyboardAwarePadding()
                     }
                     .background(Color.white)
+                    .transition(.move(edge: .bottom))
+                    .animation(.spring())
                 }
-                
             }
         }
-        .background(Image(uiImage: UIImage(named: "background")!).resizable(resizingMode: .tile))
+        .background(Image("background").resizable(resizingMode: .tile))
         .edgesIgnoringSafeArea(.bottom)
     }
 }

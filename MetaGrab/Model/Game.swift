@@ -19,4 +19,5 @@ struct Game: Hashable, Codable, Identifiable {
     var genre: Genre
     var icon: String
     var banner: String
+    var threadCount: Int
 }

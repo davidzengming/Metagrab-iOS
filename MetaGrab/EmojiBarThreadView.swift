@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct EmojiListView: View {
+struct EmojiBarThreadView: View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
     
@@ -25,6 +25,11 @@ struct EmojiListView: View {
     
     func onClickAddEmojiBubble() {
         self.gameDataStore.addEmojiThreadIdByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = self.threadId
+        
+        // check if action was initiated in a thread view, if so change state to show emoji modal is initiated by the thread
+        if self.isInThreadView == true {
+            self.gameDataStore.addEmojiViewLastClickedIsThread[threadId] = true
+        }
         
         if self.isInThreadView == true {
             self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] = true
@@ -106,7 +111,7 @@ struct EmojiListView: View {
                                     }
                                     .frame(width: 40, height: 20)
                                     .padding(5)
-                                    .background(self.gameDataStore.didReactToEmojiByThreadId[self.threadId]![emojiId]! == true ? Color.gray : Color.white)
+                                    .background(self.gameDataStore.didReactToEmojiByThreadId[self.threadId]![emojiId]! == true ? Color.gray : Color(.lightGray))
                                     .cornerRadius(5)
                                     .onTapGesture {
                                         self.onClickEmoji(emojiId: emojiId)

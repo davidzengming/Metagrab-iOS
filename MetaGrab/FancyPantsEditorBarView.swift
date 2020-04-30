@@ -140,7 +140,6 @@ struct FancyPantsEditorView: View {
                                 .padding(.leading, 20)
                             
                             Spacer()
-                            
 
                             if self.gameDataStore.keyboardHeight != 0 {
                                 Button(action: self.submit!, label: {

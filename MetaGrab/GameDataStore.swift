@@ -15,6 +15,30 @@ final class GameDataStore: ObservableObject {
     let objectWillChange = PassthroughSubject<Void, Never>()
     let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "dzengcdn", apiKey: "348513889264333", secure: true))
     
+    var myGameVisitHistory = [Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var colors = [String: Color]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var uiColors = [String: UIColor]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var leadingLineColors = [Color]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     // Game and Icon States
     var games = [Int: Game]() {
         willSet {
@@ -52,6 +76,12 @@ final class GameDataStore: ObservableObject {
     }
     
     var sortedGamesListByDayMonthYear = [Int: [Int: [Int: [Int]]]]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var hasGameByYear = [Int: Bool]() {
         willSet {
             objectWillChange.send()
         }
@@ -137,18 +167,6 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var threadsVoteStringByThreadId = [Int: String]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    
-    var threadsDownvoteStringByThreadId = [Int: String]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    
     // Comments
     var comments = [Int: Comment]() {
         willSet {
@@ -197,12 +215,6 @@ final class GameDataStore: ObservableObject {
     }
     
     var relativeDateStringByCommentId = [Int: String]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    
-    var commentsVoteStringByCommentId = [Int: String]() {
         willSet {
             objectWillChange.send()
         }
@@ -297,11 +309,11 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var emojiArrByCommentId = [Int: [[Int]]]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
+    //    var emojiArrByCommentId = [Int: [[Int]]]() {
+    //        willSet {
+    //            objectWillChange.send()
+    //        }
+    //    }
     
     var emojiCountByThreadId = [Int: [Int: Int]]() {
         willSet {
@@ -309,11 +321,11 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var emojiCountByCommentId = [Int: [Int: Int]]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
+    //    var emojiCountByCommentId = [Int: [Int: Int]]() {
+    //        willSet {
+    //            objectWillChange.send()
+    //        }
+    //    }
     
     var otherUsersArrReactToEmojiByThreadId = [Int: [Int: [Int]]]() {
         willSet {
@@ -321,23 +333,23 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var otherUsersArrReactToEmojiByCommentId = [Int: [Int: [Int]]]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    
+    //    var otherUsersArrReactToEmojiByCommentId = [Int: [Int: [Int]]]() {
+    //        willSet {
+    //            objectWillChange.send()
+    //        }
+    //    }
+    //
     var otherUsersSetReactToEmojiByThreadId = [Int: [Int: Set<Int>]]() {
         willSet {
             objectWillChange.send()
         }
     }
     
-    var otherUsersSetReactToEmojiByCommentId = [Int: [Int: Set<Int>]]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
+    //    var otherUsersSetReactToEmojiByCommentId = [Int: [Int: Set<Int>]]() {
+    //        willSet {
+    //            objectWillChange.send()
+    //        }
+    //    }
     
     var didReactToEmojiByThreadId = [Int: [Int: Bool]]() {
         willSet {
@@ -345,12 +357,12 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var didReactToEmojiByCommentId = [Int: [Int: Bool]]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
+    //    var didReactToEmojiByCommentId = [Int: [Int: Bool]]() {
+    //        willSet {
+    //            objectWillChange.send()
+    //        }
+    //    }
+    
     var isAddEmojiModalActiveByForumId = [Int: Bool]() {
         willSet {
             objectWillChange.send()
@@ -369,16 +381,79 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    var addEmojiViewLastClickedIsThread = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     var addEmojiThreadIdByForumId = [Int: Int]() {
         willSet {
             objectWillChange.send()
         }
     }
     
-    var addEmojiCommentIdByForumView = [Int: Int]() {
+    //    var addEmojiCommentIdByThreadId = [Int: Int]() {
+    //        willSet {
+    //            objectWillChange.send()
+    //        }
+    //    }
+    
+    var voteCountStringByCommentId = [Int: String]() {
         willSet {
             objectWillChange.send()
         }
+    }
+    
+    func hexStringToUIColor (hex:String) -> UIColor {
+        var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+
+        if (cString.hasPrefix("#")) {
+            cString.remove(at: cString.startIndex)
+        }
+
+        if ((cString.count) != 6) {
+            return UIColor.gray
+        }
+
+        var rgbValue:UInt64 = 0
+        Scanner(string: cString).scanHexInt64(&rgbValue)
+
+        return UIColor(
+            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+            alpha: CGFloat(1.0)
+        )
+    }
+    
+    func loadLeadingLineColors() {
+        if self.leadingLineColors.count != 0 {
+            return
+        }
+        
+        var leadingLineColors : [Color] = []
+        leadingLineColors.append(Color.purple)
+        leadingLineColors.append(Color.red)
+        leadingLineColors.append(Color.orange)
+        leadingLineColors.append(Color.yellow)
+        leadingLineColors.append(Color.green)
+        self.leadingLineColors = leadingLineColors
+        return
+    }
+    
+    func loadColors() {
+        if self.colors.count != 0 {
+            return
+        }
+        
+        self.colors["notQuiteBlack"] = Color(hexStringToUIColor(hex: "#23272a"))
+        self.colors["darkButNotBlack"] = Color(hexStringToUIColor(hex: "#2C2F33"))
+        self.colors["blurple"] = Color(hexStringToUIColor(hex: "#7289DA"))
+        
+        self.uiColors["notQuiteBlack"] = hexStringToUIColor(hex: "#23272a")
+        self.uiColors["darkButNotBlack"] = hexStringToUIColor(hex: "#2C2F33")
+        self.uiColors["blurple"] = hexStringToUIColor(hex: "#7289DA")
     }
     
     func loadEmojis() {
@@ -397,6 +472,7 @@ final class GameDataStore: ObservableObject {
     let maxEmojiCountPerRow = 5
     
     func getInitialEmojiArray(emojiArr: [Int], threadId: Int?, commentId: Int?) -> [[Int]] {
+        
         var res = [[Int]]()
         res.append([])
         
@@ -422,7 +498,9 @@ final class GameDataStore: ObservableObject {
     }
     
     func getShiftedArrayForAddEmoji(emojiId: Int, threadId: Int?, commentId: Int?) -> [[Int]] {
-        let arr = threadId != nil ? self.emojiArrByThreadId[threadId!]! : self.emojiArrByCommentId[commentId!]!
+        let arr = self.emojiArrByThreadId[threadId!]!
+        
+        //        let arr = threadId != nil ? self.emojiArrByThreadId[threadId!]! : self.emojiArrByCommentId[commentId!]!
         var res = [[Int]]()
         
         if emojiId == 0 {
@@ -446,7 +524,9 @@ final class GameDataStore: ObservableObject {
                 }
             }
         } else if emojiId == 1 {
-            if (threadId != nil ? self.emojiCountByThreadId[threadId!]![0] != nil : self.emojiCountByCommentId[commentId!]![0]! != nil) {
+            //            if (threadId != nil ? self.emojiCountByThreadId[threadId!]![0] != nil : self.emojiCountByCommentId[commentId!]![0]! != nil) {
+            
+            if (self.emojiCountByThreadId[threadId!]![0] != nil) {
                 res.append([0, 1])
                 for i in 0 ..< arr.count {
                     for j in 0 ..< arr[i].count {
@@ -512,8 +592,11 @@ final class GameDataStore: ObservableObject {
     }
     
     func getShiftedArrayForRemoveEmoji(emojiId: Int, threadId: Int?, commentId: Int?) -> [[Int]] {
-        let arr = threadId != nil ? self.emojiArrByThreadId[threadId!]! : self.emojiArrByCommentId[commentId!]!
-
+        
+        
+        let arr = self.emojiArrByThreadId[threadId!]!
+        //        let arr = threadId != nil ? self.emojiArrByThreadId[threadId!]! : self.emojiArrByCommentId[commentId!]!
+        
         var res = [[Int]]()
         res.append([])
         
@@ -574,26 +657,26 @@ final class GameDataStore: ObservableObject {
                 self.emojiArrByThreadId[threadId!]! = self.getShiftedArrayForAddEmoji(emojiId: emojiId, threadId: threadId, commentId: commentId)
             } else {
                 
-                var emojiAlreadyExists = false
-                if self.emojiCountByCommentId[commentId!]![emojiId] != nil {
-                    emojiAlreadyExists = true
-                }
-                
-                self.emojiCountByCommentId[commentId!]![emojiId] = newEmojiCount
-                
-                self.didReactToEmojiByCommentId[commentId!]![emojiId] = true
-                
-                if self.otherUsersSetReactToEmojiByCommentId[commentId!]![emojiId] == nil {
-                    self.otherUsersSetReactToEmojiByCommentId[commentId!]![emojiId] = []
-                }
-                
-                self.otherUsersSetReactToEmojiByCommentId[commentId!]![emojiId]!.insert(userId)
-                
-                if emojiAlreadyExists == true {
-                    print("Emoji already exists in array, not adding a new icon.")
-                    return
-                }
-                self.emojiArrByThreadId[commentId!]! = self.getShiftedArrayForAddEmoji(emojiId: emojiId, threadId: threadId, commentId: commentId)
+                //                var emojiAlreadyExists = false
+                //                if self.emojiCountByCommentId[commentId!]![emojiId] != nil {
+                //                    emojiAlreadyExists = true
+                //                }
+                //
+                //                self.emojiCountByCommentId[commentId!]![emojiId] = newEmojiCount
+                //
+                //                self.didReactToEmojiByCommentId[commentId!]![emojiId] = true
+                //
+                //                if self.otherUsersSetReactToEmojiByCommentId[commentId!]![emojiId] == nil {
+                //                    self.otherUsersSetReactToEmojiByCommentId[commentId!]![emojiId] = []
+                //                }
+                //
+                //                self.otherUsersSetReactToEmojiByCommentId[commentId!]![emojiId]!.insert(userId)
+                //
+                //                if emojiAlreadyExists == true {
+                //                    print("Emoji already exists in array, not adding a new icon.")
+                //                    return
+                //                }
+                //                self.emojiArrByCommentId[commentId!]! = self.getShiftedArrayForAddEmoji(emojiId: emojiId, threadId: threadId, commentId: commentId)
             }
         }
     }
@@ -610,14 +693,14 @@ final class GameDataStore: ObservableObject {
                     self.emojiCountByThreadId[threadId!]![emojiId] = newEmojiCount
                 }
             } else {
-                if newEmojiCount == 0 {
-                    self.emojiArrByCommentId[commentId!] = self.getShiftedArrayForRemoveEmoji(emojiId: emojiId, threadId: threadId, commentId: commentId)
-                    self.emojiCountByCommentId[commentId!]!.removeValue(forKey: emojiId)
-                    self.didReactToEmojiByCommentId[commentId!]!.removeValue(forKey: emojiId)
-                } else {
-                    self.didReactToEmojiByCommentId[commentId!]![emojiId] = false
-                    self.emojiCountByCommentId[commentId!]![emojiId] = newEmojiCount
-                }
+                //                if newEmojiCount == 0 {
+                //                    self.emojiArrByCommentId[commentId!] = self.getShiftedArrayForRemoveEmoji(emojiId: emojiId, threadId: threadId, commentId: commentId)
+                //                    self.emojiCountByCommentId[commentId!]!.removeValue(forKey: emojiId)
+                //                    self.didReactToEmojiByCommentId[commentId!]!.removeValue(forKey: emojiId)
+                //                } else {
+                //                    self.didReactToEmojiByCommentId[commentId!]![emojiId] = false
+                //                    self.emojiCountByCommentId[commentId!]![emojiId] = newEmojiCount
+                //                }
             }
         }
     }
@@ -816,8 +899,6 @@ final class GameDataStore: ObservableObject {
                             self.threadsTextStorage[tempThread.id] = content
                             
                             self.relativeDateStringByThreadId[tempThread.id] = RelativeDateTimeFormatter().localizedString(for: tempThread.created, relativeTo: Date())
-                            self.threadsVoteStringByThreadId[tempThread.id] = self.transformVotesString(points: self.threads[tempThread.id]!.upvotes)
-                            self.threadsDownvoteStringByThreadId[tempThread.id] = self.transformVotesString(points: self.threads[tempThread.id]!.downvotes)
                             
                             // emoji stuff
                             self.emojiArrByThreadId[tempThread.id] = [[]]
@@ -833,20 +914,20 @@ final class GameDataStore: ObservableObject {
                             self.didReactToEmojiByThreadId[tempThread.id] = [:]
                             self.otherUsersSetReactToEmojiByThreadId[tempThread.id] = [:]
                             
+                            self.emojiArrByThreadId[tempThread.id] = []
+                            self.emojiArrByThreadId[tempThread.id]!.append([])
                             for emojiId in tempThread.emojis.emojisIdArr {
                                 self.otherUsersArrReactToEmojiByThreadId[tempThread.id]![emojiId] = tempThread.emojis.userIdsArrPerEmojiDict[emojiId]
                                 self.otherUsersSetReactToEmojiByThreadId[tempThread.id]![emojiId] = []
-                                self.didReactToEmojiByThreadId[tempThread.id]![emojiId] = false
+                                self.didReactToEmojiByThreadId[tempThread.id]![emojiId] = true
                                 
-                                for reactedUserId in self.otherUsersArrReactToEmojiByThreadId[tempThread.id]![emojiId]! {
-                                    if userId == reactedUserId {
-                                        self.didReactToEmojiByThreadId[tempThread.id]![emojiId] = true
-                                    } else {
-                                        self.didReactToEmojiByThreadId[tempThread.id]![emojiId] = false
-                                        self.otherUsersSetReactToEmojiByThreadId[tempThread.id]![emojiId]!.insert(reactedUserId)
-                                    }
-                                }
+                                self.emojiArrByThreadId[tempThread.id]![0].append(emojiId)
                             }
+                            self.emojiArrByThreadId[tempThread.id]![0].append(999)
+                            
+                            self.isAddEmojiModalActiveByThreadViewId[tempThread.id] = false
+                            self.isReplyBarReplyingToThreadByThreadId[tempThread.id] = true
+                            self.replyTargetCommentIdByThreadId[tempThread.id] = -1
                             
                             self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
                             
@@ -924,7 +1005,36 @@ final class GameDataStore: ObservableObject {
                         self.voteCommentMapping[tempMainComment.id] = tempVote.id
                         self.relativeDateStringByCommentId[tempMainComment.id] = RelativeDateTimeFormatter().localizedString(for: tempMainComment.created, relativeTo: Date())
                         
-                        self.commentsVoteStringByCommentId[tempMainComment.id] = self.transformVotesString(points: self.comments[tempMainComment.id]!.upvotes)
+                        self.visibleChildCommentsNum[tempMainComment.id] = 0
+                        self.voteCountStringByCommentId[tempMainComment.id] = self.transformVotesString(points: 1)
+                        
+                        //                        // emoji stuff
+                        //                        self.emojiArrByCommentId[tempMainComment.id] = [[]]
+                        //
+                        //                        for emojiId in tempMainComment.emojis!.emojisIdArr {
+                        //                            if emojiId == 0 || emojiId == 1 {
+                        //                                continue
+                        //                            }
+                        //                            self.emojiArrByCommentId[tempMainComment.id] = self.getShiftedArrayForAddEmoji(emojiId: emojiId, threadId: nil, commentId: tempMainComment.id)
+                        //                        }
+                        //
+                        //                        self.emojiCountByCommentId[tempMainComment.id] = tempMainComment.emojis?.emojiReactionCountDict
+                        //                        self.otherUsersArrReactToEmojiByCommentId[tempMainComment.id] = [:]
+                        //                        self.didReactToEmojiByCommentId[tempMainComment.id] = [:]
+                        //                        self.otherUsersSetReactToEmojiByCommentId[tempMainComment.id] = [:]
+                        //
+                        //                        self.emojiArrByCommentId[tempMainComment.id] = []
+                        //                        self.emojiArrByCommentId[tempMainComment.id]!.append([])
+                        //                        for emojiId in tempMainComment.emojis!.emojisIdArr {
+                        //                            self.otherUsersArrReactToEmojiByCommentId[tempMainComment.id]![emojiId] = tempMainComment.emojis!.userIdsArrPerEmojiDict[emojiId]
+                        //                            self.otherUsersSetReactToEmojiByCommentId[tempMainComment.id]![emojiId] = []
+                        //                            self.didReactToEmojiByCommentId[tempMainComment.id]![emojiId] = true
+                        //
+                        //                            self.emojiArrByCommentId[tempMainComment.id]![0].append(emojiId)
+                        //                        }
+                        //                        self.emojiArrByCommentId[tempMainComment.id]![0].append(999)
+                        
+                        //                        self.isAddEmojiModalActiveByThreadViewId[tempMainComment.id] = false
                         self.mainCommentListByThreadId[tempMainComment.parentThread!]!.insert(tempMainComment.id, at: 0)
                     }
                 }
@@ -970,8 +1080,40 @@ final class GameDataStore: ObservableObject {
                         self.voteCommentMapping[tempChildComment.id] = tempVote.id
                         
                         self.visibleChildCommentsNum[tempChildComment.parentPost!]! += 1
+                        self.visibleChildCommentsNum[tempChildComment.id] = 0
+                        self.relativeDateStringByCommentId[tempChildComment.id] = RelativeDateTimeFormatter().localizedString(for: tempChildComment.created, relativeTo: Date())
+                        self.voteCountStringByCommentId[tempChildComment.id] = self.transformVotesString(points: 1)
+                        
                         self.commentNextPageStartIndex[tempChildComment.id] = -1
-                        self.commentsVoteStringByCommentId[tempChildComment.id] = self.transformVotesString(points: self.comments[tempChildComment.id]!.upvotes)
+                        
+                        //                        // emoji stuff
+                        //                        self.emojiArrByCommentId[tempChildComment.id] = [[]]
+                        //
+                        //                        for emojiId in tempChildComment.emojis!.emojisIdArr {
+                        //                            if emojiId == 0 || emojiId == 1 {
+                        //                                continue
+                        //                            }
+                        //                            self.emojiArrByCommentId[tempChildComment.id] = self.getShiftedArrayForAddEmoji(emojiId: emojiId, threadId: nil, commentId: tempChildComment.id)
+                        //                        }
+                        //
+                        //                        self.emojiCountByCommentId[tempChildComment.id] = tempChildComment.emojis?.emojiReactionCountDict
+                        //                        self.otherUsersArrReactToEmojiByCommentId[tempChildComment.id] = [:]
+                        //                        self.didReactToEmojiByCommentId[tempChildComment.id] = [:]
+                        //                        self.otherUsersSetReactToEmojiByCommentId[tempChildComment.id] = [:]
+                        //
+                        //                        self.emojiArrByCommentId[tempChildComment.id] = []
+                        //                        self.emojiArrByCommentId[tempChildComment.id]!.append([])
+                        //                        for emojiId in tempChildComment.emojis!.emojisIdArr {
+                        //                            self.otherUsersArrReactToEmojiByCommentId[tempChildComment.id]![emojiId] = tempChildComment.emojis!.userIdsArrPerEmojiDict[emojiId]
+                        //                            self.otherUsersSetReactToEmojiByCommentId[tempChildComment.id]![emojiId] = []
+                        //                            self.didReactToEmojiByCommentId[tempChildComment.id]![emojiId] = true
+                        //
+                        //                            self.emojiArrByCommentId[tempChildComment.id]![0].append(emojiId)
+                        //                        }
+                        //                        self.emojiArrByCommentId[tempChildComment.id]![0].append(999)
+                        //
+                        ////                    self.isAddEmojiModalActiveByThreadViewId[tempMainComment.id] = false
+                        
                         self.childCommentListByParentCommentId[tempChildComment.parentPost!]!.insert(tempChildComment.id, at: 0)
                     }
                 }
@@ -1010,6 +1152,7 @@ final class GameDataStore: ObservableObject {
             if let data = data {
                 if let jsonString = String(data: data, encoding: .utf8) {
                     let commentLoadTree: CommentLoadTree = load(jsonData: jsonString.data(using: .utf8)!)
+                    
                     DispatchQueue.main.async {
                         if commentLoadTree.addedComments.count == 0 {
                             self.commentNextPageStartIndex[threadId] = -1
@@ -1052,29 +1195,48 @@ final class GameDataStore: ObservableObject {
                             }
                             
                             self.relativeDateStringByCommentId[comment.id] = RelativeDateTimeFormatter().localizedString(for: comment.created, relativeTo: Date())
-                            self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
                             
-//                            self.emojiArrByCommentId[comment.id] = comment.emojis!.emojisIdArr
-//                            self.emojiCountByCommentId[comment.id] = comment.emojis!.emojiReactionCountDict
-//                            self.otherUsersArrReactToEmojiByCommentId[comment.id] = [:]
-//                            self.didReactToEmojiByCommentId[comment.id] = [:]
-//
-//                            self.otherUsersSetReactToEmojiByCommentId[comment.id] = [:]
-//
-//                            for emojiId in self.emojiArrByCommentId[comment.id]! {
-//                                self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId] = comment.emojis!.userIdsArrPerEmojiDict[emojiId]
-//                                self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
-//                                self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId] = []
-//                                for reactedUserId in self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId]! {
-//                                    self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId]!.insert(reactedUserId)
-//
-//                                    if userId == reactedUserId {
-//                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = true
-//                                    } else {
-//                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
-//                                    }
-//                                }
-//                            }
+                            self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: comment.upvotes - comment.downvotes)
+                            
+                            //                            self.emojiCountByCommentId[comment.id] = comment.emojis!.emojiReactionCountDict
+                            //
+                            //                            self.otherUsersArrReactToEmojiByCommentId[comment.id] = [:]
+                            //                            self.otherUsersSetReactToEmojiByCommentId[comment.id] = [:]
+                            //                            self.didReactToEmojiByCommentId[comment.id] = [:]
+                            //
+                            //                            for emojiId in comment.emojis!.emojisIdArr {
+                            //                                self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId] = []
+                            //                                self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId] = []
+                            //
+                            //                                self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
+                            //
+                            //                                for reactedUserId in comment.emojis!.userIdsArrPerEmojiDict[emojiId]! {
+                            //                                    if userId == reactedUserId {
+                            //                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = true
+                            //                                    } else {
+                            //                                        self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId]!.insert(reactedUserId)
+                            //                                        self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId]!.append(reactedUserId)
+                            //                                    }
+                            //                                }
+                            //                            }
+                            //
+                            //                            self.emojiArrByCommentId[comment.id] = []
+                            //                            var emojiArrToBeAdded = [Int]()
+                            //
+                            //                            for emojiId in comment.emojis!.emojisIdArr {
+                            //                                if emojiId == 0 {
+                            //                                    emojiArrToBeAdded.insert(emojiId, at: 0)
+                            //                                } else if emojiId == 1 {
+                            //                                    if emojiArrToBeAdded.count != 0 && emojiArrToBeAdded[0] == 0 {
+                            //                                        emojiArrToBeAdded.insert(1, at: 1)
+                            //                                    } else {
+                            //                                        emojiArrToBeAdded.insert(1, at: 0)
+                            //                                    }
+                            //                                } else {
+                            //                                    emojiArrToBeAdded.append(emojiId)
+                            //                                }
+                            //                            }
+                            //                            self.emojiArrByCommentId[comment.id] = self.getInitialEmojiArray(emojiArr: emojiArrToBeAdded, threadId: nil, commentId: comment.id)
                             
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
                         }
@@ -1097,8 +1259,6 @@ final class GameDataStore: ObservableObject {
                             self.votes[vote.id] = vote
                             self.voteCommentMapping[vote.comment!] = vote.id
                         }
-                        
-                        print(self.voteCommentMapping, commentLoadTree.addedVotes)
                         
                         for user in commentLoadTree.usersResponse {
                             self.users[user.id] = user
@@ -1156,32 +1316,49 @@ final class GameDataStore: ObservableObject {
                             self.visibleChildCommentsNum[comment.id] = 0
                             
                             self.relativeDateStringByCommentId[comment.id] = RelativeDateTimeFormatter().localizedString(for: comment.created, relativeTo: Date())
-                            self.commentsVoteStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes)
+                            
+                            self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: comment.upvotes - comment.downvotes)
+                            //                            self.emojiCountByCommentId[comment.id] = comment.emojis!.emojiReactionCountDict
+                            //
+                            //                            self.otherUsersArrReactToEmojiByCommentId[comment.id] = [:]
+                            //                            self.otherUsersSetReactToEmojiByCommentId[comment.id] = [:]
+                            //                            self.didReactToEmojiByCommentId[comment.id] = [:]
+                            //
+                            //                            for emojiId in comment.emojis!.emojisIdArr {
+                            //                                self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId] = []
+                            //                                self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId] = []
+                            //
+                            //                                self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
+                            //
+                            //                                for reactedUserId in comment.emojis!.userIdsArrPerEmojiDict[emojiId]! {
+                            //                                    if userId == reactedUserId {
+                            //                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = true
+                            //                                    } else {
+                            //                                        self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId]!.insert(reactedUserId)
+                            //                                        self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId]!.append(reactedUserId)
+                            //                                    }
+                            //                                }
+                            //                            }
+                            //
+                            //                            self.emojiArrByCommentId[comment.id] = []
+                            //                            var emojiArrToBeAdded = [Int]()
+                            //
+                            //                            for emojiId in comment.emojis!.emojisIdArr {
+                            //                                if emojiId == 0 {
+                            //                                    emojiArrToBeAdded.insert(emojiId, at: 0)
+                            //                                } else if emojiId == 1 {
+                            //                                    if emojiArrToBeAdded.count != 0 && emojiArrToBeAdded[0] == 0 {
+                            //                                        emojiArrToBeAdded.insert(1, at: 1)
+                            //                                    } else {
+                            //                                        emojiArrToBeAdded.insert(1, at: 0)
+                            //                                    }
+                            //                                } else {
+                            //                                    emojiArrToBeAdded.append(emojiId)
+                            //                                }
+                            //                            }
+                            //                            self.emojiArrByCommentId[comment.id] = self.getInitialEmojiArray(emojiArr: emojiArrToBeAdded, threadId: nil, commentId: comment.id)
+                            
                             self.moreCommentsByParentCommentId[comment.id] = [Int]()
-//
-//                            self.emojiArrByCommentId[comment.id] = comment.emojis!.emojisIdArr
-//                            self.emojiCountByCommentId[comment.id] = comment.emojis!.emojiReactionCountDict
-//
-//                            self.otherUsersArrReactToEmojiByCommentId[comment.id] = [:]
-//                            self.otherUsersSetReactToEmojiByCommentId[comment.id] = [:]
-//
-//                            self.didReactToEmojiByCommentId[comment.id] = [:]
-//
-//                            for emojiId in self.emojiArrByCommentId[comment.id]! {
-//                                self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId] = comment.emojis!.userIdsArrPerEmojiDict[emojiId]
-//                                self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId] = []
-//                                self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
-//
-//                                for reactedUserId in self.otherUsersArrReactToEmojiByCommentId[comment.id]![emojiId]! {
-//                                    self.otherUsersSetReactToEmojiByCommentId[comment.id]![emojiId]!.insert(reactedUserId)
-//
-//                                    if userId == reactedUserId {
-//                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = true
-//                                    } else {
-//                                        self.didReactToEmojiByCommentId[comment.id]![emojiId] = false
-//                                    }
-//                                }
-//                            }
                         }
                         
                         self.moreCommentsByParentCommentId[parentCommentId]! = [Int]()
@@ -1314,8 +1491,6 @@ final class GameDataStore: ObservableObject {
                             self.isReplyBarReplyingToThreadByThreadId[thread.id] = true
                             self.replyTargetCommentIdByThreadId[thread.id] = -1
                             self.relativeDateStringByThreadId[thread.id] = RelativeDateTimeFormatter().localizedString(for: thread.created, relativeTo: Date())
-                            self.threadsVoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.upvotes)
-                            self.threadsDownvoteStringByThreadId[thread.id] = self.transformVotesString(points: self.threads[thread.id]!.downvotes)
                             
                             self.emojiCountByThreadId[thread.id] = thread.emojis.emojiReactionCountDict
                             
@@ -1328,7 +1503,7 @@ final class GameDataStore: ObservableObject {
                                 self.otherUsersSetReactToEmojiByThreadId[thread.id]![emojiId] = []
                                 
                                 self.didReactToEmojiByThreadId[thread.id]![emojiId] = false
-
+                                
                                 for reactedUserId in thread.emojis.userIdsArrPerEmojiDict[emojiId]! {
                                     if userId == reactedUserId {
                                         self.didReactToEmojiByThreadId[thread.id]![emojiId] = true
@@ -1624,6 +1799,9 @@ final class GameDataStore: ObservableObject {
                         
                         
                         for (year, _) in self.gamesByYear {
+                            
+                            self.hasGameByYear[year] = true
+                            
                             for (month, _) in self.gamesByYear[year]! {
                                 if self.sortedDaysListByMonthYear[year] == nil {
                                     self.sortedDaysListByMonthYear[year] = [:]
@@ -1760,7 +1938,8 @@ final class GameDataStore: ObservableObject {
                     self.comments[comment.id]!.upvotes += 1
                     self.votes[voteId]!.direction = 1
                     
-                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
+                    self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
+//                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -1785,7 +1964,8 @@ final class GameDataStore: ObservableObject {
                     self.comments[comment.id]!.downvotes += 1
                     self.votes[voteId]!.direction = -1
                     
-                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
+                    self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
+//                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -1927,7 +2107,9 @@ final class GameDataStore: ObservableObject {
                         self.voteCommentMapping[comment.id] = newVote.id
                         self.comments[comment.id]!.upvotes += 1
                         
-                        self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
+                        self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
+                        
+                        //                        self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
                     }
                 }
             }
@@ -1953,9 +2135,9 @@ final class GameDataStore: ObservableObject {
                     self.votes[self.voteCommentMapping[comment.id]!]!.direction = 1
                     self.comments[comment.id]!.upvotes += 1
                     self.comments[comment.id]!.downvotes -= 1
-                    
-                    self.removeEmojiFromStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.downvotes)
-                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
+                    self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
+                    //                    self.removeEmojiFromStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.downvotes)
+                    //                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -1982,7 +2164,8 @@ final class GameDataStore: ObservableObject {
                         self.votes[newVote.id] = newVote
                         self.voteCommentMapping[comment.id] = newVote.id
                         self.comments[comment.id]!.downvotes += 1
-                        self.addEmojiToStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.downvotes)
+                        self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
+                        //                        self.addEmojiToStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.downvotes)
                     }
                 }
             }
@@ -2005,12 +2188,13 @@ final class GameDataStore: ObservableObject {
         session.dataTask(with: request) { (data, response, error) in
             if error == nil {
                 DispatchQueue.main.async {
-                    self.removeEmojiFromStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.downvotes)
-                    self.addEmojiToStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
-                    
                     self.votes[self.voteCommentMapping[comment.id]!]!.direction = -1
                     self.comments[comment.id]!.upvotes -= 1
                     self.comments[comment.id]!.downvotes += 1
+                    
+                    self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
+                    //  self.removeEmojiFromStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.downvotes)
+                    //  self.addEmojiToStore(emojiId: 1, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -2043,7 +2227,8 @@ final class GameDataStore: ObservableObject {
                     let originalVoteDirection = self.votes[vote.id]!.direction
                     self.votes[vote.id]!.direction = 0
                     
-                    self.removeEmojiFromStore(emojiId: originalVoteDirection == 1 ? 0 : 1, threadId: nil, commentId: vote.comment!, userId: userId, newEmojiCount: vote.direction == 1 ? self.comments[vote.comment!]!.upvotes : self.comments[vote.comment!]!.downvotes)
+                    self.voteCountStringByCommentId[vote.comment!] = self.transformVotesString(points: self.comments[vote.comment!]!.upvotes - self.comments[vote.comment!]!.downvotes)
+                    //                    self.removeEmojiFromStore(emojiId: originalVoteDirection == 1 ? 0 : 1, threadId: nil, commentId: vote.comment!, userId: userId, newEmojiCount: vote.direction == 1 ? self.comments[vote.comment!]!.upvotes : self.comments[vote.comment!]!.downvotes)
                 }
             }
         }.resume()
@@ -2065,6 +2250,7 @@ final class GameDataStore: ObservableObject {
         session.dataTask(with: request) { (data, response, error) in
             if error == nil {
                 DispatchQueue.main.async {
+                    
                     let threadId = vote.thread!
                     
                     if vote.direction == 1 {
