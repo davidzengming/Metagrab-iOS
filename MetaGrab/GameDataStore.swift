@@ -21,6 +21,12 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    var myGameVisitHistorySet = Set<Int>() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     var colors = [String: Color]() {
         willSet {
             objectWillChange.send()
@@ -52,6 +58,12 @@ final class GameDataStore: ObservableObject {
     }
     
     var forumsNextPageStartIndex = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isInModalView: Bool = false {
         willSet {
             objectWillChange.send()
         }
@@ -137,6 +149,13 @@ final class GameDataStore: ObservableObject {
             objectWillChange.send()
         }
     }
+    
+    var threadImagesHeight = [Int: CGFloat]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     var threadsTextStorage = [Int: NSTextStorage]() {
         willSet {
             objectWillChange.send()
@@ -928,18 +947,20 @@ final class GameDataStore: ObservableObject {
                             self.isAddEmojiModalActiveByThreadViewId[tempThread.id] = false
                             self.isReplyBarReplyingToThreadByThreadId[tempThread.id] = true
                             self.replyTargetCommentIdByThreadId[tempThread.id] = -1
+                            self.games[forumId]!.threadCount += 1
                             
                             self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
                             
-                            if self.threadsImages[tempThread.id] == nil {
-                                self.threadsImages[tempThread.id] = []
-                            }
-                            
-                            for id in imagesArray {
-                                if imageData[id] != nil {
-                                    self.threadsImages[tempThread.id]!.append(UIImage(data: imageData[id]!)!)
-                                }
-                            }
+                            //                            if self.threadsImages[tempThread.id] == nil {
+                            //                                self.threadsImages[tempThread.id] = []
+                            //                            }
+                            //
+                            //                            for id in imagesArray {
+                            //                                if imageData[id] != nil {
+                            //                                    self.threadsImages[tempThread.id]!.append(UIImage(data: imageData[id]!)!)
+                            //                                }
+                            //                            }
+                            //
                         }
                     }
                 }
@@ -968,6 +989,80 @@ final class GameDataStore: ObservableObject {
                 }
             }
         }
+    }
+    
+    func insertGameHistory(access: String, gameId: Int) {
+        if self.myGameVisitHistory.count > 0 && self.myGameVisitHistory[0] == gameId {
+            return
+        }
+        
+        guard let url = URL(string: "http://127.0.0.1:8000/games/insert_game_history_by_user_id/?game_id=" + String(gameId)) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                var newGameHistoryArr : [Int] = [gameId]
+                let maxGameHistoryLimit = 10
+                
+                DispatchQueue.main.async {
+                    if self.myGameVisitHistorySet.contains(gameId) == true {
+                        for visitedGameId in self.myGameVisitHistory {
+                            if visitedGameId == gameId {
+                                continue
+                            }
+                            
+                            newGameHistoryArr.append(visitedGameId)
+                        }
+                        
+                    } else {
+                        if self.myGameVisitHistory.count == maxGameHistoryLimit {
+                            let lastGameId = self.myGameVisitHistory.popLast()
+                            self.myGameVisitHistorySet.remove(lastGameId!)
+                        }
+                        
+                        self.myGameVisitHistorySet.insert(gameId)
+                        newGameHistoryArr += self.myGameVisitHistory
+                    }
+                    
+                    self.myGameVisitHistory = newGameHistoryArr
+                }
+            }
+        }.resume()
+    }
+    
+    func getGameHistory(access: String) {
+        guard let url = URL(string: "http://127.0.0.1:8000/games/get_game_history_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    let gameHistoryResponse: GameHistoryResponse = load(jsonData: jsonString.data(using: .utf8)!)
+                    
+                    DispatchQueue.main.async {
+                        var gameHistorySet = Set<Int>()
+                        for gameId in gameHistoryResponse.gameHistory {
+                            gameHistorySet.insert(gameId)
+                        }
+                        
+                        self.myGameVisitHistorySet = gameHistorySet
+                        self.myGameVisitHistory = gameHistoryResponse.gameHistory
+                    }
+                }
+            }
+        }.resume()
     }
     
     func postMainComment(access: String, threadId: Int, content: NSTextStorage) {
@@ -1572,7 +1667,14 @@ final class GameDataStore: ObservableObject {
                 }
                 
                 DispatchQueue.main.async {
-                    self.threadsImages[thread.id]!.append(UIImage(data: data)!)
+                    let uiImage = UIImage(data: data)!
+                    self.threadsImages[thread.id]!.append(uiImage)
+                    
+                    if self.threadImagesHeight[thread.id] == nil {
+                        self.threadImagesHeight[thread.id] = 0
+                    }
+                    
+                    self.threadImagesHeight[thread.id] = max(self.threadImagesHeight[thread.id]!, uiImage.size.height)
                 }
             }.resume()
         }

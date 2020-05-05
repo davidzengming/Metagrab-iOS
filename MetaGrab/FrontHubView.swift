@@ -20,12 +20,11 @@ struct FrontHubView: View {
     
     var body: some View {
         ZStack {
-            self.gameDataStore.colors["notQuiteBlack"].edgesIgnoringSafeArea(.all)
+            self.gameDataStore.colors["darkButNotBlack"].edgesIgnoringSafeArea(.all)
             
             GeometryReader { a in
                 VStack(alignment: .leading) {
                     ScrollView(.vertical, showsIndicators: true) {
-                        
                         VStack(alignment: .leading) {
                             Text("FRONT PAGE")
                                 .font(.title)
@@ -33,10 +32,33 @@ struct FrontHubView: View {
                                 .foregroundColor(Color.white)
                                 .shadow(radius: 5)
                                 .frame(width: a.size.width * 0.95, alignment: .leading)
-                                .padding(.bottom, 10)
+                                .padding(.bottom, 20)
                             
-                            Text("RECENT ACTIVITIES")
-                                .foregroundColor(Color.white)
+                            if self.gameDataStore.myGameVisitHistory.count > 0 {
+                                Text("RECENTLY VISITED")
+                                    .foregroundColor(Color.white)
+                                HStack {
+                                    ScrollView(.horizontal, showsIndicators: true) {
+                                        HStack(spacing: 20) {
+                                            ForEach(self.gameDataStore.myGameVisitHistory, id: \.self) { gameId in
+                                                VStack {
+                                                    if self.gameDataStore.games[gameId] != nil {
+                                                        GameFeedIcon(game: self.gameDataStore.games[gameId]!)
+                                                            .frame(width: a.size.width * self.gameIconWidthMultiplier, height: a.size.width * self.gameIconWidthMultiplier * 1 / self.widthToHeightRatio / self.imageSizeHeightRatio)
+                                                            .shadow(radius: 5)
+                                                    } else {
+                                                        Image(systemName: "photo")
+                                                            .frame(width: a.size.width * self.gameIconWidthMultiplier, height: a.size.width * self.gameIconWidthMultiplier * 1 / self.widthToHeightRatio / self.imageSizeHeightRatio)
+                                                            .shadow(radius: 5)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 5)
+                                }
+                                .padding(.bottom, 10)
+                            }
                             
                             if self.gameDataStore.followedGames.count > 0 {
                                 Text("FOLLOWED GAMES")
@@ -63,9 +85,9 @@ struct FrontHubView: View {
                 .onAppear() {
                     if self.gameDataStore.isFirstFetchAllGames {
                         self.gameDataStore.fetchAndSortGamesWithGenre(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
+                        self.gameDataStore.fetchFollowGames(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
                         self.gameDataStore.isFirstFetchAllGames = false
                     }
-                    self.gameDataStore.fetchFollowGames(access: self.userDataStore.token!.access, userDataStore: self.userDataStore)
                 }
             }
         }

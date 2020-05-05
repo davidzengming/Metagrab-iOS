@@ -20,7 +20,7 @@ struct PopularGamesView: View {
     
     var body: some View {
         ZStack {
-            self.gameDataStore.colors["notQuiteBlack"].edgesIgnoringSafeArea(.all)
+            self.gameDataStore.colors["darkButNotBlack"].edgesIgnoringSafeArea(.all)
             
             GeometryReader { a in
                 VStack(alignment: .leading) {
@@ -51,6 +51,8 @@ struct PopularGamesView: View {
                                             HStack {
                                                 Image(systemName: "chevron.left")
                                                     .foregroundColor(Color.white)
+                                                .padding(5)
+                                                .background(LinearGradient(gradient: Gradient(colors: [.blue, self.gameDataStore.colors["darkButNotBlack"]!]), startPoint: .trailing, endPoint: .leading))
                                                 
                                                 ScrollView(.horizontal, showsIndicators: true) {
                                                     HStack(spacing: 20) {
@@ -65,6 +67,8 @@ struct PopularGamesView: View {
                                                 
                                                 Image(systemName: "chevron.right")
                                                     .foregroundColor(Color.white)
+                                                .padding(5)
+                                                    .background(LinearGradient(gradient: Gradient(colors: [.blue, self.gameDataStore.colors["darkButNotBlack"]!]), startPoint: .leading, endPoint: .trailing))
                                             }
                                         }
                                     }

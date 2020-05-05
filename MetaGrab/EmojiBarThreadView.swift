@@ -98,14 +98,13 @@ struct EmojiBarThreadView: View {
                                                 self.onClickAddEmojiBubble()
                                         }
                                     }
-                                    .padding(.vertical, 2)
-                                    .padding(.horizontal, 5)
+                                    .padding(5)
                                     .frame(alignment: .leading)
                                 } else {
                                     HStack {
                                         Image(uiImage: self.gameDataStore.emojis[emojiId]!)
                                             .resizable()
-                                            .frame(width: 15, height: 15)
+                                            .frame(width: 20, height: 20)
                                         
                                         Text(String(self.gameDataStore.emojiCountByThreadId[self.threadId]![emojiId]!))
                                     }

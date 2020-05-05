@@ -141,8 +141,11 @@ struct ThreadView : View {
     
     var body: some View {
         ZStack {
+            self.gameDataStore.colors["darkButNotBlack"]!
+                .edgesIgnoringSafeArea(.all)
+            
             Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
-                    .edgesIgnoringSafeArea(.all)
+                .edgesIgnoringSafeArea(.bottom)
             
             GeometryReader { a in
                 VStack(spacing: 0) {

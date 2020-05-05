@@ -11,9 +11,7 @@ import SwiftUI
 
 struct ImagePicker: UIViewControllerRepresentable {
     
-    @Environment(\.presentationMode)
-    var presentationMode
-    
+    @Environment(\.presentationMode) var presentationMode
     @Binding var image: Image?
     @Binding var data: Data?
     @Binding var currentImages: [UUID]
@@ -21,47 +19,36 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Binding var dataDict: [UUID: Data]
     
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        @Binding var presentationMode: PresentationMode
-        @Binding var image: Image?
-        @Binding var data: Data?
-        @Binding var currentImages: [UUID]
-        @Binding var imagesDict: [UUID: Image]
-        @Binding var dataDict: [UUID: Data]
+        let parent: ImagePicker
         
         let maxNumImages = 3
         
-        init(presentationMode: Binding<PresentationMode>, image: Binding<Image?>, data: Binding<Data?>, currentImages: Binding<[UUID]>, imagesDict: Binding<[UUID: Image]>, dataDict: Binding<[UUID: Data]>) {
-            _presentationMode = presentationMode
-            _image = image
-            _data = data
-            _currentImages = currentImages
-            _imagesDict = imagesDict
-            _dataDict = dataDict
+        init(_ parent: ImagePicker) {
+            self.parent = parent
         }
         
         func imagePickerController(_ picker: UIImagePickerController,
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             let uiImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
             
-            DispatchQueue.main.async {
-                self.image = Image(uiImage: uiImage)
-                self.data = uiImage.pngData()
-                
-                if self.currentImages.count < self.maxNumImages {
-                    let newImageId = UUID()
-                    self.currentImages.append(newImageId)
-                }
-                self.presentationMode.dismiss()
+            self.parent.image = Image(uiImage: uiImage)
+            self.parent.data = uiImage.pngData()
+            
+            if self.parent.currentImages.count < self.maxNumImages {
+                let newImageId = UUID()
+                self.parent.currentImages.append(newImageId)
             }
+            
+            self.parent.presentationMode.wrappedValue.dismiss()
         }
         
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            presentationMode.dismiss()
+            self.parent.presentationMode.wrappedValue.dismiss()
         }
     }
     
     func makeCoordinator() -> Coordinator {
-        return Coordinator(presentationMode: presentationMode, image: $image, data: $data, currentImages: $currentImages, imagesDict: $imagesDict, dataDict: $dataDict)
+        return Coordinator(self)
     }
     
     func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {

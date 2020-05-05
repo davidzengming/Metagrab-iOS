@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		3E02DA2B23873A110063BCD7 /* NewThreadResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */; };
 		3E1AB15D23FAEE7800D59EDD /* ThreadImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1AB15C23FAEE7800D59EDD /* ThreadImages.swift */; };
+		3E1ECB84245B1B0500BEB413 /* GameHistoryResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1ECB83245B1B0500BEB413 /* GameHistoryResponse.swift */; };
+		3E1ECB86245B32EE00BEB413 /* GameModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1ECB85245B32EE00BEB413 /* GameModalView.swift */; };
 		3E3098D82387154100E2758F /* NewCommentResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3098D72387154100E2758F /* NewCommentResponse.swift */; };
 		3E366D1423C3C06D0029C2E1 /* FancyPantsEditorBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */; };
 		3E3970F52459D2770039760C /* FrontHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3970F42459D2770039760C /* FrontHubView.swift */; };
@@ -73,6 +75,8 @@
 		3CDF4CE4F285DAF5750237EC /* Pods-MetaGrab.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetaGrab.debug.xcconfig"; path = "Target Support Files/Pods-MetaGrab/Pods-MetaGrab.debug.xcconfig"; sourceTree = "<group>"; };
 		3E02DA2A23873A110063BCD7 /* NewThreadResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewThreadResponse.swift; sourceTree = "<group>"; };
 		3E1AB15C23FAEE7800D59EDD /* ThreadImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadImages.swift; sourceTree = "<group>"; };
+		3E1ECB83245B1B0500BEB413 /* GameHistoryResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameHistoryResponse.swift; sourceTree = "<group>"; };
+		3E1ECB85245B32EE00BEB413 /* GameModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModalView.swift; sourceTree = "<group>"; };
 		3E3098D72387154100E2758F /* NewCommentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCommentResponse.swift; sourceTree = "<group>"; };
 		3E366D1323C3C06D0029C2E1 /* FancyPantsEditorBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FancyPantsEditorBarView.swift; sourceTree = "<group>"; };
 		3E3970F42459D2770039760C /* FrontHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontHubView.swift; sourceTree = "<group>"; };
@@ -178,6 +182,7 @@
 				3EF6212523086A1D002DE02E /* MainView.swift */,
 				3EF6212723086A37002DE02E /* UserView.swift */,
 				3EF6212923086A5C002DE02E /* Load.swift */,
+				3E1ECB85245B32EE00BEB413 /* GameModalView.swift */,
 				3EF6212B23086A82002DE02E /* GameFeedIcon.swift */,
 				3EF6213123086AC8002DE02E /* GameHubView.swift */,
 				3E3970F42459D2770039760C /* FrontHubView.swift */,
@@ -239,6 +244,7 @@
 				3E1AB15C23FAEE7800D59EDD /* ThreadImages.swift */,
 				3ECE9C902436449100F70869 /* Emojis.swift */,
 				3ECE9C922436694200F70869 /* EmojiResponse.swift */,
+				3E1ECB83245B1B0500BEB413 /* GameHistoryResponse.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -415,12 +421,14 @@
 				3EF6212C23086A82002DE02E /* GameFeedIcon.swift in Sources */,
 				3EF6214923086BBE002DE02E /* Forum.swift in Sources */,
 				3EB10A2723E0936D0079D80D /* TextViewHelper.swift in Sources */,
+				3E1ECB86245B32EE00BEB413 /* GameModalView.swift in Sources */,
 				3EF6210F23086963002DE02E /* SceneDelegate.swift in Sources */,
 				3EF6212823086A37002DE02E /* UserView.swift in Sources */,
 				3EF6213623086AEC002DE02E /* ForumView.swift in Sources */,
 				3EFCE178230EF22A000FD392 /* ThreadView.swift in Sources */,
 				3E747DDC2385BB4200B807CE /* Vote.swift in Sources */,
 				3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */,
+				3E1ECB84245B1B0500BEB413 /* GameHistoryResponse.swift in Sources */,
 				3EF1B3F82444B685000AB3D4 /* EmojiBarThreadView.swift in Sources */,
 				3EF6213423086ADB002DE02E /* GameDataStore.swift in Sources */,
 				3ECF12C4238ECAE000A7160B /* KeyChain.swift in Sources */,

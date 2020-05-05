@@ -8,36 +8,6 @@
 
 import SwiftUI
 
-struct GameModalView: View {
-    @EnvironmentObject var gameDataStore: GameDataStore
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    
-    var gameId: Int
-    
-    var body: some View {
-        GeometryReader { a in
-            VStack {
-                if self.gameDataStore.gameBannerImage[self.gameId] != nil {
-                    Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
-                    .resizable()
-                    .scaledToFit()
-                }
-                
-                Button(action: {
-                    self.presentationMode.wrappedValue.dismiss()
-                }) {
-                    Text("Dismiss")
-                }
-            }
-            .frame(width: a.size.width, height: a.size.height)
-            .onAppear() {
-                self.gameDataStore.loadGameBanner(game: self.gameDataStore.games[self.gameId]!)
-            }
-        }
-        .background(self.gameDataStore.colors["darkButNotBlack"]!)
-        .edgesIgnoringSafeArea(.all)
-    }
-}
 
 struct GameFeedIcon : View {
     var game: Game
@@ -84,6 +54,7 @@ struct GameFeedIcon : View {
                     .sheet(isPresented: self.$showModal) {
                         GameModalView(gameId: self.game.id)
                             .environmentObject(self.gameDataStore)
+                            .environmentObject(self.userDataStore)
                     }
                     
                     NavigationLink(destination: ForumView(gameId: self.game.id)) {
@@ -94,7 +65,7 @@ struct GameFeedIcon : View {
                             .frame(width: a.size.width / 2, height: a.size.height * 0.2)
                     }
                 }
-                .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                .background(self.gameDataStore.colors["notQuiteBlack"]!)
             }
         }
     }

@@ -24,6 +24,7 @@ struct GameHubView: View {
         //        navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white, NSAttributedString.Key.kern: kern]
         //        navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white, NSAttributedString.Key.kern: kern]
         //
+        
     }
     
     var body: some View {
@@ -59,6 +60,7 @@ struct GameHubView: View {
                     self.gameDataStore.loadEmojis()
                     self.gameDataStore.loadColors()
                     self.gameDataStore.loadLeadingLineColors()
+                    self.gameDataStore.getGameHistory(access: self.userDataStore.token!.access)
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())

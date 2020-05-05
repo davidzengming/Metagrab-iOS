@@ -47,9 +47,10 @@ struct MonthView: View {
                         Spacer()
                         Text(String(self.gameDataStore.sortedDaysListByMonthYear[self.year]![self.month]![dayArrIndex]))
                             .font(.system(size: 30))
-                            .frame(width: 100)
+                            .frame(width: self.width * 0.2)
                             .foregroundColor(Color.white)
-                        VStack(spacing: 0) {
+                        
+                        VStack(alignment: .center, spacing: 0) {
                             ForEach(0..<self.gameDataStore.sortedGamesListByDayMonthYear[self.year]![self.month]![self.gameDataStore.sortedDaysListByMonthYear[self.year]![self.month]![dayArrIndex]]!.count, id: \.self) { gameArrIndex in
                                 HStack {
                                     GeometryReader { a in
@@ -63,6 +64,7 @@ struct MonthView: View {
                                                     .stroke(Color.white, lineWidth: a.size.width * 0.1)
                                                 }
                                             }
+                                            
                                             if dayArrIndex != self.getLastIndex(arr: self.gameDataStore.sortedDaysListByMonthYear[self.year]![self.month]!) || gameArrIndex != self.getLastIndex(arr: self.gameDataStore.sortedGamesListByDayMonthYear[self.year]![self.month]![self.gameDataStore.sortedDaysListByMonthYear[self.year]![self.month]![dayArrIndex]]!) {
                                                 
                                                 ZStack {
@@ -80,7 +82,7 @@ struct MonthView: View {
                                                     .frame(width: 15, height: 15)
                                                     .position(x: a.size.width * 0.5, y: a.size.height * 0.5)
                                                     .shadow(radius: 5)
-                                                
+                                                    
                                                 Circle()
                                                     .fill(self.gameDataStore.colors["darkButNotBlack"]!)
                                                     .frame(width: 10, height: 10)
@@ -93,9 +95,9 @@ struct MonthView: View {
                                     
                                     Rectangle()
                                         .fill(Color.white)
-                                        .frame(width: 50, height: 1)
-                                    Spacer()
+                                        .frame(width: self.width * 0.1, height: 1)
                                     
+                                    Spacer()
                                     GameFeedIcon(game: self.gameDataStore.games[self.gameDataStore.sortedGamesListByDayMonthYear[self.year]![self.month]![self.gameDataStore.sortedDaysListByMonthYear[self.year]![self.month]![dayArrIndex]]![gameArrIndex]]!)
                                         .frame(width: self.width * self.gameIconWidthMultiplier, height: self.width * self.gameIconWidthMultiplier * 1 / self.widthToHeightRatio / self.imageSizeHeightRatio)
                                         .shadow(radius: 5)
