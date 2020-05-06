@@ -20,29 +20,44 @@ struct GameModalView: View {
             GeometryReader { a in
                 VStack(alignment: .leading) {
                     
-                    Button(action: {
-                        self.presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Text("Dismiss")
-                            .frame(width: a.size.width * 0.9, height: a.size.height * 0.025)
-                        .padding(5)
-                        .foregroundColor(.white)
-                        .background(Color.blue)
-                        .cornerRadius(5)
-                        .padding()
+                    HStack(alignment: .center) {
+                        Image(systemName: "multiply")
+                        .resizable()
+                        .frame(width: a.size.height * 0.025, height: a.size.height * 0.025)
+                            .foregroundColor(.white)
+                            .onTapGesture {
+                                self.presentationMode.wrappedValue.dismiss()
+                        }
+                        Spacer()
                     }
-                    
-                    if self.gameDataStore.gameBannerImage[self.gameId] != nil {
-                        Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: a.size.width, height: a.size.height * 0.2)
-                    }
+                    .frame(width: a.size.width * 0.9, height: a.size.height * 0.05, alignment: .leading)
+                    .padding(.horizontal, a.size.width * 0.05)
+                    .padding(.vertical, a.size.height * 0.01)
                     
                     Text(self.gameDataStore.games[self.gameId]!.name)
                         .foregroundColor(Color.white)
-                        .padding()
+                        .padding(.horizontal)
                         .font(.largeTitle)
+                    
+                    HStack {
+                        Spacer()
+                        VStack {
+                            if self.gameDataStore.gameBannerImage[self.gameId] != nil {
+                                Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
+                                    .resizable()
+                                    .frame(width: a.size.width * 0.8, height: a.size.height * 0.2)
+                                    .scaledToFill()
+                                .shadow(radius: 5)
+                            }
+                        }
+                        .frame(width: a.size.width * 0.9, height: a.size.height * 0.25)
+                        .background(self.gameDataStore.colors["notQuiteBlack"]!)
+                        Spacer()
+                    }
+                    
+                    Text("About this game")
+                        .foregroundColor(Color.white)
+                        .padding()
                     
                     ScrollView {
                         VStack {
@@ -52,7 +67,7 @@ struct GameModalView: View {
                         }
                     }
                     .padding()
-                    .frame(width: a.size.width, height: a.size.height * 0.3)
+                    .frame(width: a.size.width, height: a.size.height * 0.25)
                     
                     Text(self.gameDataStore.games[self.gameId]!.genre.name)
                         .padding(.horizontal, 10)

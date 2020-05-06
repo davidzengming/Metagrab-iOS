@@ -29,6 +29,8 @@ struct ForumView : View {
     @EnvironmentObject var userDataStore: UserDataStore
     var gameId: Int
     
+    @State var showImagePicker: Bool = false
+    
     init(gameId: Int) {
         // To remove only extra separators below the list:
         // UITableView.appearance().tableFooterView = UIView()
@@ -40,24 +42,24 @@ struct ForumView : View {
         UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor:UIColor.white]
         // For navigation bar background color
         UINavigationBar.appearance().barTintColor = hexStringToUIColor(hex: "#2C2F33")
-//        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default) makes status bar translucent
+        //        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default) makes status bar translucent
         UINavigationBar.appearance().backgroundColor = hexStringToUIColor(hex: "#2C2F33")
     }
     
     func hexStringToUIColor (hex:String) -> UIColor {
         var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-
+        
         if (cString.hasPrefix("#")) {
             cString.remove(at: cString.startIndex)
         }
-
+        
         if ((cString.count) != 6) {
             return UIColor.gray
         }
-
+        
         var rgbValue:UInt64 = 0
         Scanner(string: cString).scanHexInt64(&rgbValue)
-
+        
         return UIColor(
             red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
@@ -160,13 +162,10 @@ struct ForumView : View {
                                                 ThreadRow(threadId: threadId, gameId: self.gameId, width: a.size.width * 0.9, height: a.size.height)
                                                     .background(Color.white)
                                                     .frame(width: a.size.width, height: a.size.height * 0.045 + 10 + 10 + (self.gameDataStore.threads[threadId]!.title.count > 0 ? 16 : 0) + min(self.gameDataStore.threadsDesiredHeight[threadId]!, 200)
-                                                        
                                                         + 10
-                                                        
                                                         + (self.gameDataStore.threadImagesHeight[threadId] == nil ? 0 : max(a.size.height * 0.1, min(a.size.height * 0.15, self.gameDataStore.threadImagesHeight[threadId]!)) + 20)
-                                                        
                                                         + a.size.height * 0.025 + CGFloat(self.gameDataStore.emojiArrByThreadId[threadId]!.count) * 30 + 40 + 20 + 20)
-                                                    
+                                                
                                                 Divider()
                                             }
                                         }
@@ -215,7 +214,7 @@ struct ForumView : View {
                             }
                         }
                         .frame(width: a.size.width, height: a.size.height)
-//                        .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
+                        //                        .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
                     }
                         
                     .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Board"), displayMode: .inline)
@@ -228,13 +227,13 @@ struct ForumView : View {
                         
                         self.gameDataStore.insertGameHistory(access: self.userDataStore.token!.access, gameId: self.gameId)
                     }
-                    
+                
                     NavigationLink(destination: NewThreadView(forumId: self.gameId)) {
                         NewThreadButton()
                             .frame(width: min(a.size.width, a.size.height) * 0.12, height: min(a.size.width, a.size.height) * 0.12, alignment: .center)
                             .shadow(radius: 10)
                     }
-                    .position(x: a.size.width * 0.88, y: a.size.height * 0.85)
+                    .position(x: a.size.width * 0.88, y: a.size.height * 0.88)
                     
                     if self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameId] == true {
                         VStack {

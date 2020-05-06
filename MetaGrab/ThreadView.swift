@@ -65,6 +65,8 @@ struct ThreadView : View {
     @State var isFirstResponder = false
     @State var didBecomeFirstResponder = false
     
+    @State var text: String = ""
+    
     func onClickUpvoteButton() {
         if self.gameDataStore.voteThreadMapping[threadId] != nil {
             if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == 1 {
@@ -202,38 +204,6 @@ struct ThreadView : View {
                                     
                                     EmojiBarThreadView(threadId: self.threadId, isInThreadView: true)
                                         .padding(.vertical, 20)
-                                    
-//                                    HStack(spacing: 0) {
-//                                        Spacer()
-//                                        VStack {
-//                                            Button(action: self.shareToSocialMedia) {
-//                                                VStack {
-//                                                    Image(systemName: "arrowshape.turn.up.right.fill")
-//                                                        .resizable()
-//                                                    Text("Share")
-//                                                }
-//
-//                                            }
-//                                        }
-//                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 16), height: ceil((a.size.width - self.outerPadding * 2) / 16) + 20)
-//
-//                                        Spacer()
-//                                        VStack(alignment: .center) {
-//                                            Button(action: self.scrollToOriginalThread) {
-//                                                VStack {
-//                                                    Image(systemName: "quote.bubble.fill")
-//                                                        .resizable()
-//                                                    Text(String(self.gameDataStore.threads[self.threadId]!.numChilds))
-//                                                }
-//                                            }
-//                                        }
-//                                        .frame(width: ceil((a.size.width - self.outerPadding * 2) / 16), height: ceil((a.size.width - self.outerPadding * 2) / 16) + 20)
-//
-//                                        Spacer()
-//                                    }
-//                                    .buttonStyle(PlainButtonStyle())
-//                                    .frame(width: a.size.width - self.outerPadding * 2, height: ceil((a.size.width - self.outerPadding * 2) / 8) + 20)
-//                                    .padding(.vertical, 35)
                                     
                                     if !self.gameDataStore.mainCommentListByThreadId[self.threadId]!.isEmpty {
                                         VStack(spacing: 0) {

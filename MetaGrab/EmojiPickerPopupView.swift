@@ -160,15 +160,19 @@ struct EmojiPickerPopupView: View {
     var body: some View {
         GeometryReader { a in
             VStack {
-                Button(action: self.dismissView) {
-                    Text("Dismiss")
-                    .frame(width: a.size.width * 0.9)
-                    .padding(5)
-                    .foregroundColor(.white)
-                    .background(Color.blue)
-                    .cornerRadius(5)
+                HStack(alignment: .center) {
+                    Image(systemName: "multiply")
+                    .resizable()
+                    .frame(width: a.size.height * 0.1, height: a.size.height * 0.1)
+                        .foregroundColor(.white)
+                        .onTapGesture {
+                            self.dismissView()
+                    }
+                    Spacer()
                 }
-                .padding()
+                .frame(width: a.size.width * 0.9, height: a.size.height * 0.1, alignment: .leading)
+                .padding(.horizontal, a.size.width * 0.05)
+                .padding(.vertical, a.size.height * 0.1)
                 
                 VStack(spacing: 0){
                     ScrollView(.vertical) {

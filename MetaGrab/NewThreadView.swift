@@ -74,9 +74,7 @@ struct NewThreadView: View {
                             }
                             Button(action: {
                                 self.clickedImageIndex = self.imagesArray.firstIndex(of: id)!
-                                withAnimation {
-                                    self.showImagePicker.toggle()
-                                }
+                                self.showImagePicker.toggle()
                             }) {
                                 UploadDashPlaceholderButton()
                                     .foregroundColor(Color.gray)
@@ -113,8 +111,8 @@ struct NewThreadView: View {
                         RoundedRectangle(cornerRadius: 5)
                             .stroke(Color.black, lineWidth: 2)
                 )
-                    .padding(.vertical, 25)
-                    .padding(.horizontal, 20)
+                .padding(.vertical, 25)
+                .padding(.horizontal, 20)
                 Spacer()
             }
             .KeyboardAwarePadding()

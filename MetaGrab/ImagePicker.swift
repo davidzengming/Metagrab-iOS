@@ -29,16 +29,16 @@ struct ImagePicker: UIViewControllerRepresentable {
         
         func imagePickerController(_ picker: UIImagePickerController,
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            let uiImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
-            
-            self.parent.image = Image(uiImage: uiImage)
-            self.parent.data = uiImage.pngData()
-            
+            let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
+
+            self.parent.image = Image(uiImage: uiImage!)
+            self.parent.data = uiImage!.pngData()
+
             if self.parent.currentImages.count < self.maxNumImages {
                 let newImageId = UUID()
                 self.parent.currentImages.append(newImageId)
             }
-            
+
             self.parent.presentationMode.wrappedValue.dismiss()
         }
         
