@@ -30,6 +30,8 @@ struct ForumView : View {
     var gameId: Int
     
     @State var showImagePicker: Bool = false
+    @State var text: String = ""
+    @State var curScrollHeight: CGFloat = 100
     
     init(gameId: Int) {
         // To remove only extra separators below the list:
@@ -42,8 +44,9 @@ struct ForumView : View {
         UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor:UIColor.white]
         // For navigation bar background color
         UINavigationBar.appearance().barTintColor = hexStringToUIColor(hex: "#2C2F33")
-        //        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default) makes status bar translucent
-        UINavigationBar.appearance().backgroundColor = hexStringToUIColor(hex: "#2C2F33")
+//        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default) //makes status bar translucent
+        UINavigationBar.appearance().tintColor = .white
+//        UINavigationBar.appearance().backgroundColor = .clear
     }
     
     func hexStringToUIColor (hex:String) -> UIColor {
@@ -80,9 +83,15 @@ struct ForumView : View {
         self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, start: self.gameDataStore.forumsNextPageStartIndex[self.gameId]!, userId: self.userDataStore.token!.userId)
     }
     
+    func calcScrollHeight(for metrics: GeometryProxy) {
+        self.curScrollHeight = metrics.frame(in: .global).minY
+        print(self.curScrollHeight)
+        return
+    }
+    
     var body: some View {
         ZStack {
-            self.gameDataStore.colors["darkButNotBlack"]!
+            Image("background").resizable(resizingMode: .tile)
                 .edgesIgnoringSafeArea(.all)
             
             GeometryReader { a in
@@ -96,7 +105,7 @@ struct ForumView : View {
                                             Image(uiImage: self.gameDataStore.gameIcons[self.gameId]!)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
-                                                .frame(width: a.size.width * 0.13, height: a.size.width * 0.13, alignment: .leading)
+                                                .frame(width: a.size.width * 0.15, height: a.size.width * 0.15, alignment: .leading)
                                                 .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
                                                 .overlay(
                                                     RoundedRectangle(cornerRadius: 5)
@@ -106,17 +115,22 @@ struct ForumView : View {
                                         VStack(alignment: .leading) {
                                             Text(self.gameDataStore.games[self.gameId]!.name)
                                                 .foregroundColor(Color.white)
+                                                .font(.system(size: 26))
                                                 .bold()
                                             
-                                            Text(self.gameDataStore.games[self.gameId]!.genre.name)
-                                                .foregroundColor(Color.white)
-                                                .bold()
+                                            HStack {
+                                                Text("Posts " + String(self.gameDataStore.games[self.gameId]!.threadCount))
+                                                    .foregroundColor(Color.white)
+                                                Text("Follows " + String(self.gameDataStore.games[self.gameId]!.followerCount))
+                                                    .foregroundColor(Color.white)
+                                            }
+                                            
                                         }
                                         Spacer()
-                                        
+
                                         Text("Follow")
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 10)
+                                            .padding(.horizontal, 15)
+                                            .padding(.vertical, 8)
                                             .foregroundColor(self.gameDataStore.isFollowed[self.gameId]! == true ? Color.white : Color.black)
                                             .background(self.gameDataStore.isFollowed[self.gameId]! == true ? Color.black : Color.white)
                                             .cornerRadius(30)
@@ -129,31 +143,21 @@ struct ForumView : View {
                                                 }
                                         }
                                     }
-                                    .frame(width: a.size.width * 0.8)
+                                    .frame(width: a.size.width * 0.9)
                                 }
-                                .frame(width: a.size.width, height: a.size.width * 0.13)
-                                .padding(.top, 30)
+                                .frame(width: a.size.width, height: a.size.width * 0.15)
+                                .padding(.vertical, 30)
                                 
-                                ZStack {
-                                    VStack {
-                                        Spacer()
-                                        Color.gray
-                                            .frame(width: a.size.width, height: a.size.height * 0.06)
-                                    }
-                                    
-                                    VStack {
-                                        Spacer()
-                                        VStack {
-                                            Text("Number of threads: " + String(self.gameDataStore.games[self.gameId]!.threadCount))
-                                        }
-                                        .frame(width: a.size.width * 0.8, height: a.size.height * 0.075)
-                                        .background(Color.white)
-                                        .cornerRadius(5, corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
-                                        
-                                        Spacer()
-                                    }
+                                VStack {
+                                    Text("No stickied posts at the moment~")
+                                        .foregroundColor(Color.gray)
+                                        .italic()
+                                        .padding()
+                                    Divider()
                                 }
-                                .frame(width: a.size.width, height: a.size.height * 0.12)
+                                .frame(width: a.size.width)
+                                .background(Color.white)
+                                .cornerRadius(15, corners: [.topLeft, .topRight])
                                 
                                 VStack {
                                     if !self.gameDataStore.threadListByGameId[self.gameId]!.isEmpty {
@@ -216,8 +220,7 @@ struct ForumView : View {
                         .frame(width: a.size.width, height: a.size.height)
                         //                        .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
                     }
-                        
-                    .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name + " Board"), displayMode: .inline)
+                    .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name), displayMode: .inline)
                     .onAppear() {
                         if self.gameDataStore.isBackToGamesView {
                             self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, refresh: true, userId: self.userDataStore.token!.userId)
@@ -245,11 +248,18 @@ struct ForumView : View {
                         }
                         .background(Color.white)
                         .transition(.move(edge: .bottom))
-                        .animation(.spring())
+                        .animation(.default)
+                    }
+                    
+                    if self.gameDataStore.isReportPopupActiveByForumId[self.gameId] == true {
+                        ReportPopupView()
+                            .frame(width: a.size.width, height: a.size.height * 0.2)
+                        .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                        .cornerRadius(5, corners: [.topLeft, .topRight])
+                        .KeyboardAwarePadding()
                     }
                 }
             }
-            .background(Image("background").resizable(resizingMode: .tile))
             .edgesIgnoringSafeArea(.bottom)
         }
     }

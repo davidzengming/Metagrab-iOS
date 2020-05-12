@@ -24,6 +24,8 @@ struct EmojiBarThreadView: View {
     }
     
     func onClickAddEmojiBubble() {
+        
+        self.gameDataStore.isReportPopupActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = false
         self.gameDataStore.addEmojiThreadIdByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = self.threadId
         
         // check if action was initiated in a thread view, if so change state to show emoji modal is initiated by the thread
@@ -84,31 +86,28 @@ struct EmojiBarThreadView: View {
                 ForEach(self.gameDataStore.emojiArrByThreadId[self.threadId]!.indices, id: \.self) { row in
                     HStack {
                         ForEach(self.gameDataStore.emojiArrByThreadId[self.threadId]![row], id: \.self) { emojiId in
-                            VStack {
+                            VStack(alignment: .leading) {
                                 if emojiId == 999 {
                                     HStack {
-                                        Image(systemName: "plus.bubble.fill")
+                                        Image(systemName: "plus")
                                             .resizable()
                                             .frame(width: 20, height: 20)
-                                            .padding(.all, 5)
                                             .buttonStyle(PlainButtonStyle())
-                                            .background(Color(red: 238 / 255, green: 238 / 255, blue: 238 / 255))
                                             .cornerRadius(5)
                                             .onTapGesture {
                                                 self.onClickAddEmojiBubble()
                                         }
                                     }
-                                    .padding(5)
                                     .frame(alignment: .leading)
                                 } else {
                                     HStack {
                                         Image(uiImage: self.gameDataStore.emojis[emojiId]!)
                                             .resizable()
-                                            .frame(width: 20, height: 20)
+                                            .frame(width: 15, height: 15)
                                         
                                         Text(String(self.gameDataStore.emojiCountByThreadId[self.threadId]![emojiId]!))
                                     }
-                                    .frame(width: 40, height: 20)
+                                    .frame(width: 40, height: 15)
                                     .padding(5)
                                     .background(self.gameDataStore.didReactToEmojiByThreadId[self.threadId]![emojiId]! == true ? Color.gray : Color(.lightGray))
                                     .cornerRadius(5)

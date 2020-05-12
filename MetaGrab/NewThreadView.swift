@@ -32,7 +32,6 @@ struct NewThreadView: View {
     @State var didBecomeFirstResponder = false
     
     var forumId: Int
-    
     var flairs = ["Update", "Discussion", "Meme"]
     var imageThread = ["Text", "Image"]
     let placeholder = Image(systemName: "photo")
@@ -74,7 +73,7 @@ struct NewThreadView: View {
                             }
                             Button(action: {
                                 self.clickedImageIndex = self.imagesArray.firstIndex(of: id)!
-                                self.showImagePicker.toggle()
+                                self.showImagePicker = true
                             }) {
                                 UploadDashPlaceholderButton()
                                     .foregroundColor(Color.gray)
@@ -99,8 +98,10 @@ struct NewThreadView: View {
                     }
                     Spacer()
                 }
-                .sheet(isPresented: self.$showImagePicker) {
-                    ImagePicker(image: self.$imagesDict[self.imagesArray[self.clickedImageIndex!]], data: self.$dataDict[self.imagesArray[self.clickedImageIndex!]], currentImages: self.$imagesArray, imagesDict: self.$imagesDict, dataDict: self.$dataDict)
+                .sheet(isPresented: self.$showImagePicker, onDismiss: {
+                    self.showImagePicker = false
+                }) {
+                    ImagePicker(isShown: self.$showImagePicker, image: self.$imagesDict[self.imagesArray[self.clickedImageIndex!]], data: self.$dataDict[self.imagesArray[self.clickedImageIndex!]], currentImages: self.$imagesArray, imagesDict: self.$imagesDict, dataDict: self.$dataDict)
                 }
                 .padding(.horizontal, 20)
                 

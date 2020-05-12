@@ -95,66 +95,6 @@ struct EmojiPickerPopupView: View {
         }
         
         self.gameDataStore.addEmojiByThreadId(access: self.userDataStore.token!.access, threadId: self.getClickedThreadId(), emojiId: emojiId, userId: self.userDataStore.token!.userId)
-        //        }
-        //        else {
-        //            let commentId = getClickedCommentId()
-        //            // Upvote
-        //            if emojiId == 0 {
-        //                if self.gameDataStore.voteThreadMapping[commentId] != nil {
-        //                    if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[commentId]!]!.direction == 1 {
-        //                        return
-        //                    } else if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[commentId]!]!.direction == 0 {
-        //                        self.gameDataStore.upvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[commentId]!, thread: self.gameDataStore.threads[commentId]!, userId: self.userDataStore.token!.userId)
-        //                    } else {
-        //                        self.gameDataStore.switchUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[commentId]!, userId: self.userDataStore.token!.userId)
-        //                    }
-        //                } else {
-        //                    self.gameDataStore.addNewUpvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[commentId]!, userId: self.userDataStore.token!.userId)
-        //                }
-        //                return
-        //            }
-        //
-        //            // Downvote
-        //            if emojiId == 1 {
-        //                if self.gameDataStore.voteThreadMapping[commentId] != nil {
-        //                    if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[commentId]!]!.direction == -1 {
-        //                        return
-        //                    } else if self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[commentId]!]!.direction == 0 {
-        //                        self.gameDataStore.downvoteByExistingVoteIdThread(access: self.userDataStore.token!.access, voteId: self.gameDataStore.voteThreadMapping[commentId]!, thread: self.gameDataStore.threads[commentId]!, userId: self.userDataStore.token!.userId)
-        //                    } else {
-        //                        self.gameDataStore.switchDownvoteThread(access:  self.userDataStore.token!.access, thread: self.gameDataStore.threads[commentId]!, userId: self.userDataStore.token!.userId)
-        //                    }
-        //                } else {
-        //                    self.gameDataStore.addNewDownvoteThread(access: self.userDataStore.token!.access, thread: self.gameDataStore.threads[commentId]!, userId: self.userDataStore.token!.userId)
-        //                }
-        //
-        //                return
-        //            }
-        //
-        //            // if already reacted on this emoji, return
-        //            if self.gameDataStore.didReactToEmojiByCommentId[self.gameDataStore.addEmojiCommentIdByThreadId[self.ancestorThreadId!]!]![emojiId] != nil && self.gameDataStore.didReactToEmojiByCommentId[self.gameDataStore.addEmojiCommentIdByThreadId[self.ancestorThreadId!]!]![emojiId]! == true {
-        //                return
-        //            }
-        //
-        //            // too many emojis, leave room for upvote/downvote emojis
-        //            let rowCount = self.gameDataStore.emojiArrByCommentId[commentId]!.count
-        //            let colCount = self.gameDataStore.emojiArrByCommentId[commentId]![rowCount - 1].count
-        //
-        //            if rowCount == 2 && colCount >= 3 && self.gameDataStore.emojiCountByCommentId[commentId]![emojiId] == nil {
-        //                let hasUpvote = self.gameDataStore.emojiArrByCommentId[commentId]![0][0] == 0
-        //                let hasDownvote = self.gameDataStore.emojiArrByCommentId[commentId]![0][0] == 1 || self.gameDataStore.emojiArrByCommentId[commentId]![0][1] == 1
-        //
-        //                if !hasUpvote && !hasDownvote && (emojiId != 0 && emojiId != 1) {
-        //                    print("Too many emojis")
-        //                    return
-        //                } else if ((hasUpvote && emojiId != 1) || (hasDownvote && emojiId != 0)) && colCount == self.gameDataStore.maxEmojiCountPerRow {
-        //                    print("Too many emojis")
-        //                    return
-        //                }
-        //            }
-        //
-        //            self.gameDataStore.addEmojiByCommentId(access: self.userDataStore.token!.access, commentId: self.getClickedCommentId(), emojiId: emojiId, userId: self.userDataStore.token!.userId)
-        //        }
     }
     
     var body: some View {

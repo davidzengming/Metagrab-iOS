@@ -250,7 +250,7 @@ struct ThreadView : View {
                         .background(self.gameDataStore.colors["darkButNotBlack"]!)
                         .cornerRadius(5, corners: [.topLeft, .topRight])
                         .transition(.move(edge: .bottom))
-                        .animation(.spring())
+                        .animation(.default)
                     } else {
                         VStack(spacing: 0) {
                             FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: self.$showFancyPantsEditorBar, isNewContent: true, isThread: true, threadId: self.threadId, isOmniBar: true, submit: { self.submit() })
@@ -268,7 +268,6 @@ struct ThreadView : View {
                 self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId, refresh: true, userId: self.userDataStore.token!.userId)
                 self.gameDataStore.loadThreadIcons(thread: self.gameDataStore.threads[self.threadId]!)
             }
-            .navigationBarTitle(Text(self.gameDataStore.threads[threadId]!.title))
         }
     }
 }

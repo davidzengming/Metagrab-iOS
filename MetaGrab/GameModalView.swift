@@ -22,8 +22,8 @@ struct GameModalView: View {
                     
                     HStack(alignment: .center) {
                         Image(systemName: "multiply")
-                        .resizable()
-                        .frame(width: a.size.height * 0.025, height: a.size.height * 0.025)
+                            .resizable()
+                            .frame(width: a.size.height * 0.025, height: a.size.height * 0.025)
                             .foregroundColor(.white)
                             .onTapGesture {
                                 self.presentationMode.wrappedValue.dismiss()
@@ -34,74 +34,123 @@ struct GameModalView: View {
                     .padding(.horizontal, a.size.width * 0.05)
                     .padding(.vertical, a.size.height * 0.01)
                     
-                    Text(self.gameDataStore.games[self.gameId]!.name)
-                        .foregroundColor(Color.white)
-                        .padding(.horizontal)
-                        .font(.largeTitle)
-                    
-                    HStack {
-                        Spacer()
-                        VStack {
-                            if self.gameDataStore.gameBannerImage[self.gameId] != nil {
-                                Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
-                                    .resizable()
-                                    .frame(width: a.size.width * 0.8, height: a.size.height * 0.2)
-                                    .scaledToFill()
-                                .shadow(radius: 5)
-                            }
-                        }
-                        .frame(width: a.size.width * 0.9, height: a.size.height * 0.25)
-                        .background(self.gameDataStore.colors["notQuiteBlack"]!)
-                        Spacer()
-                    }
-                    
-                    Text("About this game")
-                        .foregroundColor(Color.white)
-                        .padding()
-                    
                     ScrollView {
-                        VStack {
-                            Text(self.gameDataStore.games[self.gameId]!.gameSummary)
+                        VStack(alignment: .leading) {
+                            Text(self.gameDataStore.games[self.gameId]!.name.uppercased())
+                                .tracking(2)
                                 .foregroundColor(Color.white)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    .padding()
-                    .frame(width: a.size.width, height: a.size.height * 0.25)
-                    
-                    Text(self.gameDataStore.games[self.gameId]!.genre.name)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .foregroundColor(Color.white)
-                        .background(Color.blue)
-                        .shadow(radius: 5)
-                        .padding()
-                    
-                    HStack {
-                        Spacer()
-                        
-                        NavigationLink(destination: ForumView(gameId: self.gameId)
-                            .environmentObject(self.gameDataStore)
-                            .environmentObject(self.userDataStore)
-                            .onAppear {
-                                self.gameDataStore.isInModalView = false
-                            }
-                        ) {
+                                .padding(.horizontal)
+                                .font(.system(size: 30))
+                            
                             HStack {
-                                Text("Visit Forums")
-                                Image(systemName: "chevron.right")
+                                Spacer()
+                                VStack {
+                                    if self.gameDataStore.gameBannerImage[self.gameId] != nil {
+                                        Image(uiImage: self.gameDataStore.gameBannerImage[self.gameId]!)
+                                            .resizable()
+                                            .frame(width: a.size.width * 0.8, height: a.size.height * 0.2)
+                                            .scaledToFill()
+                                            .shadow(radius: 5)
+                                    }
+                                }
+                                .frame(width: a.size.width * 0.9, height: a.size.height * 0.15)
+                                .background(self.gameDataStore.colors["notQuiteBlack"]!)
+                                Spacer()
                             }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .foregroundColor(Color.white)
-                            .background(Color.blue)
-                            .cornerRadius(30)
-                            .shadow(radius: 5)
+                            .padding(.vertical, 20)
+                            
+                            Text("ABOUT THIS GAME")
+                                .tracking(1)
+                                .foregroundColor(Color.white)
+                                .padding(.top)
+                                .padding(.horizontal)
+                            
+                            Rectangle()
+                                .frame(width: a.size.width * 0.9, height: 1)
+                                .foregroundColor(.clear)
+                                .background(LinearGradient(gradient: Gradient(colors: [.blue, self.gameDataStore.colors["notQuiteBlack"]!]), startPoint: .leading, endPoint: .trailing))
+                                .padding(.horizontal)
+                            
+                            VStack {
+                                Text(self.gameDataStore.games[self.gameId]!.gameSummary)
+                                    .foregroundColor(Color.white)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                             .padding()
+                            
+                            VStack(alignment: .leading) {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Text("GENRE: ")
+                                            .font(.system(size: 16))
+                                            .tracking(1)
+                                            .foregroundColor(Color.gray)
+                                        
+                                        Text(self.gameDataStore.games[self.gameId]!.genre.name)
+                                            .font(.system(size: 16))
+                                            .tracking(1)
+                                            .foregroundColor(Color(UIColor.systemTeal))
+                                    }
+                                    .padding(.vertical, 5)
+                                    
+                                    HStack {
+                                        Text("DEVELOPER: ")
+                                            .font(.system(size: 16))
+                                            .tracking(1)
+                                            .foregroundColor(Color.gray)
+                                        
+                                        Text(self.gameDataStore.games[self.gameId]!.developer.name)
+                                            .font(.system(size: 16))
+                                            .tracking(1)
+                                            .foregroundColor(Color(UIColor.systemTeal))
+                                    }
+                                    .padding(.vertical, 5)
+                                    
+                                    HStack {
+                                        Text("PUBLISHER: ")
+                                            .font(.system(size: 16))
+                                            .tracking(1)
+                                            .foregroundColor(Color.gray)
+                                        
+                                        Text(self.gameDataStore.games[self.gameId]!.developer.name)
+                                            .font(.system(size: 16))
+                                            .tracking(1)
+                                            .foregroundColor(Color(UIColor.systemTeal))
+                                    }
+                                    .padding(.vertical, 5)
+                                    
+                                    Spacer()
+                                    HStack {
+                                        NavigationLink(destination: ForumView(gameId: self.gameId)
+                                            .environmentObject(self.gameDataStore)
+                                            .environmentObject(self.userDataStore)
+                                            .onAppear {
+                                                self.gameDataStore.isInModalView = false
+                                            }
+                                        ) {
+                                            HStack {
+                                                Text("Visit discussion")
+                                                .tracking(1)
+                                            }
+                                            .foregroundColor(Color.white)
+                                            .padding(.horizontal)
+                                            .padding(.vertical, 10)
+                                            .shadow(radius: 5)
+                                        }
+                                        Spacer()
+                                    }
+                                    .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                                }
+                                .padding()
+                            }
+                                
+                            .frame(width: a.size.width * 0.9, alignment: .leading)
+                            .background(self.gameDataStore.colors["notQuiteBlack"]!)
+                            .padding()
+                            
+                            Spacer()
                         }
                     }
-                    .frame(width: a.size.width, height: a.size.height * 0.1)
-                    Spacer()
                 }
                 .onAppear() {
                     self.gameDataStore.loadGameBanner(game: self.gameDataStore.games[self.gameId]!)
@@ -113,6 +162,6 @@ struct GameModalView: View {
             .background(self.gameDataStore.colors["darkButNotBlack"]!)
             .edgesIgnoringSafeArea(.all)
         }
-        
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }

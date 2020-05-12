@@ -21,4 +21,5 @@ struct Game: Hashable, Codable, Identifiable {
     var banner: String
     var threadCount: Int
     var gameSummary: String
+    var followerCount: Int
 }

@@ -11,7 +11,7 @@ import SwiftUI
 
 struct ImagePicker: UIViewControllerRepresentable {
     
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var isShown: Bool
     @Binding var image: Image?
     @Binding var data: Data?
     @Binding var currentImages: [UUID]
@@ -19,8 +19,8 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Binding var dataDict: [UUID: Data]
     
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        let parent: ImagePicker
-        
+        var parent: ImagePicker
+
         let maxNumImages = 3
         
         init(_ parent: ImagePicker) {
@@ -29,6 +29,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         
         func imagePickerController(_ picker: UIImagePickerController,
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+
             let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
 
             self.parent.image = Image(uiImage: uiImage!)
@@ -39,11 +40,11 @@ struct ImagePicker: UIViewControllerRepresentable {
                 self.parent.currentImages.append(newImageId)
             }
 
-            self.parent.presentationMode.wrappedValue.dismiss()
+            self.parent.isShown = false
         }
-        
+
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            self.parent.presentationMode.wrappedValue.dismiss()
+            self.parent.isShown = false
         }
     }
     
@@ -58,6 +59,5 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: UIViewControllerRepresentableContext<ImagePicker>) {
-        
     }
 }

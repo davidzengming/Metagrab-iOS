@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import SwiftUI
 
 struct Emojis: Hashable, Codable {
     var emojisIdArr: [Int]

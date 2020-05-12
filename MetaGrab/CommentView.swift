@@ -117,7 +117,7 @@ struct CommentView : View {
                                                 .frame(width: 11, height: 11)
                                                 .padding(5)
                                                 
-                                                .background(self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1 ? Color.black : Color(.lightGray))
+                                                .background(self.gameDataStore.voteCommentMapping[commentId] == nil || self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == 1 ? Color.black : Color(.lightGray))
                                                 .cornerRadius(5)
                                                 .onTapGesture {
                                                     self.onClickUpvoteButton()
@@ -131,7 +131,7 @@ struct CommentView : View {
                                                 .frame(width: 11, height: 11)
                                                 .padding(5)
                                                 
-                                                .background(self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1 ? Color.black : Color(.lightGray))
+                                                .background(self.gameDataStore.voteCommentMapping[commentId] != nil && self.gameDataStore.votes[self.gameDataStore.voteCommentMapping[commentId]!]!.direction == -1 ? Color.black : Color(.lightGray))
                                                 .cornerRadius(5)
                                                 .onTapGesture {
                                                     self.onClickDownvoteButton()

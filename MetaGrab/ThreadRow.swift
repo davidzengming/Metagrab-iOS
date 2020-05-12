@@ -75,6 +75,11 @@ struct ThreadRow : View {
         return self.gameDataStore.votes[self.gameDataStore.voteThreadMapping[threadId]!]!.direction == -1
     }
     
+    func onClickAddEmojiBubble() {
+        self.gameDataStore.addEmojiThreadIdByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = self.threadId
+        self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = true
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -94,6 +99,8 @@ struct ThreadRow : View {
                         .frame(height: self.height * 0.02, alignment: .leading)
                         .foregroundColor(Color(.darkGray))
                 }
+                
+                Spacer()
             }
             .frame(width: self.width, height: self.height * 0.045, alignment: .leading)
             .padding(.bottom, 10)
@@ -137,11 +144,35 @@ struct ThreadRow : View {
                         Text(String(self.gameDataStore.threads[self.threadId]!.numSubtreeNodes))
                             .font(.system(size: 16))
                     }
-                    .frame(width: self.width * 0.15, height: self.height * 0.025, alignment: .leading)
+                    .frame(height: self.height * 0.025, alignment: .leading)
+                    
+                    HStack {
+                        if self.gameDataStore.isThreadHiddenByThreadId[self.threadId]! == true {
+                            Text("Unhide")
+                                .onTapGesture {
+                                    self.gameDataStore.unhideThread(access: self.userDataStore.token!.access, threadId: self.threadId)
+                            }
+                            
+                        } else {
+                            Text("Hide")
+                                .onTapGesture {
+                                        self.gameDataStore.hideThread(access: self.userDataStore.token!.access, threadId: self.threadId)
+                                }
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Report")
+                            .onTapGesture {
+                                self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = false
+                                self.gameDataStore.isReportPopupActiveByForumId[self.gameId] = true
+                        }
+                    }
                 }
                 
                 EmojiBarThreadView(threadId: threadId, isInThreadView: false)
             }
+            .padding(.top, 10)
         }
         .padding(.all, 20)
         .onAppear() {

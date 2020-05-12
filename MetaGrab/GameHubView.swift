@@ -53,6 +53,14 @@ struct GameHubView: View {
                         Image(systemName: "hourglass.bottomhalf.fill")
                         Text("Upcoming")
                 }
+                
+                UserProfileView()
+                .navigationBarTitle("Settings")
+                .navigationBarHidden(true)
+                    .tabItem {
+                        Image(systemName: "person.fill")
+                        Text("Settings")
+                }
             }
                 //.edgesIgnoringSafeArea(.top)
                 .onAppear() {

@@ -37,6 +37,7 @@ struct FrontHubView: View {
                             if self.gameDataStore.myGameVisitHistory.count > 0 {
                                 Text("RECENTLY VISITED")
                                     .foregroundColor(Color.white)
+                                    .tracking(1)
                                 HStack {
                                     ScrollView(.horizontal, showsIndicators: true) {
                                         HStack(spacing: 20) {
@@ -63,6 +64,7 @@ struct FrontHubView: View {
                             if self.gameDataStore.followedGames.count > 0 {
                                 Text("FOLLOWED GAMES")
                                     .foregroundColor(Color.white)
+                                    .tracking(1)
                                 HStack {
                                     ScrollView(.horizontal, showsIndicators: true) {
                                         HStack(spacing: 20) {

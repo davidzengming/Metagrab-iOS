@@ -15,6 +15,84 @@ final class GameDataStore: ObservableObject {
     let objectWillChange = PassthroughSubject<Void, Never>()
     let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "dzengcdn", apiKey: "348513889264333", secure: true))
     
+    var lastClickedReportThreadByForumId = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var lastClickedReportCommentByCommentId = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isReportPopupActiveByForumId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isReportPopupActiveByCommentId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var blacklistedUserIdArr = [Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var hiddenThreadIdArr = [Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var hiddenCommentIdArr = [Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var blacklistedUsersById = [Int: User]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var hiddenThreadsById = [Int: Thread]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var hiddenCommentsById = [Int: Comment]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isUserBlockedByUserId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isThreadHiddenByThreadId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isCommentHiddenByCommentId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     var myGameVisitHistory = [Int]() {
         willSet {
             objectWillChange.send()
@@ -426,18 +504,18 @@ final class GameDataStore: ObservableObject {
     
     func hexStringToUIColor (hex:String) -> UIColor {
         var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-
+        
         if (cString.hasPrefix("#")) {
             cString.remove(at: cString.startIndex)
         }
-
+        
         if ((cString.count) != 6) {
             return UIColor.gray
         }
-
+        
         var rgbValue:UInt64 = 0
         Scanner(string: cString).scanHexInt64(&rgbValue)
-
+        
         return UIColor(
             red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
@@ -861,6 +939,261 @@ final class GameDataStore: ObservableObject {
         return generatedTextStorage
     }
     
+    func sendReportByThreadId(access: String, threadId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/reports/add_report_by_thread_id") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            print("Reported thread: ", threadId)
+        }.resume()
+    }
+    
+    func sendReportByCommentId(access: String, commentId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/reports/add_report_by_comment_id") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            print("Reported comment: ", commentId)
+        }.resume()
+    }
+    
+    func hideThread(access: String, threadId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/hide_thread_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.hiddenThreadIdArr.append(threadId)
+                self.hiddenThreadsById[threadId] = self.threads[threadId]
+            }
+        }.resume()
+    }
+    
+    func unhideThread(access: String, threadId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/unhide_thread_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                let itemToRemoveIndex = self.hiddenThreadIdArr.firstIndex(of: threadId)
+                self.hiddenThreadIdArr.remove(at: itemToRemoveIndex!)
+                self.hiddenThreadsById.removeValue(forKey: threadId)
+            }
+        }.resume()
+    }
+    
+    func hideComment(access: String, commentId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/hide_comment_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.hiddenCommentIdArr.append(commentId)
+                self.hiddenCommentsById[commentId] = self.comments[commentId]
+            }
+        }.resume()
+    }
+    
+    func unhideComment(access: String, commentId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/unhide_comment_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                let itemToRemoveIndex = self.hiddenCommentIdArr.firstIndex(of: commentId)
+                self.hiddenCommentIdArr.remove(at: itemToRemoveIndex!)
+                self.hiddenCommentsById.removeValue(forKey: commentId)
+            }
+        }.resume()
+    }
+    
+    func blockUser(access: String, userId: Int, targetBlockUserId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/add_user_to_blacklist_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.blacklistedUserIdArr.append(targetBlockUserId)
+                self.blacklistedUsersById[targetBlockUserId] = self.users[targetBlockUserId]
+            }
+        }.resume()
+    }
+    
+    func unblockUser(access: String, userId: Int, targetUnblockUserId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/remove_user_from_blacklist_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if error != nil {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                let indexToBeRemoved = self.blacklistedUserIdArr.firstIndex(of: targetUnblockUserId)
+                
+                self.blacklistedUserIdArr.remove(at: indexToBeRemoved!)
+                self.blacklistedUsersById.removeValue(forKey: targetUnblockUserId)
+            }
+        }.resume()
+    }
+    
+    func fetchBlacklistedUsers(access: String, userId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/get_blacklisted_users_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    let blacklistedUsersResponse: BlacklistedUsersResponse = load(jsonData: jsonString.data(using: .utf8)!)
+                    
+                    DispatchQueue.main.async {
+                        for blacklistedUser in blacklistedUsersResponse.blacklistedUsers {
+                            self.blacklistedUserIdArr.append(blacklistedUser.id)
+                            self.blacklistedUsersById[blacklistedUser.id] = blacklistedUser
+                            self.isUserBlockedByUserId[blacklistedUser.id] = true
+                        }
+                    }
+                }
+            }
+        }.resume()
+    }
+    
+    func fetchHiddenThreads(access: String, userId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/get_hidden_threads_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    let hiddenThreadsResponse: HiddenThreadsResponse = load(jsonData: jsonString.data(using: .utf8)!)
+                    
+                    DispatchQueue.main.async {
+                        for hiddenThread in hiddenThreadsResponse.hiddenThreads {
+                            self.hiddenThreadIdArr.append(hiddenThread.id)
+                            self.hiddenThreadsById[hiddenThread.id] = hiddenThread
+                            self.isThreadHiddenByThreadId[hiddenThread.id] = true
+                        }
+                    }
+                }
+            }
+        }.resume()
+    }
+    
+    func fetchHiddenComments(access: String, userId: Int) {
+        guard let url = URL(string: "http://127.0.0.1:8000/users_profile/get_hidden_comments_by_user_id/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let sessionConfig = URLSessionConfiguration.default
+        let authString: String? = "Bearer \(access)"
+        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+        
+        session.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    let hiddenCommentsResponse: HiddenCommentsResponse = load(jsonData: jsonString.data(using: .utf8)!)
+                    
+                    DispatchQueue.main.async {
+                        for hiddenComment in hiddenCommentsResponse.hiddenComments {
+                            self.hiddenCommentIdArr.append(hiddenComment.id)
+                            self.hiddenCommentsById[hiddenComment.id] = hiddenComment
+                            self.isCommentHiddenByCommentId[hiddenComment.id] = true
+                        }
+                    }
+                }
+            }
+        }.resume()
+    }
+    
     func submitThread(access: String, forumId: Int, title: String, flair: Int, content: NSTextStorage, imageData: [UUID: Data], imagesArray: [UUID], userId: Int) {
         let taskGroup = DispatchGroup()
         
@@ -949,18 +1282,25 @@ final class GameDataStore: ObservableObject {
                             self.replyTargetCommentIdByThreadId[tempThread.id] = -1
                             self.games[forumId]!.threadCount += 1
                             
+                            self.isThreadHiddenByThreadId[tempThread.id] = false
+                            
                             self.threadListByGameId[forumId]!.insert(tempThread.id, at: 0)
                             
-                            //                            if self.threadsImages[tempThread.id] == nil {
-                            //                                self.threadsImages[tempThread.id] = []
-                            //                            }
-                            //
-                            //                            for id in imagesArray {
-                            //                                if imageData[id] != nil {
-                            //                                    self.threadsImages[tempThread.id]!.append(UIImage(data: imageData[id]!)!)
-                            //                                }
-                            //                            }
-                            //
+                            if self.threadsImages[tempThread.id] == nil {
+                                self.threadsImages[tempThread.id] = []
+                            }
+                            
+                            if self.threadImagesHeight[tempThread.id] == nil {
+                                self.threadImagesHeight[tempThread.id] = 0
+                            }
+                            
+                            for id in imagesArray {
+                                if imageData[id] != nil {
+                                    let uiImage = UIImage(data: imageData[id]!)!
+                                    self.threadsImages[tempThread.id]!.append(uiImage)
+                                    self.threadImagesHeight[tempThread.id] = max(self.threadImagesHeight[tempThread.id]!, uiImage.size.height)
+                                }
+                            }
                         }
                     }
                 }
@@ -1102,6 +1442,7 @@ final class GameDataStore: ObservableObject {
                         
                         self.visibleChildCommentsNum[tempMainComment.id] = 0
                         self.voteCountStringByCommentId[tempMainComment.id] = self.transformVotesString(points: 1)
+                        self.isCommentHiddenByCommentId[tempMainComment.id] = false
                         
                         //                        // emoji stuff
                         //                        self.emojiArrByCommentId[tempMainComment.id] = [[]]
@@ -1180,6 +1521,7 @@ final class GameDataStore: ObservableObject {
                         self.voteCountStringByCommentId[tempChildComment.id] = self.transformVotesString(points: 1)
                         
                         self.commentNextPageStartIndex[tempChildComment.id] = -1
+                        self.isCommentHiddenByCommentId[tempChildComment.id] = false
                         
                         //                        // emoji stuff
                         //                        self.emojiArrByCommentId[tempChildComment.id] = [[]]
@@ -1263,7 +1605,8 @@ final class GameDataStore: ObservableObject {
                         
                         for comment in commentLoadTree.addedComments {
                             self.comments[comment.id] = comment
-                            
+                            self.isCommentHiddenByCommentId[comment.id] = false
+
                             if comment.parentThread != nil {
                                 commentListToBeAppendedToThread.append(comment.id)
                                 self.childCommentListByParentCommentId[comment.id] = [Int]()
@@ -1339,6 +1682,16 @@ final class GameDataStore: ObservableObject {
                         for (parentComment, childComments) in commentListToBeAppendedToComment {
                             self.childCommentListByParentCommentId[parentComment]! = childComments
                         }
+                        
+                        for vote in commentLoadTree.addedVotes {
+                            self.votes[vote.id] = vote
+                            self.voteCommentMapping[vote.comment!] = vote.id
+                        }
+                        
+                        for user in commentLoadTree.usersResponse {
+                            self.users[user.id] = user
+                        }
+                        
                         self.mainCommentListByThreadId[threadId]! += commentListToBeAppendedToThread
                         
                         self.moreCommentsByThreadId[threadId]! = [Int]()
@@ -1348,15 +1701,6 @@ final class GameDataStore: ObservableObject {
                             } else {
                                 self.moreCommentsByParentCommentId[comment.parentPost!]!.append(comment.id)
                             }
-                        }
-                        
-                        for vote in commentLoadTree.addedVotes {
-                            self.votes[vote.id] = vote
-                            self.voteCommentMapping[vote.comment!] = vote.id
-                        }
-                        
-                        for user in commentLoadTree.usersResponse {
-                            self.users[user.id] = user
                         }
                     }
                 }
@@ -1397,6 +1741,7 @@ final class GameDataStore: ObservableObject {
                         
                         for comment in commentLoadTree.addedComments {
                             self.comments[comment.id] = comment
+                            self.isCommentHiddenByCommentId[comment.id] = false
                             self.childCommentListByParentCommentId[parentCommentId]!.append(comment.id)
                             self.childCommentListByParentCommentId[comment.id] = [Int]()
                             self.commentNextPageStartIndex[comment.id] = 0
@@ -1571,6 +1916,8 @@ final class GameDataStore: ObservableObject {
                             newThreadsList.append(thread.id)
                             self.threads[thread.id] = thread
                             self.mainCommentListByThreadId[thread.id] = [Int]()
+                            self.isThreadHiddenByThreadId[thread.id] = false
+                            
                             self.threadsIndexInGameList[thread.id] = self.threadListByGameId[game.id]!.count - 1
                             self.threadsNextPageStartIndex[thread.id] = 0
                             self.threadsTextStorage[thread.id] = self.generateTextStorageFromJson(isThread: true, id: thread.id)
@@ -1947,6 +2294,7 @@ final class GameDataStore: ObservableObject {
                 DispatchQueue.main.async {
                     self.isFollowed[game.id] = true
                     self.followedGames.append(game.id)
+                    self.games[game.id]!.followerCount += 1
                 }
             }
         }.resume()
@@ -1968,6 +2316,7 @@ final class GameDataStore: ObservableObject {
                     if let index = self.followedGames.firstIndex(of: game.id) {
                         self.followedGames.remove(at: index)
                     }
+                    self.games[game.id]!.followerCount -= 1
                 }
             }
         }.resume()
@@ -2041,7 +2390,7 @@ final class GameDataStore: ObservableObject {
                     self.votes[voteId]!.direction = 1
                     
                     self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
-//                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
+                    //                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
@@ -2067,7 +2416,7 @@ final class GameDataStore: ObservableObject {
                     self.votes[voteId]!.direction = -1
                     
                     self.voteCountStringByCommentId[comment.id] = self.transformVotesString(points: self.comments[comment.id]!.upvotes - self.comments[comment.id]!.downvotes)
-//                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
+                    //                    self.addEmojiToStore(emojiId: 0, threadId: nil, commentId: comment.id, userId: userId, newEmojiCount: self.comments[comment.id]!.upvotes)
                 }
             }
         }.resume()
