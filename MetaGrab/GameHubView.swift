@@ -71,5 +71,6 @@ struct GameHubView: View {
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .background(self.gameDataStore.colors["darkButNotBlack"])
     }
 }

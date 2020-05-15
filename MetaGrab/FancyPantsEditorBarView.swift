@@ -33,6 +33,8 @@ struct FancyPantsEditorView: View {
     @State var didChangeBulletList: Bool = false
     @State var didChangeNumberedBulletList: Bool = false
     
+    @State var hasText: Bool = false
+    
     var submit: (() -> Void)?
     
     func toggleBold() {
@@ -103,7 +105,8 @@ struct FancyPantsEditorView: View {
                             isThread: self.isThread,
                             threadId:self.threadId,
                             commentId: self.commentId,
-                            isOmniBar: self.isOmniBar
+                            isOmniBar: self.isOmniBar,
+                            hasText: self.$hasText
                         )
                             .padding(.vertical, self.isEditable || self.isNewContent ? 10 : 0)
                             .padding(.horizontal, self.isEditable || self.isNewContent ? 20 : 0)
@@ -129,7 +132,8 @@ struct FancyPantsEditorView: View {
                                 isThread: self.isThread,
                                 threadId:self.threadId,
                                 commentId: self.commentId,
-                                isOmniBar: self.isOmniBar
+                                isOmniBar: self.isOmniBar,
+                                hasText: self.$hasText
                             )
                                 .padding(.vertical, 10)
                                 .padding(.horizontal, 20)
@@ -145,7 +149,7 @@ struct FancyPantsEditorView: View {
                                 Button(action: self.submit!, label: {
                                     Text("Submit")
                                         .frame(width: a.size.width * 0.17, height: 40, alignment: .center)
-                                        .background(self.newTextStorage.length > 0 ? Color.blue : Color(red: 160 / 255, green: 206 / 255, blue: 235 / 255))
+                                        .background(self.hasText ? Color.blue : Color(red: 160 / 255, green: 206 / 255, blue: 235 / 255))
                                         .foregroundColor(Color.white)
                                         .cornerRadius(8)
                                         .padding(.trailing, 20)
@@ -231,7 +235,8 @@ struct FancyPantsEditorView: View {
                         .buttonStyle(PlainButtonStyle())
                         .frame(width: 60, height: 40, alignment: .center)
                     }
-                    .frame(width: a.size.width, height: 40, alignment: .leading)
+                    .frame(width: a.size.width * 0.9, height: 40, alignment: .leading)
+                    .padding(.horizontal)
                 }
             }
         }

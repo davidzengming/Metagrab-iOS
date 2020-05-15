@@ -25,7 +25,6 @@ class TextViewHelper {
 //        let newSize2 = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
 //        let timeElapsed2 = CFAbsoluteTimeGetCurrent() - startTime2
 //        print("contentsize: ", timeElapsed1, " ||||||| sizethatfits: ", timeElapsed2)
-        
         return newSize1
     }
     

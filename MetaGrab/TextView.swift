@@ -39,11 +39,15 @@ struct TextView: UIViewRepresentable {
     @Binding var isFirstResponder: Bool
     @Binding var didBecomeFirstResponder: Bool
     
+    
+    
     var isNewContent: Bool
     var isThread: Bool
     var threadId: Int?
     var commentId: Int?
     var isOmniBar: Bool
+    
+    @Binding var hasText: Bool
     
     func makeCoordinator() -> Coordinator {
         if isNewContent {
@@ -295,19 +299,34 @@ struct TextView: UIViewRepresentable {
             DispatchQueue.main.async {
                 if self.parent.isNewContent == false {
                     if self.parent.isThread == true {
-                        self.parent.gameDataStore.threadsDesiredHeight[self.parent.threadId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
+                        let newHeight = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
+                        if newHeight != self.parent.gameDataStore.threadsDesiredHeight[self.parent.threadId!] {
+                            self.parent.gameDataStore.threadsDesiredHeight[self.parent.threadId!] = newHeight
+                        }
                     } else {
-                        self.parent.gameDataStore.commentsDesiredHeight[self.parent.commentId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
+                        let newHeight =  ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
+                        if newHeight != self.parent.gameDataStore.commentsDesiredHeight[self.parent.commentId!] {
+                            self.parent.gameDataStore.commentsDesiredHeight[self.parent.commentId!] = newHeight
+                        }
                     }
                 } else {
                     if self.parent.isOmniBar == true {
-                        self.parent.gameDataStore.threadViewReplyBarDesiredHeight[self.parent.threadId!] = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
+                        let newHeight = ceil(TextViewHelper.calculateTextViewHeight(textView: textView))
+                        if newHeight != self.parent.gameDataStore.threadViewReplyBarDesiredHeight[self.parent.threadId!] {
+                            self.parent.gameDataStore.threadViewReplyBarDesiredHeight[self.parent.threadId!] = newHeight
+                        }
                     }
                 }
             }
         }
         
         func textViewDidChange(_ textView: UITextView) {
+            
+            let hasText = textView.textStorage.length > 0
+            if self.parent.hasText != hasText {
+                self.parent.hasText = hasText
+            }
+            
             updateTextViewHeight(textView: textView)
             //            not needed - textStorage state already receives update via binding
             //            DispatchQueue.main.async {

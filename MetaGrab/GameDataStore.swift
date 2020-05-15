@@ -725,8 +725,6 @@ final class GameDataStore: ObservableObject {
     }
     
     func getShiftedArrayForRemoveEmoji(emojiId: Int, threadId: Int?, commentId: Int?) -> [[Int]] {
-        
-        
         let arr = self.emojiArrByThreadId[threadId!]!
         //        let arr = threadId != nil ? self.emojiArrByThreadId[threadId!]! : self.emojiArrByCommentId[commentId!]!
         
@@ -765,7 +763,6 @@ final class GameDataStore: ObservableObject {
     func addEmojiToStore(emojiId: Int, threadId: Int?, commentId: Int?, userId: Int, newEmojiCount: Int) {
         DispatchQueue.main.async {
             if threadId != nil {
-                
                 var emojiAlreadyExists = false
                 
                 if self.emojiCountByThreadId[threadId!]![emojiId] != nil {
@@ -839,6 +836,12 @@ final class GameDataStore: ObservableObject {
     }
     
     func addEmojiByThreadId(access: String, threadId: Int,  emojiId: Int, userId: Int) {
+        
+        if self.didReactToEmojiByThreadId[threadId]![emojiId] != nil && self.didReactToEmojiByThreadId[threadId]![emojiId]! == true {
+            print("Already reacted with same emoji.")
+            return
+        }
+        
         guard let url = URL(string: "http://127.0.0.1:8000/emojis/add_new_emoji_by_thread_id/") else { return }
         let json: [String: Any] = ["thread_id": threadId, "emoji_id": emojiId]
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
@@ -867,34 +870,39 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func addEmojiByCommentId(access: String, commentId: Int,  emojiId: Int, userId: Int) {
-        guard let url = URL(string: "http://127.0.0.1:8000/emojis/add_new_emoji_by_comment_id/") else { return }
-        let json: [String: Any] = ["comment_id": commentId, "emoji_id": emojiId]
-        let jsonData = try? JSONSerialization.data(withJSONObject: json)
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = jsonData
-        
-        let sessionConfig = URLSessionConfiguration.default
-        let authString: String? = "Bearer \(access)"
-        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
-        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
-        
-        session.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    let emojiResponse: EmojiResponse = load(jsonData: jsonString.data(using: .utf8)!)
-                    
-                    if emojiResponse.isSuccess == false {
-                        return
-                    }
-                    
-                    self.addEmojiToStore(emojiId: emojiId, threadId: nil, commentId: commentId, userId: userId, newEmojiCount: emojiResponse.newEmojiCount)
-                }
-            }
-        }.resume()
-    }
+//    func addEmojiByCommentId(access: String, commentId: Int,  emojiId: Int, userId: Int) {
+//        if self.didReactToEmojiByCommentId[commentId]![emojiId] != nil && self.didReactToEmojiByCommentId[commentId]![emojiId]! == true {
+//            print("Already reacted with same emoji.")
+//            return
+//        }
+//
+//        guard let url = URL(string: "http://127.0.0.1:8000/emojis/add_new_emoji_by_comment_id/") else { return }
+//        let json: [String: Any] = ["comment_id": commentId, "emoji_id": emojiId]
+//        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+//
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.httpBody = jsonData
+//
+//        let sessionConfig = URLSessionConfiguration.default
+//        let authString: String? = "Bearer \(access)"
+//        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+//        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+//
+//        session.dataTask(with: request) { (data, response, error) in
+//            if let data = data {
+//                if let jsonString = String(data: data, encoding: .utf8) {
+//                    let emojiResponse: EmojiResponse = load(jsonData: jsonString.data(using: .utf8)!)
+//
+//                    if emojiResponse.isSuccess == false {
+//                        return
+//                    }
+//
+//                    self.addEmojiToStore(emojiId: emojiId, threadId: nil, commentId: commentId, userId: userId, newEmojiCount: emojiResponse.newEmojiCount)
+//                }
+//            }
+//        }.resume()
+//    }
     
     // Only thread and comment authors can delete
     func removeEmojiByThreadId(access: String, threadId: Int,  emojiId: Int, userId: Int) {
@@ -926,34 +934,34 @@ final class GameDataStore: ObservableObject {
         }.resume()
     }
     
-    func removeEmojiByCommentId(access: String, commentId: Int,  emojiId: Int, userId: Int) {
-        guard let url = URL(string: "http://127.0.0.1:8000/emojis/remove_emoji_by_comment_id/") else { return }
-        let json: [String: Any] = ["comment_id": commentId, "emoji_id": emojiId]
-        let jsonData = try? JSONSerialization.data(withJSONObject: json)
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = jsonData
-        
-        let sessionConfig = URLSessionConfiguration.default
-        let authString: String? = "Bearer \(access)"
-        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
-        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
-        
-        session.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    let emojiResponse: EmojiResponse = load(jsonData: jsonString.data(using: .utf8)!)
-                    
-                    if emojiResponse.isSuccess == false {
-                        return
-                    }
-                    
-                    self.removeEmojiFromStore(emojiId: emojiId, threadId: nil, commentId: commentId, userId: userId, newEmojiCount: emojiResponse.newEmojiCount)
-                }
-            }
-        }.resume()
-    }
+//    func removeEmojiByCommentId(access: String, commentId: Int,  emojiId: Int, userId: Int) {
+//        guard let url = URL(string: "http://127.0.0.1:8000/emojis/remove_emoji_by_comment_id/") else { return }
+//        let json: [String: Any] = ["comment_id": commentId, "emoji_id": emojiId]
+//        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+//
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.httpBody = jsonData
+//
+//        let sessionConfig = URLSessionConfiguration.default
+//        let authString: String? = "Bearer \(access)"
+//        sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
+//        let session = URLSession(configuration: sessionConfig, delegate: self as? URLSessionDelegate, delegateQueue: nil)
+//
+//        session.dataTask(with: request) { (data, response, error) in
+//            if let data = data {
+//                if let jsonString = String(data: data, encoding: .utf8) {
+//                    let emojiResponse: EmojiResponse = load(jsonData: jsonString.data(using: .utf8)!)
+//
+//                    if emojiResponse.isSuccess == false {
+//                        return
+//                    }
+//
+//                    self.removeEmojiFromStore(emojiId: emojiId, threadId: nil, commentId: commentId, userId: userId, newEmojiCount: emojiResponse.newEmojiCount)
+//                }
+//            }
+//        }.resume()
+//    }
     
     var attributesEncodingCache: [Int: Any] = [:]
     func generateTextStorageFromJson(isThread: Bool, id: Int) -> NSTextStorage {
@@ -1206,7 +1214,7 @@ final class GameDataStore: ObservableObject {
                     DispatchQueue.main.async {
                         for blacklistedUser in blacklistedUsersResponse.blacklistedUsers {
                             if self.isUserBlockedByUserId[blacklistedUser.id] != nil && self.isUserBlockedByUserId[blacklistedUser.id]! == true {
-                                return
+                                continue
                             }
                             
                             self.users[blacklistedUser.id] = blacklistedUser
@@ -1236,9 +1244,11 @@ final class GameDataStore: ObservableObject {
                     let hiddenThreadsResponse: HiddenThreadsResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     
                     DispatchQueue.main.async {
-                        self.hiddenThreadIdArr = []
-                        
                         for hiddenThread in hiddenThreadsResponse.hiddenThreads {
+                            if self.isThreadHiddenByThreadId[hiddenThread.id] != nil && self.isThreadHiddenByThreadId[hiddenThread.id]! == true {
+                                continue
+                            }
+                            
                             self.hiddenThreadIdArr.append(hiddenThread.id)
                             self.hiddenThreadsById[hiddenThread.id] = hiddenThread
                             self.isThreadHiddenByThreadId[hiddenThread.id] = true
@@ -1265,8 +1275,11 @@ final class GameDataStore: ObservableObject {
                     let hiddenCommentsResponse: HiddenCommentsResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     
                     DispatchQueue.main.async {
-                        self.hiddenCommentIdArr = []
                         for hiddenComment in hiddenCommentsResponse.hiddenComments {
+                            if self.isCommentHiddenByCommentId[hiddenComment.id] != nil && self.isCommentHiddenByCommentId[hiddenComment.id]! == true {
+                                continue
+                            }
+                            
                             self.hiddenCommentIdArr.append(hiddenComment.id)
                             self.hiddenCommentsById[hiddenComment.id] = hiddenComment
                             self.isCommentHiddenByCommentId[hiddenComment.id] = true
@@ -2226,6 +2239,7 @@ final class GameDataStore: ObservableObject {
                     var followedGamesTempArr = [Int]()
                     DispatchQueue.main.async {
                         for game in followGames {
+                            
                             self.isFollowed[game.id] = true
                             followedGamesTempArr.append(game.id)
                             if self.games[game.id] == nil {
@@ -2269,10 +2283,14 @@ final class GameDataStore: ObservableObject {
                     
                     DispatchQueue.main.async {
                         for game in tempGames {
+
                             if self.isFollowed[game.id] == nil {
                                 self.isFollowed[game.id] = false
                             }
-                            self.games[game.id] = game
+                            
+                            if self.games[game.id] == nil {
+                                self.games[game.id] = game
+                            }
                         }
                     }
                 }
@@ -2302,7 +2320,10 @@ final class GameDataStore: ObservableObject {
                             if self.isFollowed[game.id] == nil {
                                 self.isFollowed[game.id] = false
                             }
-                            self.games[game.id] = game
+                            
+                            if self.games[game.id] == nil {
+                                self.games[game.id] = game
+                            }
                             
                             if self.threadListByGameId[game.id] == nil {
                                 self.threadListByGameId[game.id] = [Int]()
@@ -2330,13 +2351,18 @@ final class GameDataStore: ObservableObject {
                                 self.gamesByYear[releaseYear]![releaseMonth]![releaseDay] = Set<Int>()
                             }
                             
-                            self.gamesByYear[releaseYear]![releaseMonth]![releaseDay]!.insert(game.id)
+                            if self.gamesByYear[releaseYear]![releaseMonth]![releaseDay]!.contains(game.id) {
+                                continue
+                            } else {
+                                self.gamesByYear[releaseYear]![releaseMonth]![releaseDay]!.insert(game.id)
+                            }
                         }
-                        
                         
                         for (year, _) in self.gamesByYear {
                             
-                            self.hasGameByYear[year] = true
+                            if self.hasGameByYear[year] == nil || self.hasGameByYear[year]! == false {
+                                self.hasGameByYear[year] = true
+                            }
                             
                             for (month, _) in self.gamesByYear[year]! {
                                 if self.sortedDaysListByMonthYear[year] == nil {

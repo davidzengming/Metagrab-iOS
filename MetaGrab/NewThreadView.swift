@@ -38,9 +38,18 @@ struct NewThreadView: View {
     let maxNumImages = 3
     
     func submitThread() {
-        self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: forumId, title: title, flair: flair, content: content, imageData: dataDict, imagesArray: imagesArray, userId: self.userDataStore.token!.userId)
-        
-        self.presentationMode.wrappedValue.dismiss()
+        if self.showImagePicker == true {
+            self.showImagePicker = false
+
+            let seconds = 2.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+                self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: self.forumId, title: self.title, flair: self.flair, content: self.content, imageData: self.dataDict, imagesArray: self.imagesArray, userId: self.userDataStore.token!.userId)
+                self.presentationMode.wrappedValue.dismiss()
+            }
+        } else {
+            self.gameDataStore.submitThread(access:self.userDataStore.token!.access, forumId: self.forumId, title: self.title, flair: self.flair, content: self.content, imageData: self.dataDict, imagesArray: self.imagesArray, userId: self.userDataStore.token!.userId)
+            self.presentationMode.wrappedValue.dismiss()
+        }
     }
     
     func removeImage() {
@@ -51,6 +60,27 @@ struct NewThreadView: View {
         
         if imagesDict[imagesArray.last!] != nil {
             imagesArray.append(UUID())
+        }
+    }
+    
+    func dismissView() {
+        if self.showImagePicker == true {
+            self.showImagePicker = false
+            
+            let seconds = 2.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+                self.presentationMode.wrappedValue.dismiss()
+            }
+        } else {
+            self.presentationMode.wrappedValue.dismiss()
+        }
+    }
+    
+    var btnBack: some View {
+        Button(action: dismissView) {
+            Image(systemName: "chevron.left")
+            .resizable()
+                .foregroundColor(Color.white)
         }
     }
     
@@ -107,8 +137,8 @@ struct NewThreadView: View {
                                 .stroke(Color.black, lineWidth: 2)
                     )
                         .padding()
-                        .transition(.move(edge: .bottom))
-                        .animation(.default)
+                    .transition(.move(edge: .bottom))
+                    .animation(.default)
                     Spacer()
                 } else {
                     ImagePicker(isImagePickerShown: self.$showImagePicker, image: self.$imagesDict[self.imagesArray[self.clickedImageIndex!]], data: self.$dataDict[self.imagesArray[self.clickedImageIndex!]], currentImages: self.$imagesArray, imagesDict: self.$imagesDict, dataDict: self.$dataDict)
@@ -122,7 +152,7 @@ struct NewThreadView: View {
             }
             .KeyboardAwarePadding()
             .navigationBarTitle(Text("Post to \(self.gameDataStore.games[self.forumId]!.name)"))
-            .navigationBarItems(trailing: Button(action: self.submitThread) {
+            .navigationBarItems(leading: self.btnBack, trailing: Button(action: self.submitThread) {
                 Text("Submit")
             })
         }
