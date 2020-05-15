@@ -146,8 +146,18 @@ struct ThreadView : View {
             self.gameDataStore.colors["darkButNotBlack"]!
                 .edgesIgnoringSafeArea(.all)
             
-            Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
-                .edgesIgnoringSafeArea(.bottom)
+            
+            if (self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] == nil || self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId]! == false) && (self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] == nil || self.gameDataStore.isReportPopupActiveByThreadId[self.threadId]! == false) &&
+                (self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId] == nil ||
+                    self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId]! == false) {
+                Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
+                    .edgesIgnoringSafeArea(.bottom)
+            } else {
+                self.gameDataStore.colors["darkButNotBlack"]!
+                    .edgesIgnoringSafeArea(.bottom)
+                
+                Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
+            }
             
             GeometryReader { a in
                 VStack(spacing: 0) {
@@ -171,6 +181,15 @@ struct ThreadView : View {
                                                     .font(.system(size: 16))
                                                 Spacer()
                                             }
+                                            .onTapGesture {
+                                                
+                                                self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] = false
+                                                self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] = false
+                                                self.gameDataStore.lastClickedBlockUserByThreadId[self.threadId] = self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.id
+                                                self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId] = true
+                                                
+                                            }
+                                            
                                             Text(self.gameDataStore.relativeDateStringByThreadId[self.threadId]!)
                                                 .foregroundColor(Color(.darkGray))
                                                 .font(.system(size: 14))
@@ -178,8 +197,8 @@ struct ThreadView : View {
                                         }
                                     }
                                     .padding(.bottom, 20)
-//                                    .background(self.gameDataStore.isReplyBarReplyingToThreadByThreadId[self.threadId]!
-//                                        == true ? Color.gray : Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255))
+                                    //                                    .background(self.gameDataStore.isReplyBarReplyingToThreadByThreadId[self.threadId]!
+                                    //                                        == true ? Color.gray : Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255))
                                     
                                     FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: self.$isEditable, isFirstResponder: .constant(false), didBecomeFirstResponder: .constant(false), showFancyPantsEditorBar: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isOmniBar: false)
                                         .frame(width: a.size.width - self.outerPadding * 2, height: self.gameDataStore.threadsDesiredHeight[self.threadId]! + (self.isEditable ? 20 : 0))
@@ -187,8 +206,10 @@ struct ThreadView : View {
                                         .onTapGesture {
                                             self.setReplyTargetToThread()
                                     }
-//                                    .background(self.gameDataStore.isReplyBarReplyingToThreadByThreadId[self.threadId]!
-//                                        == true ? Color.gray : Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255))
+                                        
+                                    .padding(.bottom, 10)
+                                    //                                    .background(self.gameDataStore.isReplyBarReplyingToThreadByThreadId[self.threadId]!
+                                    //                                        == true ? Color.gray : Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255))
                                     
                                     if (self.gameDataStore.threadsImages[self.threadId] != nil) {
                                         HStack(spacing: 10) {
@@ -200,27 +221,85 @@ struct ThreadView : View {
                                                     .frame(minWidth: a.size.width * 0.05, maxWidth: a.size.width * 0.25, minHeight: a.size.height * 0.1, maxHeight: a.size.height * 0.15, alignment: .center)
                                             }
                                         }
+                                        .padding(.bottom, 10)
                                     }
+                                    
+                                    HStack {
+                                        HStack(spacing: 5) {
+                                            Image(systemName: "bubble.right.fill")
+                                            Text(String(self.gameDataStore.threads[self.threadId]!.numSubtreeNodes))
+                                                .font(.system(size: 16))
+                                                .bold()
+                                            Text("Replies")
+                                                .bold()
+                                        }
+                                        
+                                        HStack {
+                                            if self.gameDataStore.isThreadHiddenByThreadId[self.threadId]! == true {
+                                                Text("Unhide")
+                                                    .bold()
+                                                    .onTapGesture {
+                                                        self.gameDataStore.unhideThread(access: self.userDataStore.token!.access, threadId: self.threadId)
+                                                }
+                                            } else {
+                                                Text("Hide")
+                                                    .bold()
+                                                    .onTapGesture {
+                                                        self.gameDataStore.hideThread(access: self.userDataStore.token!.access, threadId: self.threadId)
+                                                }
+                                            }
+                                        }
+                                        
+                                        HStack {
+                                            Text("Report")
+                                                .bold()
+                                                .onTapGesture {
+                                                    self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId] = false
+                                                    self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] = false
+                                                    self.gameDataStore.lastClickedReportThreadByForumId[self.gameId] = self.threadId
+                                                    self.gameDataStore.isLastClickedReportThreadInThreadViewByThreadId[self.threadId] = true
+                                                    self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] = true
+                                            }
+                                        }
+                                        
+                                        Spacer()
+                                    }
+                                    .frame(width: a.size.width - self.outerPadding * 2, height: 20)
+                                    .foregroundColor(.gray)
                                     
                                     EmojiBarThreadView(threadId: self.threadId, isInThreadView: true)
                                         .padding(.vertical, 20)
                                     
-                                    if !self.gameDataStore.mainCommentListByThreadId[self.threadId]!.isEmpty {
-                                        VStack(spacing: 0) {
-                                            ForEach(self.gameDataStore.mainCommentListByThreadId[self.threadId]!, id: \.self) { commentId in
-                                                CommentView(ancestorThreadId: self.threadId, commentId: commentId, width: a.size.width - self.outerPadding * 2, height: a.size.height, leadPadding: 0, level: 0, omniBarDidBecomeFirstResponder: self.$didBecomeFirstResponder)
-                                            }
-                                        }
-                                    } else {
-                                        Divider()
+                                    if self.gameDataStore.isThreadViewLoadedByThreadId[self.threadId] == nil || self.gameDataStore.isThreadViewLoadedByThreadId[self.threadId]! == false {
+                                        Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
+                                            .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height / 2)
                                         
-                                        VStack {
-                                            Text("No one's here o__o")
-                                            Text("Be the first one to reply :D")
+                                    } else {
+                                        if !self.gameDataStore.mainCommentListByThreadId[self.threadId]!.isEmpty {
+                                            VStack(spacing: 0) {
+                                                ForEach(self.gameDataStore.mainCommentListByThreadId[self.threadId]!, id: \.self) { commentId in
+                                                    CommentView(ancestorThreadId: self.threadId, commentId: commentId, width: a.size.width - self.outerPadding * 2, height: a.size.height, leadPadding: 0, level: 0, omniBarDidBecomeFirstResponder: self.$didBecomeFirstResponder)
+                                                }
+                                            }
+                                        } else {
+                                            Divider()
+                                            
+                                            VStack {
+                                                Image(systemName: "pencil.circle.fill")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: a.size.width * 0.3, height: a.size.width * 0.3)
+                                                    .padding()
+                                                    .foregroundColor(Color(.lightGray))
+                                                Text("Don't leave the poster hanging.")
+                                                    .bold()
+                                                    .foregroundColor(Color(.lightGray))
+                                                    .padding()
+                                            }
+                                            .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height / 2)
                                         }
-                                        .frame(width: a.size.width - self.outerPadding * 2, height: a.size.height / 2)
                                     }
-                                    
+
                                     if self.gameDataStore.moreCommentsByThreadId[self.threadId] != nil && self.gameDataStore.moreCommentsByThreadId[self.threadId]!.count > 0 {
                                         Button(action: self.fetchNextPage) {
                                             Text("Load more comments (\(self.gameDataStore.threads[self.threadId]!.numChilds - self.gameDataStore.mainCommentListByThreadId[self.threadId]!.count) replies)")
@@ -245,13 +324,35 @@ struct ThreadView : View {
                         VStack {
                             EmojiPickerPopupView(parentForumId: self.gameId, ancestorThreadId: self.threadId)
                         }
-                       
+                            
                         .frame(width: a.size.width, height: a.size.height * 0.2)
                         .background(self.gameDataStore.colors["darkButNotBlack"]!)
                         .cornerRadius(5, corners: [.topLeft, .topRight])
                         .transition(.move(edge: .bottom))
                         .animation(.default)
-                    } else {
+                    }
+                    
+                    if self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] == true {
+                        ReportPopupView(threadId: self.threadId)
+                            .frame(width: a.size.width, height: a.size.height * 0.3)
+                            .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                            .cornerRadius(5, corners: [.topLeft, .topRight])
+                            .transition(.move(edge: .bottom))
+                            .animation(.default)
+                    }
+                    
+                    if self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId] == true {
+                        BlockUserPopupView(threadId: self.threadId)
+                            .frame(width: a.size.width, height: a.size.height * 0.2)
+                            .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                            .cornerRadius(5, corners: [.topLeft, .topRight])
+                            .transition(.move(edge: .bottom))
+                            .animation(.default)
+                    }
+                    
+                    if (self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] == nil || self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId]! == false) && (self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] == nil || self.gameDataStore.isReportPopupActiveByThreadId[self.threadId]! == false) &&
+                        (self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId] == nil ||
+                            self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId]! == false) {
                         VStack(spacing: 0) {
                             FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: self.$showFancyPantsEditorBar, isNewContent: true, isThread: true, threadId: self.threadId, isOmniBar: true, submit: { self.submit() })
                         }
@@ -265,6 +366,8 @@ struct ThreadView : View {
             }
             .onAppear() {
                 self.didBecomeFirstResponder = false
+                
+                self.gameDataStore.isThreadViewLoadedByThreadId[self.threadId] = false
                 self.gameDataStore.fetchCommentTreeByThreadId(access: self.userDataStore.token!.access, threadId: self.threadId, refresh: true, userId: self.userDataStore.token!.userId)
                 self.gameDataStore.loadThreadIcons(thread: self.gameDataStore.threads[self.threadId]!)
             }

@@ -111,6 +111,17 @@ struct CommentView : View {
                                         HStack(spacing: 0) {
                                             Text(self.gameDataStore.users[self.gameDataStore.comments[self.commentId]!.author]!.username)
                                                 .font(.system(size: 16))
+                                                .onTapGesture {
+                                                    if self.gameDataStore.users[self.gameDataStore.comments[self.commentId]!.author]!.id == self.userDataStore.token!.userId {
+                                                        return
+                                                    }
+                                                    
+                                                    self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.ancestorThreadId] = false
+                                                    self.gameDataStore.isReportPopupActiveByThreadId[self.ancestorThreadId] = false
+                                                    self.gameDataStore.lastClickedBlockUserByThreadId[self.ancestorThreadId] = self.gameDataStore.users[self.gameDataStore.comments[self.commentId]!.author]!.id
+                                                    self.gameDataStore.isBlockPopupActiveByThreadId[self.ancestorThreadId] = true
+                                            }
+                                            
                                             Spacer()
                                             Image(":thumbs_up:")
                                                 .resizable()
@@ -155,9 +166,46 @@ struct CommentView : View {
                                             
                                     }
                                 }
+                                
+                                HStack {
+                                    HStack {
+                                        if self.gameDataStore.isCommentHiddenByCommentId[self.commentId]! == true {
+                                            Text("Unhide")
+                                            .bold()
+                                                .onTapGesture {
+                                                    self.gameDataStore.unhideComment(access: self.userDataStore.token!.access, commentId: self.commentId)
+                                            }
+                                        } else {
+                                            Text("Hide")
+                                            .bold()
+                                                .onTapGesture {
+                                                    self.gameDataStore.hideComment(access: self.userDataStore.token!.access, commentId: self.commentId)
+                                            }
+                                        }
+                                    }
+                                    
+                                    HStack {
+                                        Text("Report")
+                                        .bold()
+                                            .onTapGesture {
+                                                self.gameDataStore.isBlockPopupActiveByThreadId[self.ancestorThreadId] = false
+                                                self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.ancestorThreadId] = false
+                                                self.gameDataStore.lastClickedReportCommentByThreadId[self.ancestorThreadId] = self.commentId
+                                                
+                                                self.gameDataStore.isLastClickedReportThreadInThreadViewByThreadId[self.ancestorThreadId] = false
+                                                self.gameDataStore.isReportPopupActiveByThreadId[self.ancestorThreadId] = true
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                }
+                                .foregroundColor(.gray)
+                                .frame(width: self.width - self.leadPadding - staticPadding * 2 - 30 - 10 - (self.level > 0 ? 10 + self.leadLineWidth: 0), height:
+                                20)
+                                    .padding(.top, 10)
                             }
                         }
-                        .frame(width: self.width - self.leadPadding - staticPadding * 2 - (self.level > 0 ? 10 + self.leadLineWidth: 0), height: 30 + self.gameDataStore.commentsDesiredHeight[self.commentId]! + (self.isEditable ? 20 : 0), alignment: .leading)
+                        .frame(width: self.width - self.leadPadding - staticPadding * 2 - (self.level > 0 ? 10 + self.leadLineWidth: 0), height: 30 + self.gameDataStore.commentsDesiredHeight[self.commentId]! + (self.isEditable ? 20 : 0) + 30, alignment: .leading)
                     }
                     .padding(.horizontal, self.staticPadding)
                     .padding(.vertical, self.verticalPadding)

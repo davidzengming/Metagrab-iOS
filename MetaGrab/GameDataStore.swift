@@ -21,7 +21,13 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var lastClickedReportCommentByCommentId = [Int: Int]() {
+    var lastClickedReportCommentByThreadId = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isLastClickedReportThreadInThreadViewByThreadId = [Int: Bool]() {
         willSet {
             objectWillChange.send()
         }
@@ -33,13 +39,37 @@ final class GameDataStore: ObservableObject {
         }
     }
     
-    var isReportPopupActiveByCommentId = [Int: Bool]() {
+    var isReportPopupActiveByThreadId = [Int: Bool]() {
         willSet {
             objectWillChange.send()
         }
     }
     
     var blacklistedUserIdArr = [Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var lastClickedBlockUserByForumId = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var lastClickedBlockUserByThreadId = [Int: Int]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isBlockPopupActiveByForumId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isBlockPopupActiveByThreadId = [Int: Bool]() {
         willSet {
             objectWillChange.send()
         }
@@ -189,6 +219,12 @@ final class GameDataStore: ObservableObject {
         }
     }
     
+    var isForumViewLoadedByGameId = [Int: Bool]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     // Threads
     var threads = [Int: Thread]() {
         willSet {
@@ -259,6 +295,12 @@ final class GameDataStore: ObservableObject {
     }
     
     var relativeDateStringByThreadId = [Int: String]() {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var isThreadViewLoadedByThreadId = [Int: Bool]() {
         willSet {
             objectWillChange.send()
         }
@@ -467,12 +509,6 @@ final class GameDataStore: ObservableObject {
     }
     
     var isAddEmojiModalActiveByThreadViewId = [Int: Bool]() {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    
-    var isAddEmjoiModalActiveByThreadId = [Int: Bool]() {
         willSet {
             objectWillChange.send()
         }
@@ -939,11 +975,15 @@ final class GameDataStore: ObservableObject {
         return generatedTextStorage
     }
     
-    func sendReportByThreadId(access: String, threadId: Int) {
-        guard let url = URL(string: "http://127.0.0.1:8000/reports/add_report_by_thread_id") else { return }
+    func sendReportByThreadId(access: String, threadId: Int, reason: String) {
+        guard let url = URL(string: "http://127.0.0.1:8000/reports/add_report_by_thread_id/") else { return }
+        
+        let json: [String: Any] = ["thread_id": threadId, "report_reason": reason]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -953,16 +993,19 @@ final class GameDataStore: ObservableObject {
             if error != nil {
                 return
             }
-            
-            print("Reported thread: ", threadId)
         }.resume()
     }
     
-    func sendReportByCommentId(access: String, commentId: Int) {
-        guard let url = URL(string: "http://127.0.0.1:8000/reports/add_report_by_comment_id") else { return }
+    func sendReportByCommentId(access: String, commentId: Int, reason: String) {
+        guard let url = URL(string: "http://127.0.0.1:8000/reports/add_report_by_comment_id/") else { return }
+        
+        let json: [String: Any] = ["comment_id": commentId, "report_reason": reason]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -972,16 +1015,19 @@ final class GameDataStore: ObservableObject {
             if error != nil {
                 return
             }
-            
-            print("Reported comment: ", commentId)
         }.resume()
     }
     
     func hideThread(access: String, threadId: Int) {
         guard let url = URL(string: "http://127.0.0.1:8000/users_profile/hide_thread_by_user_id/") else { return }
         
+        let json: [String: Any] = ["hide_thread_id": threadId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -995,6 +1041,7 @@ final class GameDataStore: ObservableObject {
             DispatchQueue.main.async {
                 self.hiddenThreadIdArr.append(threadId)
                 self.hiddenThreadsById[threadId] = self.threads[threadId]
+                self.isThreadHiddenByThreadId[threadId] = true
             }
         }.resume()
     }
@@ -1002,8 +1049,13 @@ final class GameDataStore: ObservableObject {
     func unhideThread(access: String, threadId: Int) {
         guard let url = URL(string: "http://127.0.0.1:8000/users_profile/unhide_thread_by_user_id/") else { return }
         
+        let json: [String: Any] = ["unhide_thread_id": threadId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -1018,6 +1070,7 @@ final class GameDataStore: ObservableObject {
                 let itemToRemoveIndex = self.hiddenThreadIdArr.firstIndex(of: threadId)
                 self.hiddenThreadIdArr.remove(at: itemToRemoveIndex!)
                 self.hiddenThreadsById.removeValue(forKey: threadId)
+                self.isThreadHiddenByThreadId[threadId] = false
             }
         }.resume()
     }
@@ -1025,8 +1078,13 @@ final class GameDataStore: ObservableObject {
     func hideComment(access: String, commentId: Int) {
         guard let url = URL(string: "http://127.0.0.1:8000/users_profile/hide_comment_by_user_id/") else { return }
         
+        let json: [String: Any] = ["hide_comment_id": commentId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -1040,6 +1098,7 @@ final class GameDataStore: ObservableObject {
             DispatchQueue.main.async {
                 self.hiddenCommentIdArr.append(commentId)
                 self.hiddenCommentsById[commentId] = self.comments[commentId]
+                self.isCommentHiddenByCommentId[commentId] = true
             }
         }.resume()
     }
@@ -1047,8 +1106,13 @@ final class GameDataStore: ObservableObject {
     func unhideComment(access: String, commentId: Int) {
         guard let url = URL(string: "http://127.0.0.1:8000/users_profile/unhide_comment_by_user_id/") else { return }
         
+        let json: [String: Any] = ["unhide_comment_id": commentId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -1063,6 +1127,7 @@ final class GameDataStore: ObservableObject {
                 let itemToRemoveIndex = self.hiddenCommentIdArr.firstIndex(of: commentId)
                 self.hiddenCommentIdArr.remove(at: itemToRemoveIndex!)
                 self.hiddenCommentsById.removeValue(forKey: commentId)
+                self.isCommentHiddenByCommentId[commentId] = false
             }
         }.resume()
     }
@@ -1070,8 +1135,13 @@ final class GameDataStore: ObservableObject {
     func blockUser(access: String, userId: Int, targetBlockUserId: Int) {
         guard let url = URL(string: "http://127.0.0.1:8000/users_profile/add_user_to_blacklist_by_user_id/") else { return }
         
+        let json: [String: Any] = ["blacklist_user_id": targetBlockUserId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -1092,8 +1162,13 @@ final class GameDataStore: ObservableObject {
     func unblockUser(access: String, userId: Int, targetUnblockUserId: Int) {
         guard let url = URL(string: "http://127.0.0.1:8000/users_profile/remove_user_from_blacklist_by_user_id/") else { return }
         
+        let json: [String: Any] = ["unblacklist_user_id": targetUnblockUserId]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
+        
         let sessionConfig = URLSessionConfiguration.default
         let authString: String? = "Bearer \(access)"
         sessionConfig.httpAdditionalHeaders = ["Authorization": authString!]
@@ -1130,9 +1205,14 @@ final class GameDataStore: ObservableObject {
                     
                     DispatchQueue.main.async {
                         for blacklistedUser in blacklistedUsersResponse.blacklistedUsers {
-                            self.blacklistedUserIdArr.append(blacklistedUser.id)
-                            self.blacklistedUsersById[blacklistedUser.id] = blacklistedUser
+                            if self.isUserBlockedByUserId[blacklistedUser.id] != nil && self.isUserBlockedByUserId[blacklistedUser.id]! == true {
+                                return
+                            }
+                            
+                            self.users[blacklistedUser.id] = blacklistedUser
                             self.isUserBlockedByUserId[blacklistedUser.id] = true
+                            self.blacklistedUsersById[blacklistedUser.id] = blacklistedUser
+                            self.blacklistedUserIdArr.append(blacklistedUser.id)
                         }
                     }
                 }
@@ -1156,6 +1236,8 @@ final class GameDataStore: ObservableObject {
                     let hiddenThreadsResponse: HiddenThreadsResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     
                     DispatchQueue.main.async {
+                        self.hiddenThreadIdArr = []
+                        
                         for hiddenThread in hiddenThreadsResponse.hiddenThreads {
                             self.hiddenThreadIdArr.append(hiddenThread.id)
                             self.hiddenThreadsById[hiddenThread.id] = hiddenThread
@@ -1183,6 +1265,7 @@ final class GameDataStore: ObservableObject {
                     let hiddenCommentsResponse: HiddenCommentsResponse = load(jsonData: jsonString.data(using: .utf8)!)
                     
                     DispatchQueue.main.async {
+                        self.hiddenCommentIdArr = []
                         for hiddenComment in hiddenCommentsResponse.hiddenComments {
                             self.hiddenCommentIdArr.append(hiddenComment.id)
                             self.hiddenCommentsById[hiddenComment.id] = hiddenComment
@@ -1254,22 +1337,22 @@ final class GameDataStore: ObservableObject {
                             
                             // emoji stuff
                             self.emojiArrByThreadId[tempThread.id] = [[]]
-                            for emojiId in tempThread.emojis.emojisIdArr {
+                            for emojiId in tempThread.emojis!.emojisIdArr {
                                 if emojiId == 0 || emojiId == 1 {
                                     continue
                                 }
                                 self.emojiArrByThreadId[tempThread.id] = self.getShiftedArrayForAddEmoji(emojiId: emojiId, threadId: tempThread.id, commentId: nil)
                             }
                             
-                            self.emojiCountByThreadId[tempThread.id] = tempThread.emojis.emojiReactionCountDict
+                            self.emojiCountByThreadId[tempThread.id] = tempThread.emojis?.emojiReactionCountDict
                             self.otherUsersArrReactToEmojiByThreadId[tempThread.id] = [:]
                             self.didReactToEmojiByThreadId[tempThread.id] = [:]
                             self.otherUsersSetReactToEmojiByThreadId[tempThread.id] = [:]
                             
                             self.emojiArrByThreadId[tempThread.id] = []
                             self.emojiArrByThreadId[tempThread.id]!.append([])
-                            for emojiId in tempThread.emojis.emojisIdArr {
-                                self.otherUsersArrReactToEmojiByThreadId[tempThread.id]![emojiId] = tempThread.emojis.userIdsArrPerEmojiDict[emojiId]
+                            for emojiId in tempThread.emojis!.emojisIdArr {
+                                self.otherUsersArrReactToEmojiByThreadId[tempThread.id]![emojiId] = tempThread.emojis!.userIdsArrPerEmojiDict[emojiId]
                                 self.otherUsersSetReactToEmojiByThreadId[tempThread.id]![emojiId] = []
                                 self.didReactToEmojiByThreadId[tempThread.id]![emojiId] = true
                                 
@@ -1593,6 +1676,7 @@ final class GameDataStore: ObservableObject {
                     DispatchQueue.main.async {
                         if commentLoadTree.addedComments.count == 0 {
                             self.commentNextPageStartIndex[threadId] = -1
+                            self.isThreadViewLoadedByThreadId[threadId] = true
                             return
                         }
                         
@@ -1693,6 +1777,7 @@ final class GameDataStore: ObservableObject {
                         }
                         
                         self.mainCommentListByThreadId[threadId]! += commentListToBeAppendedToThread
+                        self.isThreadViewLoadedByThreadId[threadId] = true
                         
                         self.moreCommentsByThreadId[threadId]! = [Int]()
                         for comment in commentLoadTree.moreComments {
@@ -1908,6 +1993,7 @@ final class GameDataStore: ObservableObject {
                         
                         if tempThreadsResponse.threadsResponse.count == 0 && self.forumsNextPageStartIndex[game.id] == nil {
                             self.forumsNextPageStartIndex[game.id] = -1
+                            self.isForumViewLoadedByGameId[game.id] = true
                             return
                         }
                         
@@ -1934,19 +2020,19 @@ final class GameDataStore: ObservableObject {
                             self.replyTargetCommentIdByThreadId[thread.id] = -1
                             self.relativeDateStringByThreadId[thread.id] = RelativeDateTimeFormatter().localizedString(for: thread.created, relativeTo: Date())
                             
-                            self.emojiCountByThreadId[thread.id] = thread.emojis.emojiReactionCountDict
+                            self.emojiCountByThreadId[thread.id] = thread.emojis?.emojiReactionCountDict
                             
                             self.otherUsersArrReactToEmojiByThreadId[thread.id] = [:]
                             self.otherUsersSetReactToEmojiByThreadId[thread.id] = [:]
                             self.didReactToEmojiByThreadId[thread.id] = [:]
                             
-                            for emojiId in thread.emojis.emojisIdArr {
+                            for emojiId in thread.emojis!.emojisIdArr {
                                 self.otherUsersArrReactToEmojiByThreadId[thread.id]![emojiId] = []
                                 self.otherUsersSetReactToEmojiByThreadId[thread.id]![emojiId] = []
                                 
                                 self.didReactToEmojiByThreadId[thread.id]![emojiId] = false
                                 
-                                for reactedUserId in thread.emojis.userIdsArrPerEmojiDict[emojiId]! {
+                                for reactedUserId in thread.emojis!.userIdsArrPerEmojiDict[emojiId]! {
                                     if userId == reactedUserId {
                                         self.didReactToEmojiByThreadId[thread.id]![emojiId] = true
                                     } else {
@@ -1959,7 +2045,7 @@ final class GameDataStore: ObservableObject {
                             self.emojiArrByThreadId[thread.id] = []
                             var emojiArrToBeAdded = [Int]()
                             
-                            for emojiId in thread.emojis.emojisIdArr {
+                            for emojiId in thread.emojis!.emojisIdArr {
                                 if emojiId == 0 {
                                     emojiArrToBeAdded.insert(emojiId, at: 0)
                                 } else if emojiId == 1 {
@@ -1978,7 +2064,8 @@ final class GameDataStore: ObservableObject {
                         }
                         
                         self.threadListByGameId[game.id]! += newThreadsList
-                        
+                        self.isForumViewLoadedByGameId[game.id] = true
+
                         if tempThreadsResponse.hasNextPage == true {
                             self.forumsNextPageStartIndex[game.id] = start + count
                         } else {

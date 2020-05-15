@@ -24,7 +24,6 @@ struct GameHubView: View {
         //        navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white, NSAttributedString.Key.kern: kern]
         //        navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white, NSAttributedString.Key.kern: kern]
         //
-        
     }
     
     var body: some View {
@@ -55,11 +54,11 @@ struct GameHubView: View {
                 }
                 
                 UserProfileView()
-                .navigationBarTitle("Settings")
+                .navigationBarTitle("Profile")
                 .navigationBarHidden(true)
                     .tabItem {
                         Image(systemName: "person.fill")
-                        Text("Settings")
+                        Text("Profile")
                 }
             }
                 //.edgesIgnoringSafeArea(.top)

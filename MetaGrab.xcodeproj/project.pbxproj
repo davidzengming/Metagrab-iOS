@@ -25,6 +25,7 @@
 		3E9C750523CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9C750423CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift */; };
 		3E9E286223A833D70012CD6F /* PopularGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9E286123A833D70012CD6F /* PopularGamesView.swift */; };
 		3E9E286423A834100012CD6F /* TimelineGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9E286323A834100012CD6F /* TimelineGamesView.swift */; };
+		3EA53231246C5C1A006857BE /* BlockUserPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA53230246C5C1A006857BE /* BlockUserPopupView.swift */; };
 		3EA9371924535FB900C8349B /* DarkHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA9371824535FB900C8349B /* DarkHostingController.swift */; };
 		3EB04615240980BD00C7AC98 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB04614240980BD00C7AC98 /* MonthView.swift */; };
 		3EB10A2723E0936D0079D80D /* TextViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB10A2623E0936D0079D80D /* TextViewHelper.swift */; };
@@ -96,6 +97,7 @@
 		3E9C750423CCD0D3005BCF3C /* NSAttributedStringKey+CustomAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedStringKey+CustomAttribute.swift"; sourceTree = "<group>"; };
 		3E9E286123A833D70012CD6F /* PopularGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopularGamesView.swift; sourceTree = "<group>"; };
 		3E9E286323A834100012CD6F /* TimelineGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineGamesView.swift; sourceTree = "<group>"; };
+		3EA53230246C5C1A006857BE /* BlockUserPopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockUserPopupView.swift; sourceTree = "<group>"; };
 		3EA9371824535FB900C8349B /* DarkHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DarkHostingController.swift; sourceTree = "<group>"; };
 		3EB04614240980BD00C7AC98 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 		3EB10A2623E0936D0079D80D /* TextViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewHelper.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 				3EF1B3F72444B685000AB3D4 /* EmojiBarThreadView.swift */,
 				3E78C638244752880020D69E /* EmojiBarCommentView.swift */,
 				3EC85182246B2A3A00515456 /* ReportPopupView.swift */,
+				3EA53230246C5C1A006857BE /* BlockUserPopupView.swift */,
 				3EF6212323086A00002DE02E /* LaunchView.swift */,
 				3EF6212523086A1D002DE02E /* MainView.swift */,
 				3EF6212723086A37002DE02E /* UserView.swift */,
@@ -448,6 +451,7 @@
 				3E747DDC2385BB4200B807CE /* Vote.swift in Sources */,
 				3EDCEADC231E9B6900D94E4B /* NewThreadView.swift in Sources */,
 				3E1ECB84245B1B0500BEB413 /* GameHistoryResponse.swift in Sources */,
+				3EA53231246C5C1A006857BE /* BlockUserPopupView.swift in Sources */,
 				3EC8517D246AEA4B00515456 /* HiddenThreadsResponse.swift in Sources */,
 				3EF1B3F82444B685000AB3D4 /* EmojiBarThreadView.swift in Sources */,
 				3EF6213423086ADB002DE02E /* GameDataStore.swift in Sources */,

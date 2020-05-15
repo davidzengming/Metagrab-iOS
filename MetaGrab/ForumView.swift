@@ -44,9 +44,9 @@ struct ForumView : View {
         UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor:UIColor.white]
         // For navigation bar background color
         UINavigationBar.appearance().barTintColor = hexStringToUIColor(hex: "#2C2F33")
-//        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default) //makes status bar translucent
+        //        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default) //makes status bar translucent
         UINavigationBar.appearance().tintColor = .white
-//        UINavigationBar.appearance().backgroundColor = .clear
+        //        UINavigationBar.appearance().backgroundColor = .clear
     }
     
     func hexStringToUIColor (hex:String) -> UIColor {
@@ -127,7 +127,7 @@ struct ForumView : View {
                                             
                                         }
                                         Spacer()
-
+                                        
                                         Text("Follow")
                                             .padding(.horizontal, 15)
                                             .padding(.vertical, 8)
@@ -150,69 +150,94 @@ struct ForumView : View {
                                 
                                 VStack {
                                     Text("No stickied posts at the moment~")
+                                        .bold()
                                         .foregroundColor(Color.gray)
                                         .italic()
                                         .padding()
-                                    Divider()
+                                        .padding(.top, 10)
                                 }
                                 .frame(width: a.size.width)
                                 .background(Color.white)
                                 .cornerRadius(15, corners: [.topLeft, .topRight])
                                 
                                 VStack {
-                                    if !self.gameDataStore.threadListByGameId[self.gameId]!.isEmpty {
-                                        ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
-                                            VStack {
-                                                ThreadRow(threadId: threadId, gameId: self.gameId, width: a.size.width * 0.9, height: a.size.height)
-                                                    .background(Color.white)
-                                                    .frame(width: a.size.width, height: a.size.height * 0.045 + 10 + 10 + (self.gameDataStore.threads[threadId]!.title.count > 0 ? 16 : 0) + min(self.gameDataStore.threadsDesiredHeight[threadId]!, 200)
-                                                        + 10
-                                                        + (self.gameDataStore.threadImagesHeight[threadId] == nil ? 0 : max(a.size.height * 0.1, min(a.size.height * 0.15, self.gameDataStore.threadImagesHeight[threadId]!)) + 20)
-                                                        + a.size.height * 0.025 + CGFloat(self.gameDataStore.emojiArrByThreadId[threadId]!.count) * 30 + 40 + 20 + 20)
-                                                
-                                                Divider()
-                                            }
-                                        }
+                                    
+                                    if self.gameDataStore.isForumViewLoadedByGameId[self.gameId] == nil || self.gameDataStore.isForumViewLoadedByGameId[self.gameId]! == false {
+                                        Color.white
+                                            .frame(width: a.size.width, height: a.size.height * 0.3)
                                     } else {
-                                        VStack {
-                                            Text("Be the first explorer to post in this game :D")
+                                        if self.gameDataStore.threadListByGameId[self.gameId]!.count > 0 {
+                                            ForEach(self.gameDataStore.threadListByGameId[self.gameId]!, id: \.self) { threadId in
+                                                VStack {
+                                                    Divider()
+                                                    ThreadRow(threadId: threadId, gameId: self.gameId, width: a.size.width * 0.9, height: a.size.height)
+                                                        .background(Color.white)
+                                                        .frame(width: a.size.width, height: a.size.height * 0.045 + 10 + 10 + (self.gameDataStore.threads[threadId]!.title.count > 0 ? 16 : 0) + min(self.gameDataStore.threadsDesiredHeight[threadId]!, 200)
+                                                            + 10
+                                                            + (self.gameDataStore.threadImagesHeight[threadId] == nil ? 0 : max(a.size.height * 0.1, min(a.size.height * 0.15, self.gameDataStore.threadImagesHeight[threadId]!)) + 20)
+                                                            + a.size.height * 0.025 + CGFloat(self.gameDataStore.emojiArrByThreadId[threadId]!.count) * 30 + 40 + 20 + 20)
+                                                }
+                                            }
+                                        } else {
+                                            VStack {
+                                                Image(systemName: "pencil.circle.fill")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: a.size.width * 0.3, height: a.size.width * 0.3)
+                                                    .padding()
+                                                    .foregroundColor(Color(.lightGray))
+                                                Text("Create the very first post.")
+                                                .bold()
+                                                    .foregroundColor(Color(.lightGray))
+                                                .padding()
+                                            }
+                                            .frame(width: a.size.width, height: a.size.height * 0.3)
                                         }
-                                        .frame(width: a.size.width, height: a.size.height)
                                     }
                                 }
                                 .background(Color.white)
                                 .frame(width: a.size.width)
                                 .background(self.gameDataStore.colors["darkButNotBlack"])
                                 
-                                if self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 {
-                                    HStack(alignment: .center) {
-                                        Spacer()
-                                        Image(systemName: "chevron.compact.down")
-                                            .foregroundColor(Color.white)
-                                            .padding(.top, 10)
-                                            .padding(.horizontal, 20)
-                                            .padding(.bottom, 10)
-                                        Spacer()
-                                        Image(systemName: "chevron.compact.down")
-                                            .foregroundColor(Color.white)
-                                            .padding(.top, 10)
-                                            .padding(.horizontal, 20)
-                                            .padding(.bottom, 10)
-                                        Spacer()
-                                        Image(systemName: "chevron.compact.down")
-                                            .foregroundColor(Color.white)
-                                            .padding(.top, 10)
-                                            .padding(.horizontal, 20)
-                                            .padding(.bottom, 10)
-                                        Spacer()
-                                    }
+                                VStack(spacing: 0) {
+                                    ZStack(alignment: .top) {
+                                        if self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 {
+                                            
+                                            VStack {
+                                                Spacer()
+                                                HStack(alignment: .center) {
+                                                    Spacer()
+                                                    Image(systemName: "chevron.compact.down")
+                                                        .foregroundColor(Color.white)
+                                                        .padding(.top, 10)
+                                                        .padding(.horizontal, 20)
+                                                        .padding(.bottom, 10)
+                                                    Spacer()
+                                                    Image(systemName: "chevron.compact.down")
+                                                        .foregroundColor(Color.white)
+                                                        .padding(.top, 10)
+                                                        .padding(.horizontal, 20)
+                                                        .padding(.bottom, 10)
+                                                    Spacer()
+                                                    Image(systemName: "chevron.compact.down")
+                                                        .foregroundColor(Color.white)
+                                                        .padding(.top, 10)
+                                                        .padding(.horizontal, 20)
+                                                        .padding(.bottom, 10)
+                                                    Spacer()
+                                                }
+                                            }
+                                            .frame(width: a.size.width, height: a.size.height * 0.075)
+                                            .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                                            .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
+                                            .onTapGesture {
+                                                self.fetchNextPage()
+                                            }
+                                        }
                                         
-                                    .frame(width: a.size.width, height: a.size.height * 0.05)
-                                    .background(self.gameDataStore.colors["darkButNotBlack"]!)
-                                    .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
-                                    .shadow(radius: 5)
-                                    .onTapGesture {
-                                        self.fetchNextPage()
+                                        Color.white
+                                            .frame(width: a.size.width, height: a.size.height * 0.025)
+                                        .cornerRadius(15, corners: [.bottomLeft, .bottomRight])
                                     }
                                 }
                             }
@@ -223,6 +248,7 @@ struct ForumView : View {
                     .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name), displayMode: .inline)
                     .onAppear() {
                         if self.gameDataStore.isBackToGamesView {
+                            self.gameDataStore.isForumViewLoadedByGameId[self.gameId] = false
                             self.gameDataStore.fetchThreads(access: self.userDataStore.token!.access, game: self.gameDataStore.games[self.gameId]!, refresh: true, userId: self.userDataStore.token!.userId)
                             self.gameDataStore.loadGameBanner(game: self.gameDataStore.games[self.gameId]!)
                             self.gameDataStore.isBackToGamesView = false
@@ -230,7 +256,7 @@ struct ForumView : View {
                         
                         self.gameDataStore.insertGameHistory(access: self.userDataStore.token!.access, gameId: self.gameId)
                     }
-                
+                    
                     NavigationLink(destination: NewThreadView(forumId: self.gameId)) {
                         NewThreadButton()
                             .frame(width: min(a.size.width, a.size.height) * 0.12, height: min(a.size.width, a.size.height) * 0.12, alignment: .center)
@@ -246,17 +272,27 @@ struct ForumView : View {
                                 .cornerRadius(5, corners: [.topLeft, .topRight])
                                 .KeyboardAwarePadding()
                         }
-                        .background(Color.white)
                         .transition(.move(edge: .bottom))
                         .animation(.default)
                     }
                     
                     if self.gameDataStore.isReportPopupActiveByForumId[self.gameId] == true {
-                        ReportPopupView()
+                        ReportPopupView(forumId: self.gameId)
+                            .frame(width: a.size.width, height: a.size.height * 0.3)
+                            .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                            .cornerRadius(5, corners: [.topLeft, .topRight])
+                            .KeyboardAwarePadding()
+                            .transition(.move(edge: .bottom))
+                            .animation(.default)
+                    }
+                    
+                    if self.gameDataStore.isBlockPopupActiveByForumId[self.gameId] == true {
+                        BlockUserPopupView(forumId: self.gameId)
                             .frame(width: a.size.width, height: a.size.height * 0.2)
-                        .background(self.gameDataStore.colors["darkButNotBlack"]!)
-                        .cornerRadius(5, corners: [.topLeft, .topRight])
-                        .KeyboardAwarePadding()
+                            .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                            .cornerRadius(5, corners: [.topLeft, .topRight])
+                            .transition(.move(edge: .bottom))
+                            .animation(.default)
                     }
                 }
             }

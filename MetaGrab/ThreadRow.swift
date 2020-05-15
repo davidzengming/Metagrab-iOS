@@ -76,8 +76,20 @@ struct ThreadRow : View {
     }
     
     func onClickAddEmojiBubble() {
-        self.gameDataStore.addEmojiThreadIdByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = self.threadId
-        self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = true
+        self.gameDataStore.addEmojiThreadIdByForumId[self.gameDataStore.threads[self.threadId]!.forum] = self.threadId
+        self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum] = true
+    }
+    
+    func onClickUser() {
+        if self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.id == self.userDataStore.token!.userId {
+            return
+        }
+        
+        self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum] = false
+        self.gameDataStore.isReportPopupActiveByForumId[self.gameId] = false
+        
+        self.gameDataStore.lastClickedBlockUserByForumId[self.gameId] = self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.id
+        self.gameDataStore.isBlockPopupActiveByForumId[self.gameId] = true
     }
     
     var body: some View {
@@ -93,6 +105,9 @@ struct ThreadRow : View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(self.gameDataStore.users[self.gameDataStore.threads[self.threadId]!.author]!.username)
                         .frame(height: self.height * 0.025, alignment: .leading)
+                        .onTapGesture {
+                            self.onClickUser()
+                    }
                     
                     Text(self.gameDataStore.relativeDateStringByThreadId[self.threadId]!)
                         .font(.system(size: 14))
@@ -138,37 +153,49 @@ struct ThreadRow : View {
             }
             
             VStack(alignment: .leading, spacing: 20) {
-                HStack {
-                    HStack {
-                        Image(uiImage: UIImage(systemName: "bubble.left")!)
+                HStack(spacing: 10) {
+                    
+                    HStack(spacing: 5) {
+                        Image(systemName: "bubble.right.fill")
                         Text(String(self.gameDataStore.threads[self.threadId]!.numSubtreeNodes))
                             .font(.system(size: 16))
+                            .bold()
+                        Text("Comments")
+                            .bold()
                     }
                     .frame(height: self.height * 0.025, alignment: .leading)
                     
                     HStack {
                         if self.gameDataStore.isThreadHiddenByThreadId[self.threadId]! == true {
                             Text("Unhide")
+                                .bold()
                                 .onTapGesture {
                                     self.gameDataStore.unhideThread(access: self.userDataStore.token!.access, threadId: self.threadId)
                             }
-                            
                         } else {
                             Text("Hide")
+                                .bold()
                                 .onTapGesture {
-                                        self.gameDataStore.hideThread(access: self.userDataStore.token!.access, threadId: self.threadId)
-                                }
+                                    self.gameDataStore.hideThread(access: self.userDataStore.token!.access, threadId: self.threadId)
+                            }
                         }
                     }
                     
                     HStack {
                         Text("Report")
+                            .bold()
                             .onTapGesture {
-                                self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = false
+                                self.gameDataStore.isBlockPopupActiveByForumId[self.gameId] = false
+                                self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum] = false
+                                self.gameDataStore.lastClickedReportThreadByForumId[self.gameId] = self.threadId
                                 self.gameDataStore.isReportPopupActiveByForumId[self.gameId] = true
                         }
                     }
+                    
+                    Spacer()
                 }
+                .foregroundColor(Color.gray)
+                .frame(width: self.width * 0.9)
                 
                 EmojiBarThreadView(threadId: threadId, isInThreadView: false)
             }

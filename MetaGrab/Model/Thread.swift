@@ -18,10 +18,10 @@ struct Thread: Hashable, Codable, Identifiable {
     var downvotes: Int
     var flair: Int
     var author: Int
-    var forum: Forum
+    var forum: Int
     var numChilds: Int
     var numSubtreeNodes: Int
     var imageUrls: ImageUrls
     var created: Date
-    var emojis: Emojis
+    var emojis: Emojis?
 }

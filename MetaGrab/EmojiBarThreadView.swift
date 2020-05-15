@@ -25,8 +25,9 @@ struct EmojiBarThreadView: View {
     
     func onClickAddEmojiBubble() {
         
-        self.gameDataStore.isReportPopupActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = false
-        self.gameDataStore.addEmojiThreadIdByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = self.threadId
+        self.gameDataStore.isBlockPopupActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum] = false
+        self.gameDataStore.isReportPopupActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum] = false
+        self.gameDataStore.addEmojiThreadIdByForumId[self.gameDataStore.threads[self.threadId]!.forum] = self.threadId
         
         // check if action was initiated in a thread view, if so change state to show emoji modal is initiated by the thread
         if self.isInThreadView == true {
@@ -36,7 +37,7 @@ struct EmojiBarThreadView: View {
         if self.isInThreadView == true {
             self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] = true
         } else {
-            self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum.id] = true
+            self.gameDataStore.isAddEmojiModalActiveByForumId[self.gameDataStore.threads[self.threadId]!.forum] = true
         }
     }
     
@@ -89,8 +90,9 @@ struct EmojiBarThreadView: View {
                             VStack(alignment: .leading) {
                                 if emojiId == 999 {
                                     HStack {
-                                        Image(systemName: "plus")
+                                        Image(systemName: "plus.bubble.fill")
                                             .resizable()
+                                            .foregroundColor(Color(.darkGray))
                                             .frame(width: 20, height: 20)
                                             .buttonStyle(PlainButtonStyle())
                                             .cornerRadius(5)
@@ -106,6 +108,8 @@ struct EmojiBarThreadView: View {
                                             .frame(width: 15, height: 15)
                                         
                                         Text(String(self.gameDataStore.emojiCountByThreadId[self.threadId]![emojiId]!))
+                                        .bold()
+                                            .foregroundColor(Color(.darkGray))
                                     }
                                     .frame(width: 40, height: 15)
                                     .padding(5)
@@ -118,6 +122,15 @@ struct EmojiBarThreadView: View {
                             }
                         }
                     }
+                }
+            }
+            
+            if self.gameDataStore.emojiArrByThreadId[self.threadId]!.count == 1 && self.gameDataStore.emojiArrByThreadId[self.threadId]![0][0] == 999 {
+                Text("Add reactions")
+                .foregroundColor(Color.gray)
+                .bold()
+                .onTapGesture {
+                        self.onClickAddEmojiBubble()
                 }
             }
         }
