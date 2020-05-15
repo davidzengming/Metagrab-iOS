@@ -90,7 +90,7 @@ struct CommentView : View {
                     if self.level > 0 {
                         RoundedRectangle(cornerRadius: 25, style: .continuous)
                             .fill(self.gameDataStore.leadingLineColors[self.level % self.gameDataStore.leadingLineColors.count])
-                            .frame(width: self.leadLineWidth, height: 30 + self.gameDataStore.commentsDesiredHeight[self.commentId]! + (self.isEditable ? 20 : 0))
+                            .frame(width: self.leadLineWidth, height: 30 + self.gameDataStore.commentsDesiredHeight[self.commentId]! + (self.isEditable ? 20 : 0) + 30)
                             .padding(.trailing, 10)
                     }
                     
@@ -163,7 +163,6 @@ struct CommentView : View {
                                         .onTapGesture {
                                             self.setReplyTargetToCommentId()
                                             self.omniBarDidBecomeFirstResponder = true
-                                            
                                     }
                                 }
                                 

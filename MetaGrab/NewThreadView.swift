@@ -60,9 +60,7 @@ struct NewThreadView: View {
                 TextField("Add a title! (Optional)", text: self.$title)
                     .autocapitalization(.none)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.top, 30)
-                    .padding(.bottom, 20)
-                    .padding(.horizontal, 20)
+                    .padding()
                 
                 HStack(spacing: 25) {
                     ForEach(self.imagesArray, id: \.self) { id in
@@ -98,22 +96,28 @@ struct NewThreadView: View {
                     }
                     Spacer()
                 }
-                .sheet(isPresented: self.$showImagePicker, onDismiss: {
-                    self.showImagePicker = false
-                }) {
-                    ImagePicker(isShown: self.$showImagePicker, image: self.$imagesDict[self.imagesArray[self.clickedImageIndex!]], data: self.$dataDict[self.imagesArray[self.clickedImageIndex!]], currentImages: self.$imagesArray, imagesDict: self.$imagesDict, dataDict: self.$dataDict)
-                }
-                .padding(.horizontal, 20)
+                .padding()
                 
-                FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: .constant(false), isNewContent: true, isThread: true, isOmniBar: false)
-                    .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.5, alignment: .leading)
-                    .cornerRadius(5, corners: [.bottomLeft, .bottomRight, .topLeft, .topRight])
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.black, lineWidth: 2)
-                )
-                .padding(.vertical, 25)
-                .padding(.horizontal, 20)
+                if self.showImagePicker != true {
+                    FancyPantsEditorView(newTextStorage: self.$content, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: .constant(false), isNewContent: true, isThread: true, isOmniBar: false)
+                        .frame(minWidth: 0, maxWidth: a.size.width, minHeight: 0, maxHeight: a.size.height * 0.5, alignment: .leading)
+                        .cornerRadius(5, corners: [.bottomLeft, .bottomRight, .topLeft, .topRight])
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Color.black, lineWidth: 2)
+                    )
+                        .padding()
+                        .transition(.move(edge: .bottom))
+                        .animation(.default)
+                    Spacer()
+                } else {
+                    ImagePicker(isImagePickerShown: self.$showImagePicker, image: self.$imagesDict[self.imagesArray[self.clickedImageIndex!]], data: self.$dataDict[self.imagesArray[self.clickedImageIndex!]], currentImages: self.$imagesArray, imagesDict: self.$imagesDict, dataDict: self.$dataDict)
+                        .frame(width: a.size.width)
+                        .background(self.gameDataStore.colors["darkButNotBlack"]!)
+                        .cornerRadius(5, corners: [.topLeft, .topRight])
+                        .transition(.move(edge: .bottom))
+                        .animation(.default)
+                }
                 Spacer()
             }
             .KeyboardAwarePadding()

@@ -11,7 +11,7 @@ import SwiftUI
 
 struct ImagePicker: UIViewControllerRepresentable {
     
-    @Binding var isShown: Bool
+    @Binding var isImagePickerShown: Bool
     @Binding var image: Image?
     @Binding var data: Data?
     @Binding var currentImages: [UUID]
@@ -40,11 +40,11 @@ struct ImagePicker: UIViewControllerRepresentable {
                 self.parent.currentImages.append(newImageId)
             }
 
-            self.parent.isShown = false
+            self.parent.isImagePickerShown = false
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            self.parent.isShown = false
+            self.parent.isImagePickerShown = false
         }
     }
     
