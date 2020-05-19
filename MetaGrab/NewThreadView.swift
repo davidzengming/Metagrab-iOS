@@ -79,7 +79,8 @@ struct NewThreadView: View {
     var btnBack: some View {
         Button(action: dismissView) {
             Image(systemName: "chevron.left")
-            .resizable()
+                .resizable()
+                .font(Font.system(size: 24))
                 .foregroundColor(Color.white)
         }
     }

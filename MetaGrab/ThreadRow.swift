@@ -126,10 +126,10 @@ struct ThreadRow : View {
                         if self.gameDataStore.threads[self.threadId]!.title.count > 0 {
                             Text(self.gameDataStore.threads[self.threadId]!.title)
                                 .fontWeight(.medium)
-                                .font(.system(size: 16))
                             Spacer()
                         }
                     }
+                    
                     if self.gameDataStore.threadsTextStorage[self.threadId] != nil {
                         FancyPantsEditorView(newTextStorage: .constant(NSTextStorage(string: "")), isEditable: .constant(false), isFirstResponder: .constant(false), didBecomeFirstResponder: .constant(false), showFancyPantsEditorBar: .constant(false), isNewContent: false, isThread: true, threadId: self.threadId, isOmniBar: false)
                             .frame(width: self.width * 0.9, height: min(self.gameDataStore.threadsDesiredHeight[self.threadId]!, 200), alignment: .leading)
@@ -202,6 +202,7 @@ struct ThreadRow : View {
             .padding(.top, 10)
         }
         .padding(.all, 20)
+        .frame(width: self.width)
         .onAppear() {
             self.gameDataStore.loadThreadIcons(thread: self.gameDataStore.threads[self.threadId]!)
         }

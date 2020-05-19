@@ -47,7 +47,7 @@ struct GameFeedIcon : View {
                         Image(systemName: "gamecontroller.fill")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .padding(10)
+                            .padding(a.size.width * 0.07)
                             .foregroundColor(Color.orange)
                             .frame(width: a.size.width / 2, height: a.size.height * 0.2)
                     }
@@ -61,7 +61,7 @@ struct GameFeedIcon : View {
                         Image(uiImage: UIImage(systemName: "text.bubble.fill")!)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .padding(10)
+                            .padding(a.size.width * 0.07)
                             .frame(width: a.size.width / 2, height: a.size.height * 0.2)
                     }
                 }

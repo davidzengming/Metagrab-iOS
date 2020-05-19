@@ -580,13 +580,26 @@ final class GameDataStore: ObservableObject {
             return
         }
         
-        self.colors["notQuiteBlack"] = Color(hexStringToUIColor(hex: "#23272a"))
-        self.colors["darkButNotBlack"] = Color(hexStringToUIColor(hex: "#2C2F33"))
-        self.colors["blurple"] = Color(hexStringToUIColor(hex: "#7289DA"))
+        let notQuiteBlack = hexStringToUIColor(hex: "#23272a")
+        let deepButNotBlack = hexStringToUIColor(hex: "#2C2F33")
+        let blurple = hexStringToUIColor(hex: "#7289DA")
+        let deepBlue = hexStringToUIColor(hex: "#15202d")
+        let lightBlue = hexStringToUIColor(hex: "#1a2838")
+        let teal = hexStringToUIColor(hex: "#0297cf")
         
-        self.uiColors["notQuiteBlack"] = hexStringToUIColor(hex: "#23272a")
-        self.uiColors["darkButNotBlack"] = hexStringToUIColor(hex: "#2C2F33")
-        self.uiColors["blurple"] = hexStringToUIColor(hex: "#7289DA")
+        self.colors["notQuiteBlack"] = Color(notQuiteBlack)
+        self.colors["darkButNotBlack"] = Color(deepButNotBlack)
+        self.colors["blurple"] = Color(blurple)
+        self.colors["deepBlue"] = Color(deepBlue)
+        self.colors["lightBlue"] = Color(lightBlue)
+        self.colors["teal"] = Color(teal)
+        
+        self.uiColors["notQuiteBlack"] = notQuiteBlack
+        self.uiColors["darkButNotBlack"] = deepButNotBlack
+        self.uiColors["blurple"] = blurple
+        self.uiColors["deepBlue"] = deepBlue
+        self.uiColors["lightBlue"] = lightBlue
+        self.uiColors["teal"] = teal
     }
     
     func loadEmojis() {

@@ -72,7 +72,7 @@ struct ReportPopupView: View {
                 
                 Button(action: self.submitReport) {
                     Text("Submit")
-                    .padding(7)
+                    .padding()
                         .background(Color.red)
                         .foregroundColor(Color.white)
                     .cornerRadius(10)

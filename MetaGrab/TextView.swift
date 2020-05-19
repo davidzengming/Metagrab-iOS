@@ -39,8 +39,6 @@ struct TextView: UIViewRepresentable {
     @Binding var isFirstResponder: Bool
     @Binding var didBecomeFirstResponder: Bool
     
-    
-    
     var isNewContent: Bool
     var isThread: Bool
     var threadId: Int?

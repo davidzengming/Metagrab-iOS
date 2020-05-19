@@ -97,6 +97,7 @@ final class UserDataStore: ObservableObject {
                     
                     print(jsonString, "test")
                     DispatchQueue.main.async {
+                        print("I am called")
                         self.token = load(jsonData: jsonString.data(using: .utf8)!)
                         self.isAuthenticated = true
                         self.objectWillChange.send()

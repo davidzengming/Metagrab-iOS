@@ -63,104 +63,142 @@ struct UserProfileView: View {
                             Text(self.userDataStore.username!)
                         }
                     }
+                    .foregroundColor(Color.white)
                     .padding()
                     
-                    VStack {
-                        Text("Blacklist")
-                        
-                        if self.loadedBlacklist == false {
-                            Button(action: self.fetchBlacklistedUsers) {
-                                Text("Load blacklisted users")
-                                .padding(7)
-                                    .background(Color.red)
-                                    .foregroundColor(Color.white)
-                                .cornerRadius(10)
-                            }
-                            .padding(.top, 10)
-                        }
-
-                        
-                        ForEach(self.gameDataStore.blacklistedUserIdArr, id: \.self) { blacklistedUserId in
-                            HStack {
-                                Text(self.gameDataStore.blacklistedUsersById[blacklistedUserId]!.username)
-                                HStack(alignment: .center) {
-                                    Image(systemName: "multiply")
-                                    .resizable()
-                                    .frame(width: a.size.height * 0.05, height: a.size.height * 0.05)
-                                        .foregroundColor(.white)
-                                        .onTapGesture {
-                                            self.unblockUser(unblockUserId: blacklistedUserId)
+                    ScrollView {
+                        VStack {
+                            VStack {
+                                Text("BLACKLISTED USERS")
+                                    .tracking(1)
+                                    .padding()
+                                    .frame(width: a.size.width * 0.9, height: a.size.height * 0.05, alignment: .leading)
+                                    .background(self.gameDataStore.colors["teal"])
+                                
+                                if self.loadedBlacklist == false {
+                                    Button(action: self.fetchBlacklistedUsers) {
+                                        Text("Show blacklisted users")
+                                            .padding()
+                                            .background(Color.red)
+                                            .foregroundColor(Color.white)
+                                            .cornerRadius(10)
                                     }
+                                    .padding()
+                                } else if self.loadedBlacklist == true && self.gameDataStore.blacklistedUserIdArr.isEmpty {
+                                    Text("There are no blacklisted users.")
+                                    .padding()
+                                }
+                                
+                                ForEach(self.gameDataStore.blacklistedUserIdArr, id: \.self) { blacklistedUserId in
+                                    HStack {
+                                        Text(self.gameDataStore.blacklistedUsersById[blacklistedUserId]!.username)
+                                        HStack(alignment: .center) {
+                                            Image(systemName: "multiply")
+                                                .resizable()
+                                                .frame(width: a.size.height * 0.025, height: a.size.height * 0.025)
+                                                .foregroundColor(.red)
+                                                .onTapGesture {
+                                                    self.unblockUser(unblockUserId: blacklistedUserId)
+                                            }
+                                        }
+                                        
+                                    }
+                                    .padding()
                                 }
                             }
-                        }
-                    }
-                    .padding()
-                    
-                    VStack {
-                        Text("Hidden Threads")
-                        
-                        if self.loadedHiddenThreads == false {
-                            Button(action: self.fetchHiddenThreads) {
-                                Text("Load hidden threads")
-                                .padding(7)
-                                    .background(Color.red)
-                                    .foregroundColor(Color.white)
-                                .cornerRadius(10)
+                            .frame(width: a.size.width * 0.9)
+                            .background(self.gameDataStore.colors["notQuiteBlack"])
+                            .padding()
+                            
+                            VStack {
+                                Text("HIDDEN THREADS")
+                                    .tracking(1)
+                                    .padding()
+                                    .frame(width: a.size.width * 0.9, height: a.size.height * 0.05, alignment: .leading)
+                                    .background(self.gameDataStore.colors["teal"])
+                                
+                                if self.loadedHiddenThreads == false {
+                                    Button(action: self.fetchHiddenThreads) {
+                                        Text("Show hidden threads")
+                                            .padding()
+                                            .background(Color.red)
+                                            .foregroundColor(Color.white)
+                                            .cornerRadius(10)
+                                    }
+                                    .padding()
+                                    
+                                } else if self.loadedHiddenThreads == true && self.gameDataStore.hiddenThreadIdArr.isEmpty {
+                                    Text("There are no hidden threads.")
+                                    .padding()
+                                }
+                                
+                                ForEach(self.gameDataStore.hiddenThreadIdArr, id: \.self) { hiddenThreadId in
+                                    HStack {
+                                        Text(self.gameDataStore.hiddenThreadsById[hiddenThreadId]!.title)
+                                        Image(systemName: "multiply")
+                                            .resizable()
+                                            .frame(width: a.size.height * 0.025, height: a.size.height * 0.025)
+                                            .foregroundColor(.red)
+                                            .onTapGesture {
+                                                self.unhideThread(threadId: hiddenThreadId)
+                                        }
+                                    }.padding()
+                                }
                             }
-                            .padding(.top, 10)
+                            .frame(width: a.size.width * 0.9)
+                            .background(self.gameDataStore.colors["notQuiteBlack"])
+                            .padding()
+                            
+                            VStack {
+                                Text("HIDDEN COMMENTS")
+                                    .tracking(1)
+                                    .padding()
+                                    .frame(width: a.size.width * 0.9, height: a.size.height * 0.05, alignment: .leading)
+                                    .background(self.gameDataStore.colors["teal"])
+                                
+                                if self.loadedHiddenComments == false {
+                                    Button(action: self.fetchHiddenComments) {
+                                        Text("Show hidden comments")
+                                            .padding()
+                                            .background(Color.red)
+                                            .foregroundColor(Color.white)
+                                            .cornerRadius(10)
+                                    }
+                                    .padding()
+                                    
+                                } else if self.loadedHiddenComments == true && self.gameDataStore.hiddenCommentIdArr.isEmpty {
+                                    Text("There are no hidden comments.")
+                                    .padding()
+                                }
+                                
+                                ForEach(self.gameDataStore.hiddenCommentIdArr, id: \.self) { hiddenCommentId in
+                                    HStack {
+                                        Text(self.gameDataStore.hiddenCommentsById[hiddenCommentId]!.contentString)
+                                        Image(systemName: "multiply")
+                                            .resizable()
+                                            .frame(width: a.size.height * 0.025, height: a.size.height * 0.025)
+                                            .foregroundColor(.red)
+                                            .onTapGesture {
+                                                self.unhideComment(commentId: hiddenCommentId)
+                                        }
+                                    }.padding()
+                                }
+                            }
+                            .frame(width: a.size.width * 0.9)
+                            .background(self.gameDataStore.colors["notQuiteBlack"])
+                            .padding()
+                            
+                            Spacer()
                         }
+                        .frame(width: a.size.width, height: a.size.height)
+                        .foregroundColor(Color.white)
+                    }
 
-                        
-                        ForEach(self.gameDataStore.hiddenThreadIdArr, id: \.self) { hiddenThreadId in
-                            HStack {
-                                Text(self.gameDataStore.hiddenThreadsById[hiddenThreadId]!.title)
-                                Image(systemName: "multiply")
-                                .resizable()
-                                .frame(width: a.size.height * 0.05, height: a.size.height * 0.05)
-                                    .foregroundColor(.white)
-                                    .onTapGesture {
-                                        self.unhideThread(threadId: hiddenThreadId)
-                                }
-                            }
-                        }
-                    }
-                    .padding()
-                    
-                    VStack {
-                        Text("Hidden Comments")
-                        
-                        if self.loadedHiddenComments == false {
-                            Button(action: self.fetchHiddenComments) {
-                                Text("Load hidden comments")
-                                .padding(7)
-                                    .background(Color.red)
-                                    .foregroundColor(Color.white)
-                                .cornerRadius(10)
-                            }
-                            .padding(.top, 10)
-                        }
-                                                
-                        ForEach(self.gameDataStore.hiddenCommentIdArr, id: \.self) { hiddenCommentId in
-                            HStack {
-                                Text(self.gameDataStore.hiddenCommentsById[hiddenCommentId]!.contentString)
-                                Image(systemName: "multiply")
-                                .resizable()
-                                .frame(width: a.size.height * 0.05, height: a.size.height * 0.05)
-                                    .foregroundColor(.white)
-                                    .onTapGesture {
-                                        self.unhideComment(commentId: hiddenCommentId)
-                                }
-                            }
-                        }
-                    }
-                    .padding()
-                    
-                    Spacer()
                 }
-                .frame(width: a.size.width, height: a.size.height)
-                .foregroundColor(Color.white)
+                
             }
         }
+        
     }
+    
 }

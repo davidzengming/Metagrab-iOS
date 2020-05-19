@@ -10,7 +10,6 @@ import Foundation
 import SwiftUI
 
 class TextViewHelper {
-    
     static var attrMap : [[NSAttributedString.Key: Bool] : Int]?
     
     static func calculateTextViewHeight(textView: UITextView) -> CGFloat {

@@ -114,9 +114,13 @@ struct ForumView : View {
                                         }
                                         VStack(alignment: .leading) {
                                             Text(self.gameDataStore.games[self.gameId]!.name)
+                                                .font(.system(size: a.size.width * 0.06))
                                                 .foregroundColor(Color.white)
-                                                .font(.system(size: 26))
                                                 .bold()
+                                            
+//                                            Text(String(a.size.height.description))
+//                                                .font(.system(size: a.size.height * 0.015))
+//                                                .foregroundColor(Color.white)
                                             
                                             HStack {
                                                 Text("Posts " + String(self.gameDataStore.games[self.gameId]!.threadCount))
@@ -124,17 +128,19 @@ struct ForumView : View {
                                                 Text("Follows " + String(self.gameDataStore.games[self.gameId]!.followerCount))
                                                     .foregroundColor(Color.white)
                                             }
-                                            
+                                            .font(.system(size: a.size.width * 0.04))
                                         }
+                                        .padding()
                                         Spacer()
                                         
                                         Text("Follow")
-                                            .padding(.horizontal, 15)
-                                            .padding(.vertical, 8)
+                                            .font(.system(size: a.size.width * 0.04))
+                                            .padding(.horizontal, a.size.width * 0.05)
+                                            .padding(.vertical, a.size.width * 0.025)
                                             .foregroundColor(self.gameDataStore.isFollowed[self.gameId]! == true ? Color.white : Color.black)
                                             .background(self.gameDataStore.isFollowed[self.gameId]! == true ? Color.black : Color.white)
-                                            .cornerRadius(30)
-                                            .shadow(radius: 5)
+                                            .cornerRadius(a.size.width * 0.5)
+                                            .shadow(radius: a.size.width * 0.05)
                                             .onTapGesture {
                                                 if self.gameDataStore.isFollowed[self.gameId]! == true {
                                                     self.unfollowGame()
