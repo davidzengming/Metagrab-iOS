@@ -45,7 +45,7 @@ struct UserProfileView: View {
     
     var body: some View {
         ZStack {
-            self.gameDataStore.colors["darkButNotBlack"].edgesIgnoringSafeArea(.all)
+            self.gameDataStore.colors["darkButNotBlack"].ignoresSafeArea()
             
             GeometryReader { a in
                 VStack {

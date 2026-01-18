@@ -28,7 +28,7 @@ struct KeyboardAwareModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(.bottom, self.gameDataStore.keyboardHeight)
-            .edgesIgnoringSafeArea(self.gameDataStore.keyboardHeight == 0 ? [] : .bottom)
+            .ignoresSafeArea(.all, edges: self.gameDataStore.keyboardHeight == 0 ? [] : .bottom)
             .onReceive(keyboardHeightPublisher) {
                 self.gameDataStore.keyboardHeight = $0
         }
@@ -37,7 +37,7 @@ struct KeyboardAwareModifier: ViewModifier {
 
 extension View {
     func KeyboardAwarePadding() -> some View {
-        ModifiedContent(content: self, modifier: KeyboardAwareModifier())
+        self.modifier(KeyboardAwareModifier())
     }
 }
 
@@ -144,17 +144,17 @@ struct ThreadView : View {
     var body: some View {
         ZStack {
             self.gameDataStore.colors["darkButNotBlack"]!
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
             
             
             if (self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] == nil || self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId]! == false) && (self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] == nil || self.gameDataStore.isReportPopupActiveByThreadId[self.threadId]! == false) &&
                 (self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId] == nil ||
                     self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId]! == false) {
                 Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
-                    .edgesIgnoringSafeArea(.bottom)
+                    .ignoresSafeArea(.all, edges: .bottom)
             } else {
                 self.gameDataStore.colors["darkButNotBlack"]!
-                    .edgesIgnoringSafeArea(.bottom)
+                    .ignoresSafeArea(.all, edges: .bottom)
                 
                 Color(red: 248 / 255, green: 248 / 255, blue: 248 / 255)
             }
@@ -324,12 +324,10 @@ struct ThreadView : View {
                         VStack {
                             EmojiPickerPopupView(parentForumId: self.gameId, ancestorThreadId: self.threadId)
                         }
-                            
                         .frame(width: a.size.width, height: a.size.height * 0.2)
                         .background(self.gameDataStore.colors["darkButNotBlack"]!)
                         .cornerRadius(5, corners: [.topLeft, .topRight])
                         .transition(.move(edge: .bottom))
-                        .animation(.default)
                     }
                     
                     if self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] == true {
@@ -338,7 +336,6 @@ struct ThreadView : View {
                             .background(self.gameDataStore.colors["darkButNotBlack"]!)
                             .cornerRadius(5, corners: [.topLeft, .topRight])
                             .transition(.move(edge: .bottom))
-                            .animation(.default)
                     }
                     
                     if self.gameDataStore.isBlockPopupActiveByThreadId[self.threadId] == true {
@@ -347,7 +344,6 @@ struct ThreadView : View {
                             .background(self.gameDataStore.colors["darkButNotBlack"]!)
                             .cornerRadius(5, corners: [.topLeft, .topRight])
                             .transition(.move(edge: .bottom))
-                            .animation(.default)
                     }
                     
                     if (self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId] == nil || self.gameDataStore.isAddEmojiModalActiveByThreadViewId[self.threadId]! == false) && (self.gameDataStore.isReportPopupActiveByThreadId[self.threadId] == nil || self.gameDataStore.isReportPopupActiveByThreadId[self.threadId]! == false) &&
@@ -357,7 +353,7 @@ struct ThreadView : View {
                             FancyPantsEditorView(newTextStorage: self.$replyContent, isEditable: .constant(true), isFirstResponder: self.$isFirstResponder, didBecomeFirstResponder: self.$didBecomeFirstResponder, showFancyPantsEditorBar: self.$showFancyPantsEditorBar, isNewContent: true, isThread: true, threadId: self.threadId, isOmniBar: true, submit: { self.submit() })
                         }
                         .frame(width: a.size.width, height: self.gameDataStore.keyboardHeight == 0 ? 50 : (self.gameDataStore.threadViewReplyBarDesiredHeight[self.threadId]! + 20 + 20 + 40))
-                        .animation(.spring())
+                        .animation(.spring(), value: self.gameDataStore.keyboardHeight)
                         .transition(.slide)
                         .background(Color.white)
                     }
