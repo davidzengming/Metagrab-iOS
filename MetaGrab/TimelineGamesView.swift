@@ -51,7 +51,7 @@ struct TimelineGamesView: View {
     // Lists recent games is past 2 months and upcoming games 1 year down the road
     var body: some View {
         ZStack {
-            self.gameDataStore.colors["darkButNotBlack"].edgesIgnoringSafeArea(.all)
+            self.gameDataStore.colors["darkButNotBlack"].ignoresSafeArea()
             
             GeometryReader { a in
                 VStack {

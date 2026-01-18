@@ -30,32 +30,32 @@ struct GameHubView: View {
         NavigationView {
             TabView {
                 FrontHubView()
-                    .navigationBarTitle("Front")
-                    .navigationBarHidden(true)
+                    .navigationTitle("Front")
+                    .toolbar(.hidden, for: .navigationBar)
                     .tabItem {
                         Image(systemName: "square.stack.3d.up.fill")
                         Text("Front")
                 }
                 
                 PopularGamesView()
-                    .navigationBarTitle("Popular")
-                    .navigationBarHidden(true)
+                    .navigationTitle("Popular")
+                    .toolbar(.hidden, for: .navigationBar)
                     .tabItem {
                         Image(systemName: "flame.fill")
                         Text("Popular")
                 }
                 
                 TimelineGamesView()
-                    .navigationBarTitle("Upcoming")
-                    .navigationBarHidden(true)
+                    .navigationTitle("Upcoming")
+                    .toolbar(.hidden, for: .navigationBar)
                     .tabItem {
                         Image(systemName: "hourglass.bottomhalf.fill")
                         Text("Upcoming")
                 }
                 
                 UserProfileView()
-                .navigationBarTitle("Profile")
-                .navigationBarHidden(true)
+                .navigationTitle("Profile")
+                .toolbar(.hidden, for: .navigationBar)
                     .tabItem {
                         Image(systemName: "person.fill")
                         Text("Profile")
@@ -70,7 +70,7 @@ struct GameHubView: View {
                     self.gameDataStore.getGameHistory(access: self.userDataStore.token!.access)
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
+        .navigationViewStyle(.stack)
         .background(self.gameDataStore.colors["darkButNotBlack"])
     }
 }

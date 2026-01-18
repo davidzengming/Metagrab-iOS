@@ -92,7 +92,7 @@ struct ForumView : View {
     var body: some View {
         ZStack {
             Image("background").resizable(resizingMode: .tile)
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
             
             GeometryReader { a in
                 ZStack(alignment: .bottom) {
@@ -251,7 +251,8 @@ struct ForumView : View {
                         .frame(width: a.size.width, height: a.size.height)
                         //                        .frame(width: a.size.width, height: self.gameDataStore.forumsNextPageStartIndex[self.gameId] != nil && self.gameDataStore.forumsNextPageStartIndex[self.gameId]! != -1 ? a.size.height * 0.95 : a.size.height)
                     }
-                    .navigationBarTitle(Text(self.gameDataStore.games[self.gameId]!.name), displayMode: .inline)
+                    .navigationTitle(self.gameDataStore.games[self.gameId]!.name)
+                    .navigationBarTitleDisplayMode(.inline)
                     .onAppear() {
                         if self.gameDataStore.isBackToGamesView {
                             self.gameDataStore.isForumViewLoadedByGameId[self.gameId] = false
@@ -279,7 +280,6 @@ struct ForumView : View {
                                 .KeyboardAwarePadding()
                         }
                         .transition(.move(edge: .bottom))
-                        .animation(.default)
                     }
                     
                     if self.gameDataStore.isReportPopupActiveByForumId[self.gameId] == true {
@@ -289,7 +289,6 @@ struct ForumView : View {
                             .cornerRadius(5, corners: [.topLeft, .topRight])
                             .KeyboardAwarePadding()
                             .transition(.move(edge: .bottom))
-                            .animation(.default)
                     }
                     
                     if self.gameDataStore.isBlockPopupActiveByForumId[self.gameId] == true {
@@ -298,11 +297,10 @@ struct ForumView : View {
                             .background(self.gameDataStore.colors["darkButNotBlack"]!)
                             .cornerRadius(5, corners: [.topLeft, .topRight])
                             .transition(.move(edge: .bottom))
-                            .animation(.default)
                     }
                 }
             }
-            .edgesIgnoringSafeArea(.bottom)
+            .ignoresSafeArea(.all, edges: .bottom)
         }
     }
 }

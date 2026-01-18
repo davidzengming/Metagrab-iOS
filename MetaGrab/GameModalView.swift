@@ -11,7 +11,7 @@ import SwiftUI
 struct GameModalView: View {
     @EnvironmentObject var gameDataStore: GameDataStore
     @EnvironmentObject var userDataStore: UserDataStore
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.dismiss) var dismiss
     
     var gameId: Int
     
@@ -26,7 +26,7 @@ struct GameModalView: View {
                             .frame(width: a.size.height * 0.025, height: a.size.height * 0.025)
                             .foregroundColor(.white)
                             .onTapGesture {
-                                self.presentationMode.wrappedValue.dismiss()
+                                self.dismiss()
                         }
                         Spacer()
                     }
@@ -157,11 +157,11 @@ struct GameModalView: View {
                     self.gameDataStore.isInModalView = true
                 }
             }
-            .navigationBarTitle("")
-            .navigationBarHidden(self.gameDataStore.isInModalView ? true : false)
+            .navigationTitle("")
+            .toolbar(self.gameDataStore.isInModalView ? .hidden : .visible, for: .navigationBar)
             .background(self.gameDataStore.colors["darkButNotBlack"]!)
-            .edgesIgnoringSafeArea(.all)
+            .ignoresSafeArea()
         }
-        .navigationViewStyle(StackNavigationViewStyle())
+        .navigationViewStyle(.stack)
     }
 }
